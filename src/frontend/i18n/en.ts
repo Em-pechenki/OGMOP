@@ -71,4 +71,28 @@ export const en = {
   "templates.title": "Templates",
   "notfound.title": "404",
   "notfound.text": "Page not found",
+
+  "toast.saved": "Workflow saved locally",
+  "toast.noSaved": "No saved workflow",
+  "toast.loaded": "Workflow loaded",
+  "toast.loadError": "Failed to load workflow",
+  "toast.cleared": "Cleared",
+  "toast.needNodes": "Add at least one node",
+  "toast.createError": "Failed to create workflow",
+  "toast.runError": "Failed to start run",
+  "toast.runStarted": "Run started",
+  "toast.aiApplied": "AI workflow applied to canvas",
+
+  "palette.search": "Search nodes",
+  "palette.empty": "Nothing found",
+  "palette.reset": "Reset search",
+  "palette.group.triggers": "Triggers",
+  "palette.group.logic": "Logic",
+  "palette.group.scanners": "Scanners",
+  "palette.group.notify": "Notifications",
+  "palette.group.ai": "AI",
+
+  "a11y.skipToContent": "Skip to main content",
+  "footer.copy": "© 2026 OGMOP — Cyber Garden",
+  "footer.hackathon": "Center-invest hackathon",
 } as const;

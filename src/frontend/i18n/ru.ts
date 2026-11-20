@@ -71,4 +71,28 @@ export const ru = {
   "templates.title": "Шаблоны",
   "notfound.title": "404",
   "notfound.text": "Страница не найдена",
+
+  "toast.saved": "Workflow сохранён локально",
+  "toast.noSaved": "Нет сохранённого workflow",
+  "toast.loaded": "Workflow загружен",
+  "toast.loadError": "Ошибка загрузки workflow",
+  "toast.cleared": "Очищено",
+  "toast.needNodes": "Добавьте хотя бы один узел",
+  "toast.createError": "Не удалось создать workflow",
+  "toast.runError": "Не удалось запустить",
+  "toast.runStarted": "Запуск начат",
+  "toast.aiApplied": "AI-workflow применён к холсту",
+
+  "palette.search": "Поиск узлов",
+  "palette.empty": "Ничего не найдено",
+  "palette.reset": "Сбросить поиск",
+  "palette.group.triggers": "Триггеры",
+  "palette.group.logic": "Логика",
+  "palette.group.scanners": "Сканеры",
+  "palette.group.notify": "Уведомления",
+  "palette.group.ai": "AI",
+
+  "a11y.skipToContent": "Перейти к основному содержимому",
+  "footer.copy": "© 2026 OGMOP — Cyber Garden",
+  "footer.hackathon": "Хакатон «Центр-инвест»",
 } as const;

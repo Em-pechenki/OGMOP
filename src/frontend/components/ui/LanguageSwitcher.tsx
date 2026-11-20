@@ -71,7 +71,7 @@ export const LanguageSwitcher: React.FC<LanguageSwitcherProps> = ({
         onClick={() => setOpen((v) => !v)}
         className={`inline-flex items-center gap-1 rounded-lg border border-border bg-surface text-text-muted transition-colors hover:bg-surface-elevated hover:text-text focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 ${sizeClasses[size]}`}
       >
-        <span className="text-xs font-semibold uppercase">{locale}</span>
+        <span className="text-xs font-semibold uppercase">{locale.toUpperCase()}</span>
         <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
           <path d="M6 9l6 6 6-6" />
         </svg>

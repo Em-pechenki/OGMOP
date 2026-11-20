@@ -16,6 +16,7 @@ import { useLocalStorage } from "@frontend/hooks/useLocalStorage";
 import { useI18n } from "@frontend/hooks/useI18n";
 import Container from "@frontend/components/layout/Container";
 import Button from "@frontend/components/ui/Button";
+import NodePalette, { type PaletteItem } from "@frontend/components/NodePalette";
 import Card from "@frontend/components/ui/Card";
 import { useToast } from "@frontend/components/ui/Toast";
 import { nodeTypes } from "@frontend/components/nodes";
@@ -25,14 +26,6 @@ import PropertyPanel from "@frontend/components/PropertyPanel";
 import { api } from "@frontend/services/api";
 import type { NodeData, NodeType } from "@shared/types";
 
-interface PaletteItem {
-  nodeType: NodeType;
-  label: string;
-  description: string;
-  color: string;
-  icon: React.ReactNode;
-  data: NodeData;
-}
 
 const SaveIcon = () => (
   <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
@@ -119,18 +112,18 @@ export const EditorPageInner: React.FC = () => {
   const { zoomIn, zoomOut, fitView } = useReactFlow();
 
   const PALETTE: PaletteItem[] = [
-    { nodeType: "trigger.manual", label: t("node.trigger.manual"), description: t("node.desc.trigger.manual"), color: "#50B848", icon: <TriggerIcon />, data: { kind: "trigger", triggerType: "manual", label: t("node.trigger.manual") } },
-    { nodeType: "trigger.schedule", label: t("node.trigger.schedule"), description: t("node.desc.trigger.schedule"), color: "#50B848", icon: <TriggerIcon />, data: { kind: "trigger", triggerType: "schedule", label: t("node.trigger.schedule"), schedule: "0 14 * * *" } },
-    { nodeType: "logic.if", label: t("node.logic.if"), description: t("node.desc.logic.if"), color: "#494B52", icon: <LogicIcon />, data: { kind: "logic", logicType: "if", label: t("node.logic.if"), condition: "" } },
-    { nodeType: "logic.compare", label: t("node.logic.compare"), description: t("node.desc.logic.compare"), color: "#494B52", icon: <LogicIcon />, data: { kind: "logic", logicType: "compare", label: t("node.logic.compare"), operator: "eq" } },
-    { nodeType: "logic.regex", label: t("node.logic.regex"), description: t("node.desc.logic.regex"), color: "#494B52", icon: <LogicIcon />, data: { kind: "logic", logicType: "regex", label: t("node.logic.regex"), pattern: "" } },
-    { nodeType: "scanner.secrets", label: t("node.scanner.secrets"), description: t("node.desc.scanner.secrets"), color: "#D32F2F", icon: <ScannerIcon />, data: { kind: "scanner", scannerType: "secrets", label: t("node.scanner.secrets"), config: { scannerType: "secrets" } } },
-    { nodeType: "scanner.sca", label: t("node.scanner.sca"), description: t("node.desc.scanner.sca"), color: "#E65100", icon: <ScannerIcon />, data: { kind: "scanner", scannerType: "sca", label: t("node.scanner.sca"), config: { scannerType: "sca" } } },
-    { nodeType: "scanner.sast", label: t("node.scanner.sast"), description: t("node.desc.scanner.sast"), color: "#B8860B", icon: <ScannerIcon />, data: { kind: "scanner", scannerType: "sast", label: t("node.scanner.sast"), config: { scannerType: "sast" } } },
-    { nodeType: "notify.telegram", label: t("node.notify.telegram"), description: t("node.desc.notify.telegram"), color: "#1976D2", icon: <NotifyIcon />, data: { kind: "notify", channel: "telegram", label: t("node.notify.telegram"), config: { channel: "telegram" } } },
-    { nodeType: "notify.smtp", label: t("node.notify.smtp"), description: t("node.desc.notify.smtp"), color: "#1976D2", icon: <NotifyIcon />, data: { kind: "notify", channel: "smtp", label: t("node.notify.smtp"), config: { channel: "smtp" } } },
-    { nodeType: "notify.webhook", label: t("node.notify.webhook"), description: t("node.desc.notify.webhook"), color: "#1976D2", icon: <NotifyIcon />, data: { kind: "notify", channel: "webhook", label: t("node.notify.webhook"), config: { channel: "webhook" } } },
-    { nodeType: "ai.analyze", label: t("node.ai.analyze"), description: t("node.desc.ai.analyze"), color: "#7B1FA2", icon: <AiNodeIcon />, data: { kind: "ai", label: t("node.ai.analyze"), model: "gpt-4o" } },
+    { nodeType: "trigger.manual", group: "trigger", label: t("node.trigger.manual"), description: t("node.desc.trigger.manual"), color: "var(--color-node-trigger)", icon: <TriggerIcon />, data: { kind: "trigger", triggerType: "manual", label: t("node.trigger.manual") } },
+    { nodeType: "trigger.schedule", group: "trigger", label: t("node.trigger.schedule"), description: t("node.desc.trigger.schedule"), color: "var(--color-node-trigger)", icon: <TriggerIcon />, data: { kind: "trigger", triggerType: "schedule", label: t("node.trigger.schedule"), schedule: "0 14 * * *" } },
+    { nodeType: "logic.if", group: "logic", label: t("node.logic.if"), description: t("node.desc.logic.if"), color: "var(--color-node-logic)", icon: <LogicIcon />, data: { kind: "logic", logicType: "if", label: t("node.logic.if"), condition: "" } },
+    { nodeType: "logic.compare", group: "logic", label: t("node.logic.compare"), description: t("node.desc.logic.compare"), color: "var(--color-node-logic)", icon: <LogicIcon />, data: { kind: "logic", logicType: "compare", label: t("node.logic.compare"), operator: "eq" } },
+    { nodeType: "logic.regex", group: "logic", label: t("node.logic.regex"), description: t("node.desc.logic.regex"), color: "var(--color-node-logic)", icon: <LogicIcon />, data: { kind: "logic", logicType: "regex", label: t("node.logic.regex"), pattern: "" } },
+    { nodeType: "scanner.secrets", group: "scanner", subtype: "secrets", label: t("node.scanner.secrets"), description: t("node.desc.scanner.secrets"), color: "var(--color-node-scanner)", icon: <ScannerIcon />, data: { kind: "scanner", scannerType: "secrets", label: t("node.scanner.secrets"), config: { scannerType: "secrets" } } },
+    { nodeType: "scanner.sca", group: "scanner", subtype: "sca", label: t("node.scanner.sca"), description: t("node.desc.scanner.sca"), color: "var(--color-node-scanner)", icon: <ScannerIcon />, data: { kind: "scanner", scannerType: "sca", label: t("node.scanner.sca"), config: { scannerType: "sca" } } },
+    { nodeType: "scanner.sast", group: "scanner", subtype: "sast", label: t("node.scanner.sast"), description: t("node.desc.scanner.sast"), color: "var(--color-node-scanner)", icon: <ScannerIcon />, data: { kind: "scanner", scannerType: "sast", label: t("node.scanner.sast"), config: { scannerType: "sast" } } },
+    { nodeType: "notify.telegram", group: "notify", label: t("node.notify.telegram"), description: t("node.desc.notify.telegram"), color: "var(--color-node-notify)", icon: <NotifyIcon />, data: { kind: "notify", channel: "telegram", label: t("node.notify.telegram"), config: { channel: "telegram" } } },
+    { nodeType: "notify.smtp", group: "notify", label: t("node.notify.smtp"), description: t("node.desc.notify.smtp"), color: "var(--color-node-notify)", icon: <NotifyIcon />, data: { kind: "notify", channel: "smtp", label: t("node.notify.smtp"), config: { channel: "smtp" } } },
+    { nodeType: "notify.webhook", group: "notify", label: t("node.notify.webhook"), description: t("node.desc.notify.webhook"), color: "var(--color-node-notify)", icon: <NotifyIcon />, data: { kind: "notify", channel: "webhook", label: t("node.notify.webhook"), config: { channel: "webhook" } } },
+    { nodeType: "ai.analyze", group: "ai", label: t("node.ai.analyze"), description: t("node.desc.ai.analyze"), color: "var(--color-node-ai)", icon: <AiNodeIcon />, data: { kind: "ai", label: t("node.ai.analyze"), model: "gpt-4o" } },
   ];
 
   const onDragStart = (event: React.DragEvent, item: PaletteItem) => {
@@ -178,44 +171,44 @@ export const EditorPageInner: React.FC = () => {
 
   const save = () => {
     setStored(JSON.stringify({ nodes, edges }));
-    show("Workflow сохранён локально", "success");
+    show(t("toast.saved"), "success");
   };
 
   const load = () => {
     try {
       if (!stored) {
-        show("Нет сохранённого workflow", "warning");
+        show(t("toast.noSaved"), "warning");
         return;
       }
       const parsed = JSON.parse(stored) as { nodes: Node<NodeData>[]; edges: typeof edges };
       setNodes(parsed.nodes || []);
       setEdges(parsed.edges || []);
-      show("Workflow загружен", "success");
+      show(t("toast.loaded"), "success");
     } catch {
-      show("Ошибка загрузки workflow", "error");
+      show(t("toast.loadError"), "error");
     }
   };
 
   const clear = () => {
     setNodes([]);
     setEdges([]);
-    show("Очищено", "info");
+    show(t("toast.cleared"), "info");
   };
 
   const handleRun = async () => {
     if (nodes.length === 0) {
-      show("Добавьте хотя бы один узел", "warning");
+      show(t("toast.needNodes"), "warning");
       return;
     }
     try {
       const res = await api.post("/api/workflows", { name: "Workflow", nodes, edges });
       const wf = (res.data as { data?: { id?: string } })?.data;
       const id = wf?.id;
-      if (!id) throw new Error("Не удалось создать workflow");
+      if (!id) throw new Error(t("toast.createError"));
       const runRes = await api.post(`/api/workflows/${id}/run`, { input: {} });
       const runId = (runRes.data as { data?: { runId?: string } })?.data?.runId;
-      if (!runId) throw new Error("Не удалось запустить");
-      show("Запуск начат", "info");
+      if (!runId) throw new Error(t("toast.runError"));
+      show(t("toast.runStarted"), "info");
       navigate(`/run/${runId}`);
     } catch (e) {
       show((e as Error).message, "error");
@@ -225,7 +218,7 @@ export const EditorPageInner: React.FC = () => {
   const applyGenerated = (wf: { name?: string; nodes: any[]; edges: any[] }) => {
     setNodes(wf.nodes || []);
     setEdges(wf.edges || []);
-    show("AI-workflow применён к холсту", "success");
+    show(t("toast.aiApplied"), "success");
   };
 
   return (
@@ -262,33 +255,7 @@ export const EditorPageInner: React.FC = () => {
       <div className="flex flex-col lg:flex-row gap-4 lg:h-[calc(100vh-160px)]">
         <Card padding="sm" className="w-full lg:w-64 lg:shrink-0 lg:overflow-auto">
           <h2 className="text-sm font-semibold text-text mb-2">{t("editor.palette")}</h2>
-          <div className="flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
-            {PALETTE.map((item) => (
-              <div
-                key={item.nodeType}
-                draggable
-                onDragStart={(e) => onDragStart(e, item)}
-                className="group flex items-center gap-2 cursor-grab active:cursor-grabbing rounded-lg border border-border bg-white px-2 py-1.5 text-sm text-text hover:shadow-card transition-shadow whitespace-nowrap lg:whitespace-normal"
-                style={{ borderLeft: `3px solid ${item.color}` }}
-                role="button"
-                tabIndex={0}
-                aria-label={item.label}
-                title={item.description}
-              >
-                <span className="text-text-subtle opacity-60 group-hover:opacity-100" aria-hidden="true">
-                  ⋮⋮
-                </span>
-                <span
-                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
-                  style={{ backgroundColor: `${item.color}22`, color: item.color }}
-                  aria-hidden="true"
-                >
-                  {item.icon}
-                </span>
-                <span className="truncate">{item.label}</span>
-              </div>
-            ))}
-          </div>
+          <NodePalette items={PALETTE} onDragStart={onDragStart} />
         </Card>
         <div ref={reactFlowWrapper} className="flex-1 min-h-[320px] rounded-lg border border-border overflow-hidden bg-surface" role="application" aria-label={t("editor.canvas")}>
           <ReactFlow

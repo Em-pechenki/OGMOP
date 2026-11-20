@@ -73,7 +73,7 @@ export const ThemeToggle: React.FC<ThemeToggleProps> = ({
               title={opt.label}
             >
               {opt.icon}
-              {showLabel && <span>{opt.label}</span>}
+              {(showLabel || variant === "segmented") && <span>{opt.label}</span>}
             </button>
           );
         })}
