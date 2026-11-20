@@ -15,4 +15,6 @@ export const templateSchema = z.object({
   previewSvg: z.string().optional(),
   version: z.string().optional(),
   category: z.string().optional(),
+  downloads: z.number().int().nonnegative().optional(),
+  rating: z.number().min(0).max(5).optional(),
 });

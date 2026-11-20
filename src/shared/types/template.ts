@@ -7,11 +7,13 @@ export interface Template {
   workflow: Workflow;
   author?: string;
   tags?: string[];
+  category?: string;
+  downloads?: number;
+  rating?: number;
   createdAt?: string;
   updatedAt?: string;
   isPublic?: boolean;
   usageCount?: number;
   previewSvg?: string;
   version?: string;
-  category?: string;
 }
