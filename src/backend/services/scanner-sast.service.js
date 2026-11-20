@@ -104,6 +104,7 @@ export async function scanSast({ root, config = {} } = {}) {
           severity: rule.severity,
           file: path.relative(root, file).replace(/\\/g, "/"),
           line: lineNo,
+          title: rule.name,
           message: rule.message + ` (${rule.name})`,
           snippet: m[0].slice(0, 120),
           cve: null,

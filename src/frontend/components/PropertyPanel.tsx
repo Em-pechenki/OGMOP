@@ -42,7 +42,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = "" }) 
   if (!selectedNode || !data) {
     return (
       <div className={`rounded-lg border border-border bg-white p-4 text-sm text-text-muted ${className}`}>
-        Выберите ноду на канвасе для редактирования свойств.
+        Выберите ноду на холсте, чтобы редактировать её свойства.
       </div>
     );
   }
@@ -51,7 +51,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = "" }) 
 
   return (
     <div className={`overflow-auto rounded-lg border border-border bg-white p-4 ${className}`}>
-      <Section title="Общие">
+      <Section title="Основное">
         <Field label="Название">
           <input
             className={inputCls}
@@ -98,7 +98,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = "" }) 
               <option value="regex">regex</option>
             </select>
           </Field>
-          <Field label="Условие / выражение">
+          <Field label="Условие">
             <input
               className={inputCls}
               value={(data as { condition?: string }).condition || ""}
@@ -191,7 +191,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = "" }) 
       )}
 
       {kind === "notify" && (
-        <Section title="Уведомления">
+        <Section title="Уведомление">
           <Field label="Канал">
             <select
               className={inputCls}

@@ -94,6 +94,7 @@ export async function scanSca({ root, config = {} } = {}) {
           severity: cve.severity,
           file: "build.gradle.kts",
           line: null,
+          title: `${cve.title} (${cve.id})`,
           message: `${cve.title} (${cve.id}) in ${pkg}:${dep.version}`,
           snippet: `${pkg}:${dep.version}`,
           cve: cve.id,

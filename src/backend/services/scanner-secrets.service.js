@@ -68,6 +68,7 @@ export async function scanSecrets({ root, config = {} } = {}) {
           severity: pat.severity,
           file: path.relative(root, file).replace(/\\/g, "/"),
           line: lineNo,
+          title: `${pat.name} detected`,
           message: `${pat.name} detected`,
           snippet: mask(matched),
           cve: null,

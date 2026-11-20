@@ -27,7 +27,7 @@ export default function App() {
             <Route path="/runs" element={<RunsPage />} />
             <Route path="/templates" element={<TemplatesPage />} />
             <Route path="/run/:id" element={<RunDetailPage />} />
-            <Route path="*" element={<div className="py-20 text-center text-text-muted">404 — страница не найдена</div>} />
+          <Route path="*" element={<div className="py-20 text-center text-text-muted">404 - page not found</div>} />
           </Route>
         </Routes>
       </Suspense>

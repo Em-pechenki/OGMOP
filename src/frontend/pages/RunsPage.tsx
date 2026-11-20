@@ -44,7 +44,7 @@ export const RunsPage: React.FC = () => {
               <div>
                 <p className="text-sm font-semibold text-text">{r.id}</p>
                 <p className="text-xs text-text-muted">
-                  {r.workflowId} · {r.status} · {r.startedAt}
+                  {r.workflowId} — {r.status} — {r.startedAt}
                 </p>
               </div>
               <Link to={`/run/${r.id}`}>
