@@ -1,145 +1,164 @@
 # Типы нод — OGMOP
 
-Ноды — строительные блоки workflow. Каждая нода имеет тип, параметры (настраиваются в боковой панели редактора), входы/выходы данных и статус выполнения.
+Источник истины: `src/shared/types/node.ts` (`NodeType`, `NodeData` и производные). Ниже — описание типов, параметров и данных.
 
-Общий контракт ноды:
+Общий контракт ноды (`FlowNode`):
 
 ```ts
-interface Node {
+interface FlowNode {
   id: string;
-  type: string;            // например "trigger.button"
+  type: NodeType;
   position: { x: number; y: number };
-  data: Record<string, unknown>; // параметры
+  data: NodeData;
 }
 ```
 
-Статусы ноды: `idle | running | success | error | skipped`.
+Связь (`FlowEdge`):
+
+```ts
+interface FlowEdge {
+  id: string;
+  source: string;
+  target: string;
+  sourceHandle?: string | null;
+  targetHandle?: string | null;
+  label?: string;
+  condition?: "true" | "false" | string;
+  animated?: boolean;
+  style?: Record<string, unknown>;
+}
+```
 
 ---
 
 ## 1. Trigger (триггеры запуска)
 
-Запускают выполнение workflow.
-
-### `trigger.button` — Запуск по кнопке
-- **Параметры:** `label?: string` (текст кнопки).
-- **Выход:** `{ triggered: true, at: ISO8601 }`.
-- **Примечание:** Основной триггер для демо.
+### `trigger.manual` — Запуск вручную (по кнопке)
+- **Данные (`TriggerNodeData`):** `kind: "trigger"`, `triggerType: "manual"`, `label?`, `params?`.
+- **Выход движка (заглушка Фазы 1):** `{ nodeId, type, data }`.
 
 ### `trigger.schedule` — Запуск по расписанию
-- **Параметры:** `cron: string` (выражение cron), `timezone?: string`.
-- **Выход:** `{ triggered: true, at: ISO8601 }`.
-- **Примечание:** В MVP может быть эмулирован (ручной запуск по расписанию).
+- **Данные:** `kind: "trigger"`, `triggerType: "schedule"`, `label?`, `schedule?` (строка расписания), `params?`.
 
 ---
 
 ## 2. Logic (логика и ветвление)
 
-### `logic.if` — Условное ветвление (if/else)
-- **Параметры:** `expression: string` (условие, например сравнение полей входных данных).
-- **Вход:** любые данные предыдущей ноды.
-- **Выход:** данные передаются по ветке `true`/`false` (два выходных порта).
-- **Примечание:** Выражение вычисляется безопасно (без eval произвольного кода — цель).
+### `logic.if` — Условное ветвление
+- **Данные (`LogicNodeData`):** `kind: "logic"`, `logicType: "if"`, `label?`, `condition?`.
 
 ### `logic.compare` — Сравнение
-- **Параметры:** `left: string`, `operator: "==" | "!=" | ">" | "<" | ">=" | "<="`, `right: string`.
-- **Выход:** `{ result: boolean }`.
+- **Данные:** `kind: "logic"`, `logicType: "compare"`, `label?`, `operator?: "eq" | "ne" | "gt" | "lt" | "gte" | "lte" | "contains" | "regex"`, `left?`, `right?`.
 
 ### `logic.regex` — Проверка по регулярному выражению
-- **Параметры:** `pattern: string`, `flags?: string`, `inputField?: string`.
-- **Выход:** `{ matched: boolean, matches: string[] }`.
+- **Данные:** `kind: "logic"`, `logicType: "regex"`, `label?`, `pattern?`.
 
 ---
 
 ## 3. Scanner (анализаторы безопасности)
 
-Собственные анализаторы (без готовых сканеров). Вход — путь к тестовому репозиторию (или файлы). Выход — массив `Finding[]`.
+Собственные анализаторы (без готовых сканеров). Конфигурация — `ScanConfig` (`src/shared/types/scanner.ts`):
+
+```ts
+interface ScanConfig {
+  scannerType: "secrets" | "sca" | "sast";
+  targetPath?: string;
+  repoUrl?: string;
+  includePatterns?: string[];
+  excludePatterns?: string[];
+  options?: Record<string, unknown>;
+}
+```
 
 ### `scanner.secrets` — Поиск секретов
-- **Параметры:** `paths?: string[]` (глобы), `rules?: string[]` (подмножество правил).
-- **Правила (эвристики/regex):** пароли, API-ключи, токены (AWS, GitHub, generic), приватные ключи, JDBC URL с паролями и т.п.
-- **Выход:** `Finding[]` с `rule: "hardcoded-secret" | ...`.
+- **Данные (`ScannerNodeData`):** `kind: "scanner"`, `scannerType: "secrets"`, `label?`, `config: ScanConfig`.
 
 ### `scanner.sca` — Проверка зависимостей (SCA)
-- **Параметры:** `buildFile?: string` (по умолчанию `build.gradle.kts`), `cveDbPath?: string` (JSON справочник).
-- **Логика:** парсинг Gradle Kotlin DSL, извлечение зависимостей и версий, сравнение с CVE JSON (нормализованные диапазоны версий).
-- **Выход:** `Finding[]` с `rule: "vulnerable-dependency"`, `cve?: string`.
+- **Данные:** `kind: "scanner"`, `scannerType: "sca"`, `label?`, `config: ScanConfig`.
 
 ### `scanner.sast` — Статический анализ Kotlin/Spring Boot
-- **Параметры:** `paths?: string[]`, `rules?: string[]`.
-- **Правила (собственные эвристики):** SQL-инъекция (конкатенация в запросах), захардкоженные креды, небезопасная конфигурация Spring (отключённая CSRF, открытые эндпоинты, debug), небезопасная десериализация и т.п.
-- **Выход:** `Finding[]` с `rule: "sast-*"`.
+- **Данные:** `kind: "scanner"`, `scannerType: "sast"`, `label?`, `config: ScanConfig`.
 
-### Общий тип находки
+### Находка (`Finding`, `src/shared/types/finding.ts`)
 
 ```ts
 interface Finding {
   id: string;
   severity: "critical" | "high" | "medium" | "low" | "info";
-  file: string;
+  title: string;
+  description?: string;
+  file?: string;
   line?: number;
   column?: number;
-  rule: string;
-  message: string;
-  cve?: string;       // для SCA
-  snippet?: string;   // фрагмент кода
+  ruleId?: string;
+  scanner?: "secrets" | "sca" | "sast";
+  cve?: string;
+  packageName?: string;
+  package?: string;
+  version?: string;
+  fixedVersion?: string;
+  recommendation?: string;
+  snippet?: string;
 }
 ```
 
 ### Уровни критичности
 
-| Уровень | Цвет | Описание |
-|---------|------|----------|
-| critical | красный | Критическая уязвимость, требует немедленного исправления |
-| high | оранжевый | Серьёзная проблема |
-| medium | жёлтый | Умеренный риск |
-| low | зелёный | Низкий риск / best practice |
-| info | серый | Информационное замечание |
+| Уровень | Описание |
+|---------|----------|
+| critical | Критическая уязвимость |
+| high | Серьёзная проблема |
+| medium | Умеренный риск |
+| low | Низкий риск |
+| info | Информационное замечание |
 
 ---
 
 ## 4. Notify (уведомления)
 
-Один канал на выбор (требование ТЗ).
+Каналы: `telegram | smtp | webhook` (`NotifyChannel`). Конфигурация — `NotifyConfig` (`src/shared/types/notification.ts`).
 
 ### `notify.telegram`
-- **Параметры:** `botToken: string` (секрет, маскируется), `chatId: string`, `messageTemplate?: string`.
-- **Вход:** результаты/отчёт.
-- **Выход:** `{ sent: boolean, messageId?: string }`.
+- **Данные (`NotifyNodeData`):** `kind: "notify"`, `channel: "telegram"`, `label?`, `config: NotifyConfig` (поля `botToken?`, `chatId?` и др.).
 
 ### `notify.smtp`
-- **Параметры:** `host`, `port`, `user`, `password` (секрет), `to`, `subject`, `template?`.
-- **Выход:** `{ sent: boolean }`.
+- **Данные:** `kind: "notify"`, `channel: "smtp"`, `label?`, `config: NotifyConfig`.
 
 ### `notify.webhook`
-- **Параметры:** `url: string`, `method?: "POST" | "PUT"`, `headers?: Record<string,string>`, `bodyTemplate?: string`.
-- **Выход:** `{ status: number, ok: boolean }`.
+- **Данные:** `kind: "notify"`, `channel: "webhook"`, `label?`, `config: NotifyConfig`.
 
 ---
 
 ## 5. AI (LLM-анализ)
 
 ### `ai.analyze` — AI-агрегация и рекомендации
-- **Параметры:** `provider?: "openai" | "anthropic" | "ollama" | "vllm"`, `model?: string`, `promptTemplate?: string`, `language?: "ru" | "en"`.
-- **Вход:** массив `Finding[]` (и опционально контекст кода).
-- **Выход:**
-  ```json
-  {
-    "summary": "Краткое резюме",
-    "findings": [
-      { "findingId": "f1", "explanation": "...", "recommendation": "...", "severity": "high" }
-    ],
-    "recommendations": ["..."]
+- **Данные (`AiNodeData`):** `kind: "ai"`, `label?`, `provider?`, `model?`, `prompt?`, `temperature?`, `maxTokens?`.
+- **Отчёт (`AiReport`, `src/shared/types/llm.ts`):**
+  ```ts
+  interface AiReport {
+    summary: string;
+    riskLevel?: Severity;
+    findings: Finding[];
+    recommendations: string[];
+    generatedAt?: string;
   }
   ```
-- **Правило:** LLM только объясняет и рекомендует; источник находок — сканеры. Ответ валидируется по схеме; несуществующие CVE/файлы отбрасываются.
+
+Правило: LLM только объясняет и рекомендует; источник находок — сканеры.
 
 ---
 
+## Статусы выполнения
+
+- Run: `pending | running | success | error | cancelled` (`RunStatus`).
+- Нода: `idle | running | success | error | skipped` (`NodeRunStatus`).
+
+Результат запуска (`RunResult`): `id`, `workflowId`, `status`, `startedAt?`, `finishedAt?`, `nodeResults: NodeResult[]`, `findings: Finding[]`, `aiReport?`, `error?`.
+
 ## Поток данных между нодами
 
-Нода получает на вход выход предыдущей ноды (или массив при нескольких входах). Движок выполняет ноды в топологическом порядке, передавая результаты. Условные ноды (`logic.if`) маршрутизируют данные по веткам.
+Движок выполняет ноды в топологическом порядке (`topologicalSort` в `src/backend/engine/workflow-engine.js`), передавая выходы. Условные ноды маршрутизируют данные по веткам (`condition: "true"/"false"` на edge).
 
 ## Расширение
 
-Новые типы нод регистрируются в реестре (см. ADR-0005): тип → `{ schema, defaultParams, executor, uiComponent }`. Движок и редактор подхватывают автоматически.
+Новые типы нод — через расширение `NodeType` и `NodeData` в `src/shared/types/node.ts` плюс регистрация handler/UI. Движок Фазы 1 использует заглушку-обработчик (все ноды success).

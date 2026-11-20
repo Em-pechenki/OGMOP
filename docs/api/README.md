@@ -1,120 +1,98 @@
 # API — OGMOP
 
-Базовый URL (локальный бэкенд): `http://localhost:3001`. Фронтенд на GitHub Pages обращается к бэкенду по настраиваемому base URL (планируется).
+Базовый URL (локальный бэкенд): `http://localhost:3001`. Точка входа: `src/backend/index.js` (импортирует `createApp` из `src/backend/server.js`). Порт задаётся `PORT` (по умолчанию 3001).
 
-Все ответы оборачиваются в `ApiResponse<T>`:
+Все ответы имеют форму:
 
 ```ts
-interface ApiResponse<T> {
-  data: T;
-  error?: string;
-}
+// success
+{ "data": <T>, "error": null }
+// error
+{ "data": null, "error": "<message>", "details"?: <any> }
 ```
 
-## Статусы эндпоинтов
+Реализация: `src/backend/utils/response.js` (`sendSuccess`, `sendError`).
 
-| Статус | Значение |
-|--------|----------|
-| ✅ Реализовано | Доступно в `src/backend/index.js` |
-| 🟡 Черновик | Контракт предложен, реализация в процессе |
-| 🔵 Планируется | Запланировано (см. backlog) |
+## Маршруты (актуально)
 
-## Эндпоинты
+### Health
 
-### `GET /api/health` — ✅ Реализовано
+- `GET /api/health` — ✅
+  - Ответ: `{ status, project, uptime, timestamp }`.
 
-Проверка живости сервера.
+### Workflows (`/api/workflows`)
 
-**Ответ 200:**
-```json
-{ "status": "ok", "project": "OGMOP" }
-```
+- `GET /api/workflows` — список workflow.
+- `POST /api/workflows` — создать (body: `WorkflowCreateSchema`).
+- `GET /api/workflows/:id` — получить по id.
+- `PUT /api/workflows/:id` — обновить (body: `WorkflowUpdateSchema`).
+- `PATCH /api/workflows/:id` — частичное обновление (тот же schema).
+- `DELETE /api/workflows/:id` — удалить → `{ deleted: true }`.
 
----
+Тело создания/обновления (`src/backend/validators/workflow.validator.js`):
 
-### `POST /api/workflow/run` — 🟡 Черновик
-
-Запуск workflow. Тело — сериализованный граф.
-
-**Запрос:**
 ```json
 {
-  "workflow": {
-    "id": "wf_1",
-    "name": "Secrets scan",
-    "nodes": [
-      { "id": "n1", "type": "trigger.button", "position": { "x": 0, "y": 0 }, "data": {} }
-    ],
-    "edges": [
-      { "id": "e1", "source": "n1", "target": "n2" }
-    ]
-  },
-  "inputs": {
-    "repoPath": "/path/to/test-repo"
-  }
+  "name": "My workflow",
+  "description": "...",
+  "nodes": [ { "id": "n1", "type": "trigger.manual", "position": { "x": 0, "y": 0 }, "data": { "kind": "trigger", "triggerType": "manual" } } ],
+  "edges": [ { "id": "e1", "source": "n1", "target": "n2" } ]
 }
 ```
 
-**Ответ 202:**
+Ответ — объект `Workflow` (`src/shared/types/workflow.ts`): `id, name, description?, nodes, edges, createdAt?, updatedAt?, version?, templateId?, metadata?`.
+
+### Runs
+
+- `POST /api/workflows/:id/run` — запустить workflow (body: `{ "input": { ... } }`, опционально). Ответ `202`: `{ runId }`.
+- `GET /api/runs/:id` — статус запуска.
+
+Ответ `GET /api/runs/:id` (`src/backend/services/run.service.js` `getRunStatus`):
+
 ```json
 {
-  "data": { "runId": "run_abc123", "status": "queued" }
+  "id": "run_...",
+  "workflowId": "wf_...",
+  "status": "queued | running | success | failed | cancelled",
+  "nodeStatuses": { "n1": "success" },
+  "nodeResults": { "n1": { "nodeId": "n1", "type": "trigger.manual", "data": { } } },
+  "startedAt": "...",
+  "finishedAt": "...",
+  "error": null
 }
 ```
 
-**Ошибки:** `400` при невалидном теле (Zod), `429` при rate-limit.
+Примечание: `RunResult` в shared-типах (`src/shared/types/run.ts`) описывает `nodeResults: NodeResult[]`, `findings`, `aiReport`; бэкенд Фазы 1 возвращает `nodeResults` как объект (map) и без findings/aiReport (заглушка движка).
 
----
+### Templates (`/api/templates`)
 
-### `GET /api/runs/:id` — 🟡 Черновик
+- `GET /api/templates` — список шаблонов.
+- `POST /api/templates` — создать (body: `{ name?, description?, workflow? }`).
+- `GET /api/templates/:id` — получить.
+- `DELETE /api/templates/:id` — удалить → `{ deleted: true }`.
 
-Статус выполнения запуска, статусы нод, находки, логи.
+Объект `Template` (`src/shared/types/template.ts`): `id, name, description?, workflow, author?, tags?, createdAt?, updatedAt?, isPublic?`.
 
-**Ответ 200:**
-```json
-{
-  "data": {
-    "runId": "run_abc123",
-    "status": "running",
-    "nodes": {
-      "n1": { "status": "success", "output": { "triggered": true } }
-    },
-    "findings": [
-      { "id": "f1", "severity": "high", "file": "src/Foo.kt", "line": 12, "rule": "hardcoded-secret", "message": "..." }
-    ],
-    "logs": ["..."]
-  }
-}
-```
+## Валидация и ошибки
 
-**Статусы run:** `queued | running | success | error | canceled`.
+- Валидация: `src/backend/middleware/validate.middleware.js` + Zod-схемы (`src/backend/validators/workflow.validator.js`).
+- Ошибки валидации → `400` с `details`.
+- Не найдено → `404` `{ data: null, error: "..." }`.
+- Глобальный обработчик ошибок: `src/backend/middleware/error-handler.middleware.js`.
+- Безопасность: `src/backend/middleware/security.middleware.js` (helmet/CORS/rate-limit и т.д. — см. исходники).
 
-**Статусы ноды:** `idle | running | success | error | skipped`.
+## Безопасность и лимиты
 
----
+- `express.json({ limit: "2mb" })`.
+- Security middleware применяется через `securityMiddleware()` (см. `src/backend/middleware/security.middleware.js`).
 
-### `GET /api/runs` — 🔵 Планируется
+## Связанные типы
 
-Список запусков (история). Пагинация — планируется.
-
----
-
-### `POST /api/workflow` / `GET /api/workflow/:id` — 🔵 Планируется
-
-Сохранение/загрузка workflow (сейчас — localStorage на фронте).
-
----
-
-### `POST /api/notify/test` — 🔵 Планируется
-
-Тестовый вызов канала уведомлений (Telegram/SMTP/webhook) с маскированием секретов.
-
-## Типы (черновик, будут уточнены в `src/shared`)
-
-Сущности (планируются DATA-треком): `Node`, `Edge`, `Workflow`, `TriggerNode`, `LogicNode`, `NotifyNode`, `ScannerNode`, `Finding`, `Severity`, `RunStatus`, `NodeStatus`, `ScanResult`. См. `docs/nodes.md` и `docs/backlog.md`.
+- `src/shared/types/*.ts`: `FlowNode`, `FlowEdge`, `Workflow`, `Finding`, `RunResult`, `NodeResult`, `Template`, `NotifyConfig`, `ScanConfig`, `AiReport`, `LlmRequest/Response`.
+- Статусы: `RunStatus = pending | running | success | error | cancelled`; `NodeRunStatus = idle | running | success | error | skipped`.
 
 ## Примечания
 
-- Контракты помечены как черновик и будут уточняться по мере реализации BE/DATA треков. Не использовать как финальную спецификацию до стабилизации.
-- Секреты (токены) передаются в зашифрованном/маскированном виде; в логах не отображаются (цель).
-- OpenAPI-спецификация — планируется (Фаза 2).
+- Движок выполнения Фазы 1 — заглушка: `src/backend/engine/workflow-engine.js` (`nodeHandler` возвращает success и эхо data, задержка 50 мс на ноду). Реальные сканеры/уведомления/AI — Фаза 2.
+- In-memory store сбрасывается при рестарте процесса.
+- OpenAPI-спецификация — планируется.
