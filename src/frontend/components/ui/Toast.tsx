@@ -35,21 +35,21 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     <ToastContext.Provider value={{ toasts, show, dismiss }}>
       {children}
       <div className="fixed bottom-4 right-4 z-[60] flex flex-col gap-2 max-w-sm">
-        {toasts.map((t) => (
+        {toasts.map((toast) => (
           <div
-            key={t.id}
+            key={toast.id}
             className={`rounded-lg px-4 py-3 shadow-hover text-sm text-white flex items-start gap-2 ${
-              t.type === "success"
+              toast.type === "success"
                 ? "bg-primary"
-                : t.type === "error"
+                : toast.type === "error"
                 ? "bg-error"
-                : t.type === "warning"
+                : toast.type === "warning"
                 ? "bg-warning-text"
                 : "bg-secondary"
             }`}
           >
-            <span className="flex-1">{t.message}</span>
-            <button onClick={() => dismiss(t.id)} className="opacity-80 hover:opacity-100" aria-label={t("common.close")}>
+            <span className="flex-1">{toast.message}</span>
+            <button onClick={() => dismiss(toast.id)} className="opacity-80 hover:opacity-100" aria-label={t("common.close")}>
               ×
             </button>
           </div>

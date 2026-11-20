@@ -1,4 +1,5 @@
 import React from "react";
+import { useI18n } from "@frontend/hooks/useI18n";
 import Button from "@frontend/components/ui/Button";
 import Badge from "@frontend/components/ui/Badge";
 import Card from "@frontend/components/ui/Card";
@@ -39,6 +40,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
   selected,
   loading,
 }) => {
+  const { t: tr } = useI18n();
   const t = template;
   const tags = t.tags || [];
   const rawNodes = (t.workflow?.nodes || []) as any[];
@@ -66,7 +68,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
     <>
       <div className="flex items-start justify-between gap-2">
         <h3 className="text-base font-semibold text-text truncate" id={"tpl-" + t.id}>{t.name}</h3>
-        {t.isPublic && <Badge variant="info">Публичный</Badge>}
+        {t.isPublic && <Badge variant="info">{tr("templateCard.public")}</Badge>}
       </div>
       {variant !== "compact" && t.description && (
         <p className={"text-sm text-text-muted " + (variant === "featured" ? "line-clamp-4" : "line-clamp-2")}>{t.description}</p>
@@ -77,27 +79,27 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
         ))}
       </div>
       <p className="text-xs text-text-subtle">
-        {t.author ? "Автор: " + t.author + " · " : ""}
+        {t.author ? tr("templateCard.author", { name: t.author }) + " · " : ""}
         {t.createdAt ? new Date(t.createdAt).toLocaleDateString() : ""}
-        {typeof t.usageCount === "number" ? " · Использований: " + t.usageCount : ""}
+        {typeof t.usageCount === "number" ? tr("templateCard.usages", { count: t.usageCount }) : ""}
       </p>
     </>
   );
 
   const actions = (
     <div className="flex flex-wrap gap-2 mt-2">
-      <Button size="sm" onClick={() => onUse && onUse(t)}>Использовать</Button>
-      <Button size="sm" variant="secondary" onClick={() => onCopy && onCopy(t)}>Копировать</Button>
+      <Button size="sm" onClick={() => onUse && onUse(t)}>{tr("templateCard.use")}</Button>
+      <Button size="sm" variant="secondary" onClick={() => onCopy && onCopy(t)}>{tr("templateCard.copy")}</Button>
       {variant !== "compact" && (
         <>
-          <Button size="sm" variant="ghost" onClick={() => onPreview && onPreview(t)}>Подробнее</Button>
-          <Button size="sm" variant="ghost" onClick={() => onEdit && onEdit(t)}>Редактировать</Button>
+          <Button size="sm" variant="ghost" onClick={() => onPreview && onPreview(t)}>{tr("templateCard.details")}</Button>
+          <Button size="sm" variant="ghost" onClick={() => onEdit && onEdit(t)}>{tr("templateCard.edit")}</Button>
         </>
       )}
       <Button size="sm" variant="ghost" onClick={() => onPublish && onPublish(t)}>
-        {t.isPublic ? "Снять с публикации" : "Опубликовать"}
+        {t.isPublic ? tr("templateCard.unpublish") : tr("templateCard.publish")}
       </Button>
-      <Button size="sm" variant="danger" onClick={() => onDelete && onDelete(t)}>Удалить</Button>
+      <Button size="sm" variant="danger" onClick={() => onDelete && onDelete(t)}>{tr("templateCard.delete")}</Button>
     </div>
   );
 
@@ -115,11 +117,11 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
       ) : (
         <div className="flex flex-col items-center gap-1 text-text-subtle">
           <img src="/OGMOP/icons/logic.svg" alt="" className="w-8 h-8 opacity-40" />
-          <span className="text-xs">Нет превью</span>
+          <span className="text-xs">{tr("templateCard.noPreview")}</span>
         </div>
       )}
-      <button type="button" onClick={() => onPreview && onPreview(t)} className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-colors" aria-label="Предпросмотр">
-        <span className="opacity-0 group-hover:opacity-100 text-xs bg-white px-2 py-1 rounded shadow">Предпросмотр</span>
+      <button type="button" onClick={() => onPreview && onPreview(t)} className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/10 transition-colors" aria-label={tr("templateCard.preview")}>
+        <span className="opacity-0 group-hover:opacity-100 text-xs bg-white px-2 py-1 rounded shadow">{tr("templateCard.preview")}</span>
       </button>
     </div>
   );
@@ -153,9 +155,9 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
             {nodeTypes.length === 0 && <img src="/OGMOP/icons/logic.svg" alt="" className="w-4 h-4 opacity-40" />}
           </div>
           <h3 className="text-sm font-semibold text-text truncate flex-1">{t.name}</h3>
-          <Button size="sm" variant="primary" onClick={() => onUse && onUse(t)}>Использовать</Button>
+          <Button size="sm" variant="primary" onClick={() => onUse && onUse(t)}>{tr("templateCard.use")}</Button>
         </div>
-        <p className="text-xs text-text-subtle mt-1">Использований: {t.usageCount ?? 0}</p>
+        <p className="text-xs text-text-subtle mt-1">{tr("templateCard.compact.usages", { count: t.usageCount ?? 0 })}</p>
       </Card>
     );
   }
@@ -163,7 +165,7 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
   return (
     <Card hoverable padding="md" className={selected ? "ring-2 ring-primary" : ""}>
       {variant === "featured" && (
-        <div className="absolute -top-2 -right-2 z-10"><Badge variant="success">Рекомендуемый</Badge></div>
+        <div className="absolute -top-2 -right-2 z-10"><Badge variant="success">{tr("templateCard.recommended")}</Badge></div>
       )}
       {preview}
       <div className="flex flex-col gap-2 mt-3">{body}</div>

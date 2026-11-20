@@ -1,4 +1,5 @@
 import React from "react";
+import { useI18n } from "@frontend/hooks/useI18n";
 import { useWorkflowStore } from "@frontend/store/workflowStore";
 import type { NodeData } from "@shared/types";
 
@@ -24,6 +25,7 @@ const inputCls =
   "rounded-md border border-border bg-white px-2 py-1.5 text-sm text-text focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30";
 
 export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = "" }) => {
+  const { t } = useI18n();
   const { selectedNode, updateNodeData } = useWorkflowStore();
 
   const data = selectedNode?.data as NodeData | undefined;
@@ -42,7 +44,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = "" }) 
   if (!selectedNode || !data) {
     return (
       <div className={`rounded-lg border border-border bg-white p-4 text-sm text-text-muted ${className}`}>
-        Выберите ноду на холсте, чтобы редактировать её свойства.
+        {t("property.empty")}
       </div>
     );
   }
@@ -51,8 +53,8 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = "" }) 
 
   return (
     <div className={`overflow-auto rounded-lg border border-border bg-white p-4 ${className}`}>
-      <Section title="Основное">
-        <Field label="Название">
+      <Section title={t("property.section.main")}>
+        <Field label={t("property.field.name")}>
           <input
             className={inputCls}
             value={(data as { label?: string }).label || ""}
@@ -62,8 +64,8 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = "" }) 
       </Section>
 
       {kind === "trigger" && (
-        <Section title="Триггер">
-          <Field label="Тип">
+        <Section title={t("property.section.trigger")}>
+          <Field label={t("property.field.type")}>
             <select
               className={inputCls}
               value={(data as { triggerType?: string }).triggerType || "manual"}
@@ -74,7 +76,7 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = "" }) 
             </select>
           </Field>
           {(data as { triggerType?: string }).triggerType === "schedule" && (
-            <Field label="Расписание (cron)">
+            <Field label={t("property.field.schedule")}>
               <input
                 className={inputCls}
                 value={(data as { schedule?: string }).schedule || ""}
@@ -86,8 +88,8 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = "" }) 
       )}
 
       {kind === "logic" && (
-        <Section title="Логика">
-          <Field label="Тип">
+        <Section title={t("property.section.logic")}>
+          <Field label={t("property.field.type")}>
             <select
               className={inputCls}
               value={(data as { logicType?: string }).logicType || "if"}
@@ -98,14 +100,14 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = "" }) 
               <option value="regex">regex</option>
             </select>
           </Field>
-          <Field label="Условие">
+          <Field label={t("property.field.condition")}>
             <input
               className={inputCls}
               value={(data as { condition?: string }).condition || ""}
               onChange={(e) => update({ condition: e.target.value } as Partial<NodeData>)}
             />
           </Field>
-          <Field label="Оператор">
+          <Field label={t("property.field.operator")}>
             <select
               className={inputCls}
               value={(data as { operator?: string }).operator || "eq"}
@@ -118,14 +120,14 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = "" }) 
               ))}
             </select>
           </Field>
-          <Field label="Левый операнд">
+          <Field label={t("property.field.left")}>
             <input
               className={inputCls}
               value={(data as { left?: string }).left || ""}
               onChange={(e) => update({ left: e.target.value } as Partial<NodeData>)}
             />
           </Field>
-          <Field label="Правый операнд">
+          <Field label={t("property.field.right")}>
             <input
               className={inputCls}
               value={(data as { right?: string }).right || ""}
@@ -143,8 +145,8 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = "" }) 
       )}
 
       {kind === "scanner" && (
-        <Section title="Сканер">
-          <Field label="Тип сканера">
+        <Section title={t("property.section.scanner")}>
+          <Field label={t("property.field.scannerType")}>
             <select
               className={inputCls}
               value={(data as { scannerType?: string }).scannerType || "secrets"}
@@ -191,8 +193,8 @@ export const PropertyPanel: React.FC<PropertyPanelProps> = ({ className = "" }) 
       )}
 
       {kind === "notify" && (
-        <Section title="Уведомление">
-          <Field label="Канал">
+        <Section title={t("property.section.notify")}>
+          <Field label={t("property.field.channel")}>
             <select
               className={inputCls}
               value={(data as { channel?: string }).channel || "webhook"}

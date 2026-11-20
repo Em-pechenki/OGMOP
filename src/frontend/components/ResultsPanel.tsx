@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { useI18n } from "@frontend/hooks/useI18n";
 import { useRunStore } from "@frontend/store/runStore";
 import type { Finding, Severity } from "@shared/types";
 
@@ -17,6 +18,7 @@ export interface ResultsPanelProps {
 }
 
 export const ResultsPanel: React.FC<ResultsPanelProps> = ({ className = "" }) => {
+  const { t } = useI18n();
   const findings = useRunStore((s) => s.findings);
   const aiReport = useRunStore((s) => s.aiReport);
   const [sevFilter, setSevFilter] = useState<Severity[]>([]);
@@ -49,7 +51,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({ className = "" }) =>
   return (
     <div className={`flex flex-col gap-4 ${className}`}>
       <div className="rounded-lg border border-border bg-white p-4">
-        <h3 className="mb-2 text-sm font-semibold text-text">Находки ({findings.length})</h3>
+        <h3 className="mb-2 text-sm font-semibold text-text">{t("results.findings", { count: findings.length })}</h3>
         <div className="mb-3 flex flex-wrap gap-2">
           {SEVERITIES.map((s) => (
             <button
@@ -66,7 +68,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({ className = "" }) =>
         <div className="mb-3 flex gap-2">
           <input
             className="flex-1 rounded-md border border-border bg-white px-2 py-1.5 text-sm"
-            placeholder="Поиск..."
+            placeholder={t("results.search")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -75,7 +77,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({ className = "" }) =>
             value={scannerFilter}
             onChange={(e) => setScannerFilter(e.target.value)}
           >
-            <option value="">Все сканеры</option>
+            <option value="">{t("results.allScanners")}</option>
             <option value="secrets">secrets</option>
             <option value="sca">sca</option>
             <option value="sast">sast</option>
@@ -83,7 +85,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({ className = "" }) =>
         </div>
         <div className="flex flex-col gap-2">
           {filtered.length === 0 && (
-            <p className="text-sm text-text-muted">Нет находок.</p>
+            <p className="text-sm text-text-muted">{t("results.none")}</p>
           )}
           {filtered.map((f) => (
             <article
@@ -113,7 +115,7 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({ className = "" }) =>
                 </pre>
               )}
               {f.recommendation && (
-                <p className="mt-2 text-xs text-primary-dark">Рекомендация: {f.recommendation}</p>
+                <p className="mt-2 text-xs text-primary-dark">{t("results.recommendation", { text: f.recommendation })}</p>
               )}
             </article>
           ))}
@@ -122,9 +124,9 @@ export const ResultsPanel: React.FC<ResultsPanelProps> = ({ className = "" }) =>
 
       {aiReport && (
         <div className="rounded-lg border border-border bg-white p-4">
-          <h3 className="mb-2 text-sm font-semibold text-text">AI-отчёт</h3>
+          <h3 className="mb-2 text-sm font-semibold text-text">{t("results.aiReport")}</h3>
           {aiReport.riskLevel && (
-            <p className="mb-2 text-xs text-text-muted">Уровень риска: {aiReport.riskLevel}</p>
+            <p className="mb-2 text-xs text-text-muted">{t("results.riskLevel", { level: aiReport.riskLevel })}</p>
           )}
           <p className="mb-2 text-sm text-text">{aiReport.summary}</p>
           {aiReport.recommendations?.length ? (

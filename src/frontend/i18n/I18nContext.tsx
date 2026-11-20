@@ -3,7 +3,7 @@ import { ru } from "./ru";
 import { en } from "./en";
 
 export type Locale = "ru" | "en";
-export type Dictionary = typeof ru;
+export type Dictionary = { [K in keyof typeof ru]: string };
 
 const dictionaries: Record<Locale, Dictionary> = { ru, en };
 
@@ -67,7 +67,7 @@ const defaultValue: I18nContextValue = {
 export const I18nContext = createContext<I18nContextValue>(defaultValue);
 
 export interface I18nProviderProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   initialLocale?: Locale;
 }
 

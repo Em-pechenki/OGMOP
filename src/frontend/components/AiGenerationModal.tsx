@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { ReactFlow, ReactFlowProvider, Background, Controls, MiniMap } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import Modal from "@frontend/components/ui/Modal";
+import { useI18n } from "@frontend/hooks/useI18n";
 import Button from "@frontend/components/ui/Button";
 import Input from "@frontend/components/ui/Input";
 import Spinner from "@frontend/components/ui/Spinner";
@@ -29,6 +30,7 @@ export interface AiGenerationModalProps {
 }
 
 export const AiGenerationModal: React.FC<AiGenerationModalProps> = ({ open, onClose, onApply }) => {
+  const { t } = useI18n();
   const [prompt, setPrompt] = useState("");
   const [name, setName] = useState("");
   const [language, setLanguage] = useState("Kotlin/Spring Boot");
@@ -44,7 +46,7 @@ export const AiGenerationModal: React.FC<AiGenerationModalProps> = ({ open, onCl
 
   const generate = async () => {
     if (prompt.trim().length < 10) {
-      setError("Опишите задачу подробнее (минимум 10 символов).");
+      setError(t("ai.error.min"));
       setStatus("error");
       return;
     }
@@ -66,12 +68,12 @@ export const AiGenerationModal: React.FC<AiGenerationModalProps> = ({ open, onCl
         return;
       }
       const warnings: string[] = [];
-      if (wf.nodes.length > 50) warnings.push("Сгенерировано много узлов — проверьте граф вручную.");
-      if (!wf.edges || wf.edges.length === 0) warnings.push("Связи между узлами не найдены — возможно, граф неполный.");
+      if (wf.nodes.length > 50) warnings.push(t("ai.warning.manyNodes"));
+      if (!wf.edges || wf.edges.length === 0) warnings.push(t("ai.warning.noEdges"));
       setResult({ ...wf, warnings });
       setStatus("preview");
     } catch (e) {
-      setError((e as Error).message || "Не удалось сгенерировать workflow");
+      setError((e as Error).message || t("ai.error.generate"));
       setStatus("error");
     }
   };
@@ -93,24 +95,24 @@ export const AiGenerationModal: React.FC<AiGenerationModalProps> = ({ open, onCl
   };
 
   return (
-    <Modal open={open} onClose={close} title="AI-генерация workflow" size="lg">
+    <Modal open={open} onClose={close} title={t("ai.modal.title")} size="lg">
       <div className="flex flex-col gap-4">
         <label className="flex flex-col gap-1 text-sm text-text-muted">
-          <span>Описание</span>
+          <span>{t("ai.field.description")}</span>
           <textarea
             className="rounded-md border border-border bg-white px-3 py-2 text-sm text-text focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/30"
             rows={4}
             maxLength={2000}
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Опишите, что должен делать workflow..."
+            placeholder={t("ai.field.descriptionPlaceholder")}
           />
           <span className="text-xs text-text-subtle">{prompt.length}/2000</span>
         </label>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <label className="flex flex-col gap-1 text-sm text-text-muted">
-            <span>Язык/стек</span>
+            <span>{t("ai.field.language")}</span>
             <select
               className="rounded-md border border-border bg-white px-2 py-1.5 text-sm text-text"
               value={language}
@@ -124,13 +126,13 @@ export const AiGenerationModal: React.FC<AiGenerationModalProps> = ({ open, onCl
             </select>
           </label>
           <label className="flex flex-col gap-1 text-sm text-text-muted">
-            <span>Уведомления</span>
+            <span>{t("ai.field.notify")}</span>
             <select
               className="rounded-md border border-border bg-white px-2 py-1.5 text-sm text-text"
               value={notify}
               onChange={(e) => setNotify(e.target.value)}
             >
-              <option value="none">Нет</option>
+              <option value="none">{t("ai.notify.none")}</option>
               <option value="telegram">Telegram</option>
               <option value="webhook">Webhook</option>
               <option value="email">Email</option>
@@ -139,7 +141,7 @@ export const AiGenerationModal: React.FC<AiGenerationModalProps> = ({ open, onCl
         </div>
 
         <div className="flex flex-col gap-1">
-          <span className="text-sm text-text-muted">Сканеры</span>
+          <span className="text-sm text-text-muted">{t("ai.field.scanners")}</span>
           <div className="flex flex-wrap gap-2">
             {SCANNERS.map((s) => (
               <button
@@ -159,13 +161,13 @@ export const AiGenerationModal: React.FC<AiGenerationModalProps> = ({ open, onCl
         </div>
 
         <label className="flex flex-col gap-1 text-sm text-text-muted">
-          <span>Имя workflow (необязательно)</span>
+          <span>{t("ai.field.name")}</span>
           <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="AI workflow" />
         </label>
 
         <div className="flex flex-wrap gap-2">
           <Button onClick={generate} disabled={status === "loading"}>
-            {status === "loading" ? "Генерация..." : "Сгенерировать"}
+            {status === "loading" ? t("ai.generating") : t("ai.generate")}
           </Button>
           {status === "loading" && <Spinner size="sm" />}
         </div>
@@ -176,7 +178,7 @@ export const AiGenerationModal: React.FC<AiGenerationModalProps> = ({ open, onCl
 
         {status === "empty" && (
           <div className="rounded-md bg-surface text-text-muted px-3 py-2 text-sm">
-            Не удалось построить workflow. Попробуйте изменить описание.
+            {t("ai.empty")}
           </div>
         )}
 
@@ -192,7 +194,7 @@ export const AiGenerationModal: React.FC<AiGenerationModalProps> = ({ open, onCl
               </div>
             )}
             <div className="text-sm text-text-muted">
-              Узлов: {result.nodes.length}, связей: {result.edges.length}
+              {t("ai.preview.nodes", { nodes: result.nodes.length, edges: result.edges.length })}
             </div>
             <div className="h-[280px] rounded-lg border border-border overflow-hidden bg-surface">
               <ReactFlowProvider>
@@ -218,10 +220,10 @@ export const AiGenerationModal: React.FC<AiGenerationModalProps> = ({ open, onCl
 
       <div className="mt-4 flex justify-end gap-2">
         <Button variant="ghost" onClick={close}>
-          Отмена
+          {t("ai.cancel")}
         </Button>
         <Button onClick={apply} disabled={status !== "preview" || !result}>
-          Применить к холсту
+          {t("ai.apply")}
         </Button>
       </div>
     </Modal>

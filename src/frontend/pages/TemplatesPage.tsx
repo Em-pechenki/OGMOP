@@ -352,7 +352,7 @@ export const TemplatesPage: React.FC = () => {
         </div>
       </Modal>
 
-      <Modal open={publishOpen} onClose={() => setPublishOpen(false)} title="Публикация шаблона" size="md">
+      <Modal open={publishOpen} onClose={() => setPublishOpen(false)} title={t("templates.modal.publishTitle")} size="md">
         <div className="flex flex-col gap-3">
           <label className="flex flex-col gap-1 text-sm text-text-muted">
             <span>{t("templates.field.name")}</span>
@@ -373,11 +373,11 @@ export const TemplatesPage: React.FC = () => {
         </div>
         <div className="mt-4 flex justify-end gap-2">
           <Button variant="ghost" onClick={() => setPublishOpen(false)}>{t("common.cancel")}</Button>
-          <Button onClick={submitPublish} disabled={saving}>{saving ? "Сохранение..." : "Опубликовать"}</Button>
+          <Button onClick={submitPublish} disabled={saving}>{saving ? t("common.saving") : t("templates.publish")}</Button>
         </div>
       </Modal>
 
-      <Modal open={!!previewTpl} onClose={() => setPreviewTpl(null)} title={previewTpl?.name || "Предпросмотр"} size="lg">
+      <Modal open={!!previewTpl} onClose={() => setPreviewTpl(null)} title={previewTpl?.name || t("templates.modal.preview")} size="lg">
         {previewTpl && (
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap gap-1">
@@ -386,15 +386,15 @@ export const TemplatesPage: React.FC = () => {
             </div>
             <p className="text-sm text-text-muted">{previewTpl.description}</p>
             <div className="bg-surface rounded-lg p-4 min-h-[160px] flex items-center justify-center">
-              <span className="text-xs text-text-muted">Узлы: {(previewTpl.workflow?.nodes || []).length}</span>
+              <span className="text-xs text-text-muted">{t("templates.preview.nodes", { count: (previewTpl.workflow?.nodes || []).length })}</span>
             </div>
             <p className="text-xs text-text-subtle">
-              {previewTpl.author ? "Автор: " + previewTpl.author + " · " : ""}
+              {previewTpl.author ? t("templates.preview.author", { name: previewTpl.author }) + " · " : ""}
               {previewTpl.createdAt ? new Date(previewTpl.createdAt).toLocaleDateString() : ""}
             </p>
             <div className="flex justify-end gap-2">
-              <Button onClick={() => { applyTemplate(previewTpl); setPreviewTpl(null); }}>Использовать</Button>
-              <Button variant="secondary" onClick={() => copyJson(previewTpl)}>Копировать JSON</Button>
+              <Button onClick={() => { applyTemplate(previewTpl); setPreviewTpl(null); }}>{t("templates.preview.use")}</Button>
+              <Button variant="secondary" onClick={() => copyJson(previewTpl)}>{t("templates.preview.copyJson")}</Button>
               <Button variant="ghost" onClick={() => setPreviewTpl(null)}>{t("common.close")}</Button>
             </div>
           </div>

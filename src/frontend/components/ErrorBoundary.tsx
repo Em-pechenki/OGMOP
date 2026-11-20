@@ -13,7 +13,7 @@ interface ErrorBoundaryState {
 
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   static contextType = I18nContext;
-  context!: React.ContextType<typeof I18nContext>;
+  declare context: React.ContextType<typeof I18nContext>;
   state: ErrorBoundaryState = { hasError: false, error: null };
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
