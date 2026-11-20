@@ -96,15 +96,19 @@ function compare(left, op, right) {
 function resolveRoot(input) {
   if (input?.repoPath) {
     const p = input.repoPath;
-    if (typeof p !== "string" || p.includes("\0")) {
+    if (typeof p !== "string" || p.includes("\0") || p.length === 0 || p.length > 4096) {
       throw new Error("Invalid repository path");
     }
-    const normalized = p.replace(/\\\\/g, "/");
+    const normalized = p.replace(/\\/g, "/");
     if (normalized.split("/").includes("..")) {
       throw new Error("Invalid repository path");
     }
-    if (path.isAbsolute(p)) return p;
-    return path.resolve(process.cwd(), p);
+    const resolved = path.resolve(process.cwd(), p);
+    const root = path.resolve(process.cwd());
+    if (resolved !== root && !resolved.startsWith(root + path.sep)) {
+      throw new Error("Repository path must be within the working directory");
+    }
+    return resolved;
   }
   // default demo repo
   return path.resolve(process.cwd(), "src", "backend", "seed", "demo-repo");
@@ -160,9 +164,9 @@ async function handleNode(node, context) {
   }
 
   if (type === "logic.regex") {
-    const value = asString(getValue(data.left ?? data.value ?? "", context));
+    const value = asString(getValue(data.left ?? data.value ?? "", context)).slice(0, 10000);
     const pattern = data.pattern || data.right || "";
-    if (typeof pattern !== "string" || pattern.length > 200) {
+    if (typeof pattern !== "string" || pattern.length === 0 || pattern.length > 200) {
       return { status: "success", output: { result: false, value, pattern } };
     }
     let result = false;
