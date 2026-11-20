@@ -5,8 +5,32 @@
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-11-20
+
 ### Added
-- `docs/user-guide/quickstart.md`: руководство пользователя (сборка сценария, запуск, чтение результата).
+- Финальный релиз v1.0.0: README, CHANGELOG, демо-сценарий, инструкции по деплою и настройке.
+- `docs/deploy.md`: деплой на GitHub Pages, CI, preview, Lighthouse, мониторинг, секреты.
+- `docs/user-guide/`: installation, quickstart, troubleshooting, README.
+- `docs/demo.md`: финальный демо-сценарий (5–8 мин), ожидаемые результаты (32 находки), запасной план, Q&A.
+- OpenAPI-спецификация `docs/api/openapi.yaml` v1.0.0: health, workflows (CRUD + run), runs, templates; схемы Finding, Run, NodeResult, AiReport, ScanConfig, NotifyConfig, NodeType.
+- Полное описание нод в `docs/nodes.md` (trigger, logic, scanner, notify, ai) с параметрами и примерами JSON.
+- Движок выполнения workflow (топологическая сортировка, статусы нод, поток данных).
+- Сканеры безопасности: секреты (regex), SCA (Gradle + CVE JSON), SAST (Kotlin/Spring Boot).
+- Классификация критичности находок (critical/high/medium/low/info).
+- AI-анализ (LLM-агрегация, объяснение, рекомендации) и уведомления (Telegram/SMTP/webhook).
+- Шаблоны workflow (backend API + страница `/templates`).
+- Тесты: unit, integration, e2e, smoke, regression, a11y (83 passed, 1 skipped, 3 todo).
+- CI/CD: GitHub Actions (lint, typecheck, test, build, deploy Pages, preview, monitor, Lighthouse).
+
+### Changed
+- `README.md`: финальная структура, возможности, ссылки, статус v1.0.0.
+- `docs/architecture/overview.md`: движок, сканеры, AI-адаптер, уведомления, безопасность.
+- `docs/api/README.md`: синхронизация с OpenAPI v1.0.0, актуальный движок и маршруты.
+- `docs/qa/coverage.md`: актуальные метрики (71.54% строк, 83 теста).
+- `package.json`: версия 1.0.0.
+
+### Fixed
+- Мелкие несоответствия документации и кода (счетчики находок SCA, статусы run, список маршрутов).
 
 ## [0.3.0] - 2026-11-20
 
