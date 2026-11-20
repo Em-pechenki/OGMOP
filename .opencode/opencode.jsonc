@@ -1,0 +1,15 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "default_agent": "director",
+  "model": "OpenRoute/deepseek-v4.1-flash-free",
+  "permissions": [
+    { "action": "shell", "resource": "git push *", "effect": "ask" },
+    { "action": "shell", "resource": "rm -rf *", "effect": "deny" }
+  ],
+  "skills": [
+    "./.opencode/skills"
+  ],
+  "instructions": [
+    "AGENTS.md"
+  ]
+}
