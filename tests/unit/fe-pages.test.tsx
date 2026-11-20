@@ -19,9 +19,7 @@ describe("FE: pages", () => {
     render(
       React.createElement(MemoryRouter, { initialEntries: ["/run/123"] }, React.createElement(RunDetailPage))
     );
-    // eslint-disable-next-line no-console
-    console.log("RUNDETAIL HTML:", document.body.innerHTML.slice(0, 500));
-    expect(true).toBe(true);
+    expect(screen.getByRole("heading", { name: /Запуск/i })).toBeInTheDocument();
   });
 
   it("renders HomePage", async () => {
