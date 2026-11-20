@@ -1,6 +1,6 @@
 ﻿import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { ReactFlow, Background, Controls, MiniMap, ReactFlowProvider } from "@xyflow/react";
+import { ReactFlow, Background, Controls, MiniMap, ReactFlowProvider, ControlButton, useReactFlow } from "@xyflow/react";
 import { AnimatedEdge } from "@frontend/components/edges/AnimatedEdge";
 import "@xyflow/react/dist/style.css";
 import Container from "@frontend/components/layout/Container";

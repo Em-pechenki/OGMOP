@@ -1,21 +1,26 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-
-const navItems = [
-  { to: "/", label: "Главная" },
-  { to: "/editor", label: "Редактор" },
-  { to: "/runs", label: "Запуски" },
-  { to: "/templates", label: "Шаблоны" },
-];
+import { useI18n } from "@frontend/hooks/useI18n";
+import ThemeToggle from "@frontend/components/ui/ThemeToggle";
+import LanguageSwitcher from "@frontend/components/ui/LanguageSwitcher";
 
 export const Header: React.FC = () => {
+  const { t } = useI18n();
+
+  const navItems = [
+    { to: "/", label: t("nav.home"), key: "home" },
+    { to: "/editor", label: t("nav.editor"), key: "editor" },
+    { to: "/runs", label: t("nav.runs"), key: "runs" },
+    { to: "/templates", label: t("nav.templates"), key: "templates" },
+  ];
+
   return (
-    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-border">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <NavLink to="/" className="flex items-center gap-2">
+    <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-border dark:bg-surface/90">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-2">
+        <NavLink to="/" className="flex items-center gap-2 shrink-0">
           <img src="/OGMOP/logo.svg" alt="OGMOP" className="h-8 w-auto" />
         </NavLink>
-        <nav className="flex items-center gap-1 overflow-x-auto" aria-label="Основная навигация">
+        <nav className="flex items-center gap-1 overflow-x-auto" aria-label={t("header.aria")}>
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -31,6 +36,10 @@ export const Header: React.FC = () => {
             </NavLink>
           ))}
         </nav>
+        <div className="flex items-center gap-2 shrink-0">
+          <LanguageSwitcher variant="compact" size="sm" />
+          <ThemeToggle variant="icon" size="sm" />
+        </div>
       </div>
     </header>
   );

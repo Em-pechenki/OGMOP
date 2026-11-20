@@ -4,6 +4,8 @@ import MainLayout from "@frontend/layouts/MainLayout";
 import { ToastProvider } from "@frontend/components/ui/Toast";
 import Spinner from "@frontend/components/ui/Spinner";
 import ErrorBoundary from "@frontend/components/ErrorBoundary";
+import { ThemeProvider } from "@frontend/context/ThemeContext";
+import { I18nProvider } from "@frontend/i18n/I18nContext";
 
 const HomePage = lazy(() => import("@frontend/pages/HomePage"));
 const EditorPage = lazy(() => import("@frontend/pages/EditorPage"));
@@ -21,23 +23,27 @@ const Fallback: React.FC = () => (
 
 export default function App() {
   return (
-    <ToastProvider>
-      <ErrorBoundary>
-        <Suspense fallback={<Fallback />}>
-          <Routes>
-            <Route element={<MainLayout />}>
-              <Route path="/" element={<HomePage />} />
-              <Route path="/editor" element={<EditorPage />} />
-              <Route path="/runs" element={<RunsPage />} />
-              <Route path="/templates" element={<TemplatesPage />} />
-              <Route path="/run/:id" element={<RunDetailPage />} />
-              <Route path="/404" element={<NotFoundPage />} />
-              <Route path="/500" element={<ServerErrorPage />} />
-              <Route path="*" element={<NotFoundPage />} />
-            </Route>
-          </Routes>
-        </Suspense>
-      </ErrorBoundary>
-    </ToastProvider>
+    <ThemeProvider>
+      <I18nProvider>
+        <ToastProvider>
+          <ErrorBoundary>
+            <Suspense fallback={<Fallback />}>
+              <Routes>
+                <Route element={<MainLayout />}>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/editor" element={<EditorPage />} />
+                  <Route path="/runs" element={<RunsPage />} />
+                  <Route path="/templates" element={<TemplatesPage />} />
+                  <Route path="/run/:id" element={<RunDetailPage />} />
+                  <Route path="/404" element={<NotFoundPage />} />
+                  <Route path="/500" element={<ServerErrorPage />} />
+                  <Route path="*" element={<NotFoundPage />} />
+                </Route>
+              </Routes>
+            </Suspense>
+          </ErrorBoundary>
+        </ToastProvider>
+      </I18nProvider>
+    </ThemeProvider>
   );
 }

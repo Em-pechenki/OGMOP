@@ -6,11 +6,16 @@ import { describe, it, expect } from "vitest";
 import EditorPage from "../../src/frontend/pages/EditorPage";
 import RunDetailPage from "../../src/frontend/pages/RunDetailPage";
 import HomePage from "../../src/frontend/pages/HomePage";
+import { I18nProvider } from "../../src/frontend/i18n/I18nContext";
 
 describe("FE: pages", () => {
   it("renders EditorPage", async () => {
     render(
-      React.createElement(MemoryRouter, null, React.createElement(EditorPage))
+      React.createElement(
+        MemoryRouter,
+        null,
+        React.createElement(I18nProvider, { initialLocale: "ru" }, React.createElement(EditorPage))
+      )
     );
     expect(await screen.findByText("Конструктор workflow")).toBeInTheDocument();
   });
