@@ -228,27 +228,17 @@ export const EditorPageInner: React.FC = () => {
         <div className="flex flex-wrap items-center gap-2" role="toolbar" aria-label={t("editor.title")}>
           <div className="flex items-center gap-1 rounded-lg border border-border bg-surface p-1" role="group" aria-label={t("editor.group.file")}>
             <span className="px-2 text-xs font-semibold text-text-muted">{t("editor.group.file")}</span>
-            <Button variant="secondary" size="sm" leftIcon={<LoadIcon />} onClick={load} title={t("editor.load")} aria-label={t("editor.load")}>
-              {t("editor.load")}
-            </Button>
-            <Button variant="primary" size="sm" leftIcon={<SaveIcon />} onClick={save} title={t("editor.saveLocal")} aria-label={t("editor.saveLocal")}>
-              {t("editor.saveLocal")}
-            </Button>
-            <Button variant="ghost" size="sm" leftIcon={<ClearIcon />} onClick={clear} title={t("editor.clear")} aria-label={t("editor.clear")}>
-              {t("editor.clear")}
-            </Button>
+            <Button variant="secondary" size="sm" leftIcon={<LoadIcon />} onClick={load} title={t("editor.load")} aria-label={t("editor.load")} />
+            <Button variant="primary" size="sm" leftIcon={<SaveIcon />} onClick={save} title={t("editor.saveLocal")} aria-label={t("editor.saveLocal")} />
+            <Button variant="ghost" size="sm" leftIcon={<ClearIcon />} onClick={clear} title={t("editor.clear")} aria-label={t("editor.clear")} />
           </div>
           <div className="flex items-center gap-1 rounded-lg border border-border bg-surface p-1" role="group" aria-label={t("editor.group.run")}>
             <span className="px-2 text-xs font-semibold text-text-muted">{t("editor.group.run")}</span>
-            <Button variant="primary" size="sm" leftIcon={<RunIcon />} onClick={handleRun} title={t("editor.run")} aria-label={t("editor.run")}>
-              {t("editor.run")}
-            </Button>
+            <Button variant="primary" size="sm" leftIcon={<RunIcon />} onClick={handleRun} title={t("editor.run")} aria-label={t("editor.run")} />
           </div>
           <div className="flex items-center gap-1 rounded-lg border border-border bg-surface p-1" role="group" aria-label={t("editor.group.ai")}>
             <span className="px-2 text-xs font-semibold text-text-muted">{t("editor.group.ai")}</span>
-            <Button variant="secondary" size="sm" leftIcon={<AiIcon />} onClick={() => setAiOpen(true)} title={t("editor.aiGenerate")} aria-label={t("editor.aiGenerate")}>
-              {t("editor.aiGenerate")}
-            </Button>
+            <Button variant="secondary" size="sm" leftIcon={<AiIcon />} onClick={() => setAiOpen(true)} title={t("editor.aiGenerate")} aria-label={t("editor.aiGenerate")} />
           </div>
         </div>
       </div>

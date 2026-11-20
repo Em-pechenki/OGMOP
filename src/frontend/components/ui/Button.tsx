@@ -27,13 +27,17 @@ const sizeClasses: Record<ButtonSize, string> = {
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = "primary", size = "md", loading, disabled, leftIcon, rightIcon, fullWidth, className = "", children, ...rest }, ref) => {
+    const iconOnly = !children && (leftIcon || rightIcon || loading);
+    const sizeClass = iconOnly
+      ? size === "sm" ? "p-1.5" : size === "lg" ? "p-3" : "p-2"
+      : sizeClasses[size];
     return (
       <button
         ref={ref}
         disabled={disabled || loading}
         aria-busy={loading || undefined}
         aria-disabled={disabled || loading || undefined}
-        className={`inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-150 ease-out hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-1 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${variantClasses[variant]} ${sizeClasses[size]} ${fullWidth ? "w-full" : ""} ${className}`}
+        className={`inline-flex items-center justify-center gap-2 rounded-lg font-medium transition-all duration-150 ease-out hover:shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-1 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed ${variantClasses[variant]} ${sizeClass} ${fullWidth ? "w-full" : ""} ${className}`}
         {...rest}
       >
         {loading && (
