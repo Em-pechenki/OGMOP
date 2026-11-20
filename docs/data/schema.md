@@ -73,6 +73,11 @@ Template *..1 Workflow
 - `src/backend/seed/demo-repo/` — учебный Kotlin/Spring Boot проект.
 ```
 
+## Алиасы типов
+Для совместимости со спецификацией отдела доступны алиасы:
+`Node = FlowNode`, `Edge = FlowEdge`, `TriggerNode`, `LogicNode`, `NotifyNode`, `ScannerNode`, `AiNode`.
+`ScanResult` описывает результат работы сканера (находки, статус, длительность).
+
 ## Пример FlowNode
 
 ```json
