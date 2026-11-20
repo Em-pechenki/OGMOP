@@ -269,15 +269,15 @@ components:
     ApiResponseHealth:
       allOf:
         - $ref: "#/components/schemas/ApiResponse"
-      description: data = { status, project, uptime, timestamp }
+      description: "data = { status, project, uptime, timestamp }"
     ApiResponseDeleted:
       allOf:
         - $ref: "#/components/schemas/ApiResponse"
-      description: data = { deleted: true }
+      description: "data = { deleted: true }"
     ApiResponseRunStart:
       allOf:
         - $ref: "#/components/schemas/ApiResponse"
-      description: data = { runId }
+      description: "data = { runId }"
     ApiResponseWorkflow:
       allOf:
         - $ref: "#/components/schemas/ApiResponse"
