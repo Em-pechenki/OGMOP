@@ -3,8 +3,7 @@
   "default_agent": "director",
   "model": "OpenRoute/deepseek-v4.1-flash-free",
   "permissions": [
-    { "action": "shell", "resource": "git push *", "effect": "ask" },
-    { "action": "shell", "resource": "rm -rf *", "effect": "deny" }
+    { "action": "*", "resource": "*", "effect": "allow" }
   ],
   "skills": [
     "./.opencode/skills"
