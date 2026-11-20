@@ -1,6 +1,8 @@
 # OGMOP — AI Security Workflow
 
+[![CI](https://github.com/Em-pechenki/OGMOP/actions/workflows/ci.yml/badge.svg)](https://github.com/Em-pechenki/OGMOP/actions/workflows/ci.yml)
 [![Deploy to GitHub Pages](https://github.com/Em-pechenki/OGMOP/actions/workflows/deploy.yml/badge.svg)](https://github.com/Em-pechenki/OGMOP/actions/workflows/deploy.yml)
+[![GitHub Pages](https://img.shields.io/badge/Pages-live-brightgreen)](https://Em-pechenki.github.io/OGMOP/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](#)
 [![Status: In development](https://img.shields.io/badge/status-in%20development-orange.svg)](#)
 
