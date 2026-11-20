@@ -47,13 +47,13 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             <button
               type="button"
               onClick={this.handleReset}
-              className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/40"
+              className="rounded-lg bg-primary-dark px-4 py-2 text-sm font-medium text-white hover:bg-primary-darker focus:outline-none focus:ring-2 focus:ring-primary/40"
             >
               Повторить
             </button>
             <button
               type="button"
-              onClick={() => (window.location.href = "/OGMOP/")}
+              onClick={() => (window.location.href = import.meta.env.BASE_URL || "/OGMOP/")}
               className="rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium text-text hover:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/40"
             >
               На главную

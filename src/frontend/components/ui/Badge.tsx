@@ -4,7 +4,7 @@ export type BadgeVariant = "default" | "success" | "warning" | "error" | "info";
 
 const variantClasses: Record<BadgeVariant, string> = {
   default: "bg-secondary-light text-secondary",
-  success: "bg-primary-light text-primary-dark",
+  success: "bg-primary-light text-primary-darker",
   warning: "bg-warning text-warning-text",
   error: "bg-error/10 text-error",
   info: "bg-info text-secondary",
