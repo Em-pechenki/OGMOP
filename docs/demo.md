@@ -114,6 +114,30 @@ curl -X POST http://localhost:3001/api/workflows/<workflowId>/run \
 - `monitor.yml`: проверка доступности Pages каждые 6 часов.
 - URL production: https://Em-pechenki.github.io/OGMOP/
 
+## 8.5. AI-генерация workflow (1 мин)
+
+1. Открыть модальное окно "AI-генерация workflow" в редакторе.
+2. Ввести описание (>= 10 символов), выбрать стек, сканеры и канал уведомлений.
+3. Нажать "Сгенерировать" -> предпросмотр графа.
+4. Применить граф в редактор.
+
+API:
+
+```bash
+curl -X POST http://localhost:3001/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{ "prompt": "Security scan for Kotlin Spring Boot", "scanners": ["secrets","sca","sast"], "aiReport": true, "notify": "webhook", "webhookUrl": "https://example.com/hook" }'
+```
+
+## 8.6. CI/CD-триггер (30 сек)
+
+```bash
+curl -X POST http://localhost:3001/api/ci/run \
+  -H "Content-Type: application/json" \
+  -d '{ "workflowId": "<workflowId>", "branch": "main", "repo": "org/repo" }'
+# -> { "data": { "runId": "run_...", "source": "ci" }, "error": null }
+```
+
 ## 9. Технические детали (1 мин)
 
 - Стек: React 18 + Vite + TypeScript + Tailwind + React Flow; Node.js + Express + Zod.

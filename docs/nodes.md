@@ -447,3 +447,47 @@ Pipeline описан в `.github/workflows`:
 - `monitor.yml` - проверка доступности Pages каждые 6 часов.
 
 Подробности: [docs/deploy.md](deploy.md).
+
+---
+
+## 9. AI-генерация workflow (Generate)
+
+Генератор создаёт валидный граф workflow по текстовому описанию.
+
+### Endpoint
+
+- `POST /api/generate` (алиасы: `/api/generate/generate`, `/api/generate/scenario`).
+- Вход (`GenerateRequest`): `prompt` (3-2000), `name?`, `stack?`, `scanners?` (secrets/sca/sast), `notify?`/`notification?`, `aiReport?`, `targetPath?`, `webhookUrl?`.
+- Выход (`GenerateResponse`): `name`, `stack?`, `nodes[]`, `edges[]`, `warnings[]`.
+
+### Пример
+
+```bash
+curl -X POST http://localhost:3001/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{ "prompt": "Security scan for Kotlin Spring Boot", "scanners": ["secrets","sca","sast"], "aiReport": true, "notify": "webhook", "webhookUrl": "https://example.com/hook" }'
+```
+
+Frontend использует модальное окно `AiGenerationModal` (предпросмотр и применение графа).
+
+---
+
+## 10. CI/CD-триггер (CI)
+
+Запуск workflow из CI/CD pipeline.
+
+### Endpoint
+
+- `POST /api/ci` (алиасы: `/api/ci/run`, `/api/ci/runs`, `/api/ci/ci`, ...).
+- Вход: `workflowId` | `workflow_id` | `id`, `branch?`, `repo?`, `input?`.
+- Выход: `{ runId, source: "ci" }` (HTTP 202).
+
+### Пример
+
+```bash
+curl -X POST http://localhost:3001/api/ci/run \
+  -H "Content-Type: application/json" \
+  -d '{ "workflowId": "wf_123", "branch": "main", "repo": "org/repo" }'
+```
+
+Shared-типы: `CiCdConfig`, `CiRun` (`src/shared/types/cicd.ts`) для конфигурации интеграции и истории запусков.

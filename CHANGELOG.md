@@ -20,6 +20,8 @@
 
 ### Added
 - Шаблоны workflow: in-memory store и API `/api/templates` (create/get/list/delete), документация в `docs/nodes.md` и OpenAPI.
+- AI-генерация workflow: endpoint `/api/generate` (алиасы) и модальное окно предпросмотра.
+- CI/CD-триггер: endpoint `/api/ci` (алиасы) для запуска workflow из pipeline.
 - AI-генерация отчётов: документированы LLM-провайдеры, переменные окружения, mock-fallback и валидация `AiReport`.
 - CI/CD: задокументированы workflows `ci.yml`, `deploy.yml`, `preview.yml`, `monitor.yml` и pipeline.
 - Обновлены `README.md`, `docs/nodes.md`, `docs/api/openapi.yaml`, `docs/demo.md` под v1.1.0.

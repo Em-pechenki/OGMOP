@@ -101,6 +101,8 @@ OGMOP/
 - Узлы: триггеры (manual/schedule), логика (if/compare/regex), сканеры (secrets/SCA/SAST), AI-анализ, уведомления (telegram/smtp/webhook).
 - Сканеры находят секреты, уязвимые зависимости (Gradle + CVE) и небезопасный код (Kotlin/Spring Boot).
 - AI-генерация отчёта: summary, объяснение находок, рекомендации, riskLevel (LLM или mock-fallback).
+- AI-генерация workflow: создание графа по текстовому описанию (`POST /api/generate`).
+- CI/CD-триггер: запуск workflow из pipeline (`POST /api/ci`).
 - Шаблоны workflow: сохранение/список/получение/удаление через `/api/templates`.
 - Таблица находок с severity (critical/high/medium/low/info).
 - In-memory store для MVP (данные сбрасываются при рестарте).
