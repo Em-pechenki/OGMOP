@@ -1,0 +1,24 @@
+﻿
+[1m[7m[36m RUN [39m[27m[22m [36mv2.1.9 [39m[90mD:/OGMOP[39m
+
+node.exe : [90mstderr[2m | tests/unit/fe-pages.test.tsx[2m > [22m[2mFE: pages[2m > [22m[2mrenders EditorPage
+строка:1 знак:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: ([90mstderr[2m...ders EditorPage:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+[22m[39mтЪая╕П React Router Future Flag Warning: React Router will begin wrapping state updates in `React.startTransi
+tion` in v7. You can use the `v7_startTransition` future flag to opt-in early. For more information, see https://reactr
+outer.com/v6/upgrading/future#v7_starttransition.
+тЪая╕П React Router Future Flag Warning: Relative route resolution within Splat routes is changing in v7. You can use t
+he `v7_relativeSplatPath` future flag to opt-in early. For more information, see https://reactrouter.com/v6/upgrading/f
+uture#v7_relativesplatpath.
+
+ [32mтЬУ[39m tests/unit/fe-pages.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[90m 107[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m1 passed[39m[22m[90m (1)[39m
+[2m      Tests [22m [1m[32m3 passed[39m[22m[90m (3)[39m
+[2m   Start at [22m 00:42:40
+[2m   Duration [22m 1.51s[2m (transform 170ms, setup 71ms, collect 436ms, tests 107ms, environment 630ms, prepare 89ms)[22m
+

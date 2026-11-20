@@ -33,7 +33,7 @@ export const listTemplates = asyncHandler(async (req, res) => {
 });
 
 export const copyTemplate = asyncHandler(async (req, res) => {
-  const result = templateService.copy(req.params.id);
+  const result = templateService.copy(req.params.id, req.body || {});
   if (!result) return sendError(res, "Template not found", 404);
   const workflow = result.workflow;
   return res.status(201).json({

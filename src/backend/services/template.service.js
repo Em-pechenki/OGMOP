@@ -18,8 +18,15 @@ function toBool(v) {
 
 function toArray(v) {
   if (v === undefined || v === null) return [];
-  if (Array.isArray(v)) return v.flatMap((x) => String(x).split(",")).map((s) => s.trim()).filter(Boolean);
-  return String(v).split(",").map((s) => s.trim()).filter(Boolean);
+  if (Array.isArray(v))
+    return v
+      .flatMap((x) => String(x).split(","))
+      .map((s) => s.trim())
+      .filter(Boolean);
+  return String(v)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
 }
 
 function clamp(n, min, max) {
@@ -35,7 +42,7 @@ export const templateService = {
       description: p.description,
       workflow: p.workflow,
       author: p.author,
-      tags: Array.isArray(p.tags) ? p.tags : (p.tags ? [String(p.tags)] : []),
+      tags: Array.isArray(p.tags) ? p.tags : p.tags ? [String(p.tags)] : [],
       isPublic: p.isPublic,
       category: p.category,
       version: p.version,
@@ -54,7 +61,10 @@ export const templateService = {
     if (q) {
       const needle = String(q).toLowerCase().trim();
       items = items.filter((t) => {
-        const hay = [t.name, t.description, t.author, t.category, ...(t.tags || [])].filter(Boolean).join(" ").toLowerCase();
+        const hay = [t.name, t.description, t.author, t.category, ...(t.tags || [])]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
         return hay.includes(needle);
       });
     }
@@ -62,7 +72,9 @@ export const templateService = {
     const tags = toArray(p.tag || p.tags);
     if (tags.length) {
       const lower = tags.map((t) => t.toLowerCase());
-      items = items.filter((t) => (t.tags || []).some((tag) => lower.includes(String(tag).toLowerCase())));
+      items = items.filter((t) =>
+        (t.tags || []).some((tag) => lower.includes(String(tag).toLowerCase()))
+      );
     }
 
     if (p.category) {
@@ -71,7 +83,11 @@ export const templateService = {
     }
     if (p.author) {
       const a = String(p.author).toLowerCase();
-      items = items.filter((t) => String(t.author || "").toLowerCase().includes(a));
+      items = items.filter((t) =>
+        String(t.author || "")
+          .toLowerCase()
+          .includes(a)
+      );
     }
     const pub = toBool(p.isPublic !== undefined ? p.isPublic : p.public);
     if (pub !== undefined) {
@@ -79,8 +95,23 @@ export const templateService = {
     }
 
     // sort
-    const sortBy = String(p.sort || p.sortBy || p.orderBy || "createdAt");
-    const order = String(p.order || p.sortOrder || p.direction || "desc").toLowerCase();
+    let sortBy = String(p.sort || p.sortBy || p.orderBy || "").toLowerCase();
+    let order = String(p.order || p.sortOrder || p.direction || "").toLowerCase();
+    // friendly sort aliases per docs
+    if (sortBy === "popular" || sortBy === "popularity" || sortBy === "usage") {
+      sortBy = "usageCount";
+      if (!order) order = "desc";
+    } else if (sortBy === "new" || sortBy === "newest" || sortBy === "recent") {
+      sortBy = "createdAt";
+      if (!order) order = "desc";
+    } else if (sortBy === "name" || sortBy === "alpha" || sortBy === "alphabetical") {
+      sortBy = "name";
+      if (!order) order = "asc";
+    } else if (!sortBy) {
+      sortBy = "usageCount";
+      if (!order) order = "desc";
+    }
+    if (!order) order = "desc";
     const dir = order === "asc" ? 1 : -1;
     items.sort((a, b) => {
       const av = a && a[sortBy];
@@ -134,13 +165,14 @@ export const templateService = {
   remove(id) {
     return deleteTemplate(id);
   },
-  copy(id) {
+  copy(id, payload = {}) {
     const t = getTemplate(id);
     if (!t) return null;
     const wf = t.workflow && typeof t.workflow === "object" ? t.workflow : {};
+    const p = payload || {};
     const created = createWorkflow({
-      name: wf.name || t.name || "Copied template",
-      description: wf.description || t.description || "",
+      name: p.name || wf.name || t.name || "Copied template",
+      description: p.description || wf.description || t.description || "",
       nodes: Array.isArray(wf.nodes) ? wf.nodes : [],
       edges: Array.isArray(wf.edges) ? wf.edges : [],
       templateId: t.id,
@@ -151,10 +183,21 @@ export const templateService = {
     }
     // increment usage count
     try {
-      const updated = updateTemplate(id, { usageCount: (t.usageCount || 0) + 1, updatedAt: new Date().toISOString() });
+      const updated = updateTemplate(id, {
+        usageCount: (t.usageCount || 0) + 1,
+        updatedAt: new Date().toISOString(),
+      });
       if (updated) Object.assign(t, updated);
-    } catch { /* ignore */ }
-    return { workflow: created, template: t, workflowId: created.id, templateId: t.id, copied: true };
+    } catch {
+      /* ignore */
+    }
+    return {
+      workflow: created,
+      template: t,
+      workflowId: created.id,
+      templateId: t.id,
+      copied: true,
+    };
   },
 };
 

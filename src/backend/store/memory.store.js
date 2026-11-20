@@ -25,6 +25,7 @@ export function createWorkflow(data) {
     description: data.description || "",
     nodes: Array.isArray(data.nodes) ? data.nodes : [],
     edges: Array.isArray(data.edges) ? data.edges : [],
+    templateId: data.templateId,
     createdAt: now(),
     updatedAt: now(),
   };
@@ -102,7 +103,7 @@ export function createTemplate(data) {
     description: d.description || "",
     workflow: d.workflow || null,
     author: d.author,
-    tags: Array.isArray(d.tags) ? d.tags : (d.tags ? [String(d.tags)] : []),
+    tags: Array.isArray(d.tags) ? d.tags : d.tags ? [String(d.tags)] : [],
     createdAt: d.createdAt || now(),
     updatedAt: d.updatedAt || now(),
     isPublic: d.isPublic !== undefined ? Boolean(d.isPublic) : true,
@@ -150,12 +151,21 @@ function seedTemplates() {
   let dir = null;
   for (const c of candidates) {
     try {
-      if (fs.existsSync(c) && fs.statSync(c).isDirectory()) { dir = c; break; }
-    } catch { /* ignore */ }
+      if (fs.existsSync(c) && fs.statSync(c).isDirectory()) {
+        dir = c;
+        break;
+      }
+    } catch {
+      /* ignore */
+    }
   }
   if (!dir) return;
   let files = [];
-  try { files = fs.readdirSync(dir).filter((f) => f.toLowerCase().endsWith(".json")); } catch { return; }
+  try {
+    files = fs.readdirSync(dir).filter((f) => f.toLowerCase().endsWith(".json"));
+  } catch {
+    return;
+  }
   for (const f of files) {
     try {
       const raw = fs.readFileSync(path.join(dir, f), "utf8");
@@ -166,7 +176,12 @@ function seedTemplates() {
         id,
         name: data.name || data.workflow?.name || f.replace(/\.json$/i, ""),
         description: data.description || data.workflow?.description || "",
-        workflow: data.workflow && typeof data.workflow === "object" ? data.workflow : (data.nodes ? { name: data.name, nodes: data.nodes, edges: data.edges } : null),
+        workflow:
+          data.workflow && typeof data.workflow === "object"
+            ? data.workflow
+            : data.nodes
+              ? { name: data.name, nodes: data.nodes, edges: data.edges }
+              : null,
         author: data.author,
         tags: Array.isArray(data.tags) ? data.tags : [],
         createdAt: data.createdAt || now(),
