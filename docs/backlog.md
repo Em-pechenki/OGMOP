@@ -28,7 +28,7 @@ DESIGN, FE, BE, DATA, DEVOPS, QA, DOCS, SEC.
 - [ ] BE: структура сервера, API-контракты workflow/scan.
 - [ ] DATA: типы Node, Edge, Workflow, Finding, Severity, ScanResult.
 - [ ] DEVOPS: CI/CD проверка, Pages.
-- [ ] QA: настройка Vitest, ESLint.
+- [x] QA: настройка Vitest, ESLint.
 - [ ] DOCS: README, архитектурный обзор черновик.
 - [ ] SEC: threat model, CORS/helmet.
 
@@ -62,7 +62,7 @@ DESIGN, FE, BE, DATA, DEVOPS, QA, DOCS, SEC.
 - [ ] Deploy Pages.
 
 ### QA
-- [ ] Smoke-тесты сборки.
+- [x] Smoke-тесты сборки.
 - [ ] Тесты компонентов дизайн-системы.
 
 ### DOCS
