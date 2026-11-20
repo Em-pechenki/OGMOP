@@ -6,6 +6,31 @@
 
 ---
 
+## 0. `/` — Лендинг (входная страница)
+
+### Назначение
+Приветственная страница: объяснить ценность OGMOP, показать возможности, привести к действию (редактор / шаблоны).
+
+### Структура
+См. `docs/design/landing.md`. Секции: Hero → Social proof/метрики → Features → How it works → Demo preview → Templates highlight → Final CTA → Footer.
+
+### Layout
+- Container max-width 1280px, padding 16/24/32px.
+- Header лендинг-вариант (навигация: Возможности / Шаблоны / Документация; CTA «Начать»).
+- Footer полный (3 колонки).
+
+### Responsive
+- Hero: 2 колонки (≥1024) → 1 колонка (<1024).
+- Features: 3 (≥1024) / 2 (768–1023) / 1 (<768).
+- См. `landing.md` §11.
+
+### Состояния
+- Initial load: splash с логотипом.
+- Empty templates: секция Templates скрывается или показывает CTA.
+- Offline/error boundary: общие.
+
+---
+
 ## Общий Layout (все страницы)
 
 - **Header** (высота 56px, sticky): логотип Центр-инвест (слева), навигация (Editor / Runs / Templates), справа — кнопка «New workflow», аватар/меню.

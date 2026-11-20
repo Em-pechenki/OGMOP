@@ -56,6 +56,56 @@
 - Desktop card width ~ 1/3-1/4 контейнера; preview aspect 16:9 (min 160×90).
 - Mobile: preview высота 100px.
 
+## 3.1 TemplateCard — варианты (variants)
+
+Базовый `TemplateCard` (§3) имеет варианты, управляемые prop `variant`.
+
+| Вариант | Превью | Плотность | Использование |
+|---------|--------|-----------|---------------|
+| `default` | 120px (16:9) | стандартная | сетка `/templates` |
+| `featured` | 180px, бейдж «Рекомендуемый» | расширенная (больше описания) | топ шаблоны на лендинге |
+| `compact` | 80px (только иконки нод) | компактная | sidebar, списки, mobile drawer |
+| `horizontal` | слева (120×90) | горизонтальная | mobile (<768) как альтернатива вертикальной |
+
+### `featured`
+- Card `elevated`, padding lg, граница `--color-primary` (2px) + тень `--shadow-hover`.
+- Бейдж «Рекомендуемый» (Badge success sm, dot) в правом верхнем углу превью.
+- Описание до 4 строк (line-clamp-4), теги до 5.
+- CTA: «Использовать» (primary md) + «Подробнее» (ghost sm).
+
+### `compact`
+- Без превью-графа: ряд иконок нод (до 5, 16px, `--color-text-muted`) + «+N».
+- Заголовок `--text-sm`, font-weight 600; описание скрыто (tooltip на hover).
+- Мета-строка сокращена: «N использований».
+- Actions: только иконки («Использовать» icon primary, «Копировать» ghost icon).
+
+### `horizontal`
+- Flex row: превью слева (120×90), контент справа.
+- На mobile (<768) используется по умолчанию для экономии вертикали.
+
+### Общие правила вариантов
+- Все варианты используют токены (никаких hex).
+- Hover: `--shadow-hover`, translateY -2px, `--duration-fast` (кроме compact — только цвет фона).
+- Focus: `--shadow-focus`.
+- Loading: skeleton по форме варианта (shimmer).
+- Selected: рамка `--color-primary`.
+
+---
+
+## 3.2 TemplateCard — состояния (расширенные)
+
+| Состояние | Визуал |
+|-----------|--------|
+| `default` | Card default, hoverable |
+| `hover` | подъём, тень hover |
+| `focus` | кольцо focus |
+| `loading` | skeleton (shimmer) по форме варианта |
+| `selected` | рамка primary |
+| `error` | рамка `--color-error`, сообщение под карточкой |
+| `empty-preview` | фон `--color-surface`, иконка logic.svg 32px muted, текст «Нет превью» |
+
+---
+
 ## 4. Фильтры, поиск, сортировка
 
 ### Search
@@ -95,10 +145,40 @@
 - Превью workflow (read-only миниатюра) вверху.
 - Состояния: idle / loading (spinner) / success (toast + закрытие) / error (inline).
 
-## 7. Empty / Loading / Error
-- Empty: иконка `logic.svg` 48px muted, заголовок «Шаблонов нет», описание, CTA «Опубликовать» (primary) + «Создать вручную» (secondary → /editor).
-- Loading: skeleton grid 6 карточек (shimmer).
-- Error: сообщение + «Повторить».
+## 7. Empty / Loading / Error (расширенные)
+
+### Empty (нет шаблонов)
+- Контейнер: Card `subtle`, padding `--space-12`, центрирован, max-width 480px, по центру страницы.
+- Иконка: `logic.svg` 64px, `--color-text-subtle`, opacity 0.6.
+- Заголовок: «Шаблонов пока нет» (`--text-xl`, font-weight 600, `--color-text`).
+- Описание: «Создайте первый шаблон из workflow или используйте готовые.» (`--text-sm`, `--color-text-muted`, max-width 320px).
+- CTA-группа: «Опубликовать» (primary md) + «Создать вручную» (secondary md → /editor).
+- Фон: `--color-surface`, радиус `--radius-lg`.
+
+### Empty (нет результатов поиска/фильтрам)
+- Иконка: search 48px, `--color-text-subtle`.
+- Заголовок: «Ничего не найдено».
+- Описание: «Попробуйте изменить запрос или сбросить фильтры.»
+- CTA: «Сбросить фильтры» (ghost md).
+- Live region: «Найдено 0 шаблонов» (`aria-live="polite"`).
+
+### Loading (skeleton grid)
+- 6 карточек-заглушек (desktop) / 4 (tablet) / 3 (mobile) по форме `default` варианта.
+- Skeleton: фон `--color-surface`, shimmer-анимация 1.5s infinite.
+- Блоки-заглушки: превью (120px, radius top), заголовок (60% ширины), описание (2 строки 80%/60%), теги (3 pill), мета (40%).
+- Не показывать спиннер поверх — только skeleton.
+
+### Error
+- Контейнер: Card `outlined`, padding `--space-8`, центрирован.
+- Иконка: alert-circle 48px, `--color-error`.
+- Заголовок: «Не удалось загрузить шаблоны» (`--text-lg`, font-weight 600, `--color-error`).
+- Описание: сообщение ошибки (`--text-sm`, `--color-text-muted`), max 2 строки.
+- CTA: «Повторить» (primary md) + «На главную» (ghost md).
+- При повторной ошибке: показать детали (collapsible, mono xs).
+
+### A11y
+- Empty/error контейнеры — `role="status"` (empty) / `role="alert"` (error).
+- Loading — `aria-busy="true"` на grid, `aria-live="polite"` «Загрузка шаблонов».
 
 ## 8. Пагинация
 - Desktop: numbered pagination (1 2 3 … N) + «Показать ещё» (ghost) альтернатива.
