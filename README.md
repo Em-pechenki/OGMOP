@@ -4,13 +4,13 @@
 [![Deploy to GitHub Pages](https://github.com/Em-pechenki/OGMOP/actions/workflows/deploy.yml/badge.svg)](https://github.com/Em-pechenki/OGMOP/actions/workflows/deploy.yml)
 [![GitHub Pages](https://img.shields.io/badge/Pages-live-brightgreen)](https://Em-pechenki.github.io/OGMOP/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](#)
-[![Status: In development](https://img.shields.io/badge/status-in%20development-orange.svg)](#)
 
 Визуальная платформа автоматизации проверок безопасности кода: drag-and-drop конструктор сценариев (workflow) из нод, собственные анализаторы (секреты / SCA / SAST для Kotlin + Spring Boot + Gradle), классификация критичности, AI-объяснения и рекомендации, уведомления.
 
 Проект разрабатывается в рамках хакатона **Cyber Garden 2026** (кейс «AI Security Workflow»).
 
 - **Демо (GitHub Pages):** https://Em-pechenki.github.io/OGMOP/
+- **Демо-сценарий:** [docs/demo.md](docs/demo.md)
 - **ТЗ заказчика:** `ТЗ/tz.md`, `ТЗ/отделы/*.md`
 
 ## Быстрый старт
@@ -41,6 +41,8 @@ npm run server    # http://localhost:3001, переменная PORT перео�
 
 Проверка: `curl http://localhost:3001/api/health` → `{ "status": "ok", "project": "OGMOP" }`.
 
+Подробнее: [docs/user-guide/installation.md](docs/user-guide/installation.md), [docs/user-guide/quickstart.md](docs/user-guide/quickstart.md).
+
 ## Структура проекта
 
 ```
@@ -57,7 +59,8 @@ OGMOP/
 │   ├── design/          # Дизайн-токены и спецификации
 │   ├── qa/              # Отчёты о тестах/покрытии
 │   ├── security/        # Модель угроз, аудит
-│   └── user-guide/      # Руководство пользователя
+│   ├── user-guide/      # Руководство пользователя
+│   └── demo.md          # Демо-сценарий
 ├── scripts/             # Скрипты автоматизации
 ├── .github/workflows/   # CI/CD (lint, test, build, deploy Pages)
 ├── ТЗ/                  # Техническое задание заказчика
@@ -74,6 +77,11 @@ OGMOP/
 - [Дизайн-токены](docs/design/tokens.md)
 - [План на 30 часов](docs/plan-30h.md)
 - [Бэклог](docs/backlog.md)
+- [Демо-сценарий](docs/demo.md)
+- [Руководство пользователя](docs/user-guide/README.md)
+- [Установка](docs/user-guide/installation.md)
+- [Быстрый старт](docs/user-guide/quickstart.md)
+- [Troubleshooting](docs/user-guide/troubleshooting.md)
 - [CHANGELOG](CHANGELOG.md)
 
 ## Стек
@@ -82,11 +90,20 @@ OGMOP/
 - **Бэкенд:** Node.js, Express, CORS, Zod (валидация).
 - **Общее:** TypeScript-типы в `src/shared`.
 - **CI/CD:** GitHub Actions → GitHub Pages.
-- **Тесты:** Vitest (+ React Testing Library планируется).
+- **Тесты:** Vitest.
+
+## Возможности
+
+- Drag-and-drop конструктор workflow (React Flow).
+- Ноды: триггеры (manual/schedule), логика (if/compare/regex), сканеры (secrets/sca/sast), AI-анализ, уведомления (telegram/smtp/webhook).
+- Собственные сканеры без внешних зависимостей.
+- AI-агрегация и рекомендации с валидацией ответа.
+- Визуализация статусов и результатов по severity.
+- Деплой фронтенда на GitHub Pages.
 
 ## Статус
 
-Фаза 0–1: каркас. Идёт параллельная разработка по трекам DESIGN/FE/BE/DATA/DEVOPS/QA/DOCS/SEC. См. `docs/backlog.md`.
+Фаза 3: руководство пользователя, troubleshooting, демо-сценарий, финальная документация. См. `docs/backlog.md`, `CHANGELOG.md`.
 
 ## Лицензия
 

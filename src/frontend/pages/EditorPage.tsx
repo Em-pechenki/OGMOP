@@ -1,4 +1,5 @@
 import React, { useCallback, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   ReactFlow,
   Background,
@@ -17,7 +18,6 @@ import { useToast } from "@frontend/components/ui/Toast";
 import { nodeTypes } from "@frontend/components/nodes";
 import PropertyPanel from "@frontend/components/PropertyPanel";
 import { api } from "@frontend/services/api";
-import { runWorkflow } from "@frontend/services/workflowRunner";
 import type { NodeData, NodeType } from "@shared/types";
 
 interface PaletteItem {
@@ -28,12 +28,12 @@ interface PaletteItem {
 }
 
 const PALETTE: PaletteItem[] = [
-  { nodeType: "trigger.manual", label: "Триггер: Ручной запуск", color: "#50B848", data: { kind: "trigger", triggerType: "manual", label: "Триггер: Ручной запуск" } },
-  { nodeType: "trigger.schedule", label: "Триггер: По расписанию", color: "#50B848", data: { kind: "trigger", triggerType: "schedule", label: "Триггер: По расписанию", schedule: "0 14 * * *" } },
+  { nodeType: "trigger.manual", label: "Триггер: ручной запуск", color: "#50B848", data: { kind: "trigger", triggerType: "manual", label: "Триггер: ручной запуск" } },
+  { nodeType: "trigger.schedule", label: "Триггер: по расписанию", color: "#50B848", data: { kind: "trigger", triggerType: "schedule", label: "Триггер: по расписанию", schedule: "0 14 * * *" } },
   { nodeType: "logic.if", label: "Логика: if/else", color: "#494B52", data: { kind: "logic", logicType: "if", label: "Логика: if/else", condition: "" } },
-  { nodeType: "logic.compare", label: "Логика: Сравнение", color: "#494B52", data: { kind: "logic", logicType: "compare", label: "Логика: Сравнение", operator: "eq" } },
+  { nodeType: "logic.compare", label: "Логика: сравнение", color: "#494B52", data: { kind: "logic", logicType: "compare", label: "Логика: сравнение", operator: "eq" } },
   { nodeType: "logic.regex", label: "Логика: regex", color: "#494B52", data: { kind: "logic", logicType: "regex", label: "Логика: regex", pattern: "" } },
-  { nodeType: "scanner.secrets", label: "Сканер: Секреты", color: "#D32F2F", data: { kind: "scanner", scannerType: "secrets", label: "Сканер: Секреты", config: { scannerType: "secrets" } } },
+  { nodeType: "scanner.secrets", label: "Сканер: секреты", color: "#D32F2F", data: { kind: "scanner", scannerType: "secrets", label: "Сканер: секреты", config: { scannerType: "secrets" } } },
   { nodeType: "scanner.sca", label: "Сканер: SCA", color: "#E65100", data: { kind: "scanner", scannerType: "sca", label: "Сканер: SCA", config: { scannerType: "sca" } } },
   { nodeType: "scanner.sast", label: "Сканер: SAST", color: "#B8860B", data: { kind: "scanner", scannerType: "sast", label: "Сканер: SAST", config: { scannerType: "sast" } } },
   { nodeType: "notify.telegram", label: "Уведомление: Telegram", color: "#1976D2", data: { kind: "notify", channel: "telegram", label: "Уведомление: Telegram", config: { channel: "telegram" } } },
@@ -42,13 +42,11 @@ const PALETTE: PaletteItem[] = [
 ];
 
 const nodeColor = (data: NodeData) => {
-  const item = PALETTE.find((p) => p.nodeType === (data as { nodeType?: string }).nodeType);
-  if (item) return item.color;
   if (data.kind === "trigger") return "#50B848";
   if (data.kind === "logic") return "#494B52";
   if (data.kind === "scanner") return "#D32F2F";
   if (data.kind === "notify") return "#1976D2";
-  return "#494B52";
+  return "#7B1FA2";
 };
 
 export const EditorPageInner: React.FC = () => {
@@ -57,6 +55,7 @@ export const EditorPageInner: React.FC = () => {
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const [stored, setStored] = useLocalStorage<string>("ogmop_workflow", "");
   const { show } = useToast();
+  const navigate = useNavigate();
 
   const onDragStart = (event: React.DragEvent, item: PaletteItem) => {
     event.dataTransfer.setData("application/ogmop-node", JSON.stringify(item));
@@ -92,7 +91,7 @@ export const EditorPageInner: React.FC = () => {
 
   const save = () => {
     setStored(JSON.stringify({ nodes, edges }));
-    show("Workflow сохранён", "success");
+    show("Workflow сохранён локально", "success");
   };
 
   const load = () => {
@@ -106,7 +105,7 @@ export const EditorPageInner: React.FC = () => {
       setEdges(parsed.edges || []);
       show("Workflow загружен", "success");
     } catch {
-      show("Ошибка парсинга", "error");
+      show("Ошибка загрузки workflow", "error");
     }
   };
 
@@ -117,14 +116,20 @@ export const EditorPageInner: React.FC = () => {
   };
 
   const handleRun = async () => {
+    if (nodes.length === 0) {
+      show("Добавьте хотя бы один узел", "warning");
+      return;
+    }
     try {
       const res = await api.post("/api/workflows", { name: "Workflow", nodes, edges });
       const wf = (res.data as { data?: { id?: string } })?.data;
       const id = wf?.id;
-      if (!id) throw new Error("Не удалось создать workflow");
-      show("Запуск...", "info");
-      await runWorkflow(id);
-      show("Запуск завершён", "success");
+      if (!id) throw new Error("Не удалось сохранить workflow");
+      const runRes = await api.post(`/api/workflows/${id}/run`, { input: {} });
+      const runId = (runRes.data as { data?: { runId?: string } })?.data?.runId;
+      if (!runId) throw new Error("Не получен runId");
+      show("Запуск начат", "info");
+      navigate(`/run/${runId}`);
     } catch (e) {
       show((e as Error).message, "error");
     }
@@ -132,33 +137,36 @@ export const EditorPageInner: React.FC = () => {
 
   return (
     <Container size="full">
-      <div className="py-4 flex items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-text">Конструктор workflow</h1>
-        <div className="flex gap-2">
+      <div className="py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <h1 className="text-lg sm:text-xl font-semibold text-text">Конструктор workflow</h1>
+        <div className="flex flex-wrap gap-2">
           <Button variant="secondary" onClick={load}>Загрузить</Button>
           <Button onClick={save}>Сохранить (local)</Button>
           <Button variant="ghost" onClick={clear}>Очистить</Button>
           <Button onClick={handleRun}>Запустить</Button>
         </div>
       </div>
-      <div className="flex gap-4 h-[calc(100vh-160px)]">
-        <Card padding="sm" className="w-64 shrink-0 overflow-auto">
-          <h2 className="text-sm font-semibold text-text mb-2">Палитра нод</h2>
-          <div className="flex flex-col gap-2">
+      <div className="flex flex-col lg:flex-row gap-4 lg:h-[calc(100vh-160px)]">
+        <Card padding="sm" className="w-full lg:w-64 lg:shrink-0 lg:overflow-auto">
+          <h2 className="text-sm font-semibold text-text mb-2">Палитра узлов</h2>
+          <div className="flex flex-row lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
             {PALETTE.map((item) => (
               <div
                 key={item.label}
                 draggable
                 onDragStart={(e) => onDragStart(e, item)}
-                className="cursor-grab active:cursor-grabbing rounded-lg border border-border bg-white px-3 py-2 text-sm text-text hover:shadow-card transition-shadow"
+                className="cursor-grab active:cursor-grabbing rounded-lg border border-border bg-white px-3 py-2 text-sm text-text hover:shadow-card transition-shadow whitespace-nowrap lg:whitespace-normal"
                 style={{ borderLeft: `4px solid ${item.color}` }}
+                role="button"
+                tabIndex={0}
+                aria-label={item.label}
               >
                 {item.label}
               </div>
             ))}
           </div>
         </Card>
-        <div ref={reactFlowWrapper} className="flex-1 rounded-lg border border-border overflow-hidden bg-surface">
+        <div ref={reactFlowWrapper} className="flex-1 min-h-[320px] rounded-lg border border-border overflow-hidden bg-surface" role="application" aria-label="Холст workflow">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -175,7 +183,7 @@ export const EditorPageInner: React.FC = () => {
             <MiniMap nodeColor={(n) => nodeColor(n.data as NodeData)} />
           </ReactFlow>
         </div>
-        <div className="w-80 shrink-0 overflow-auto">
+        <div className="w-full lg:w-80 lg:shrink-0 lg:overflow-auto">
           <PropertyPanel />
         </div>
       </div>

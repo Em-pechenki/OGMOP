@@ -27,9 +27,30 @@ async function sendTelegram(config, payload) {
   return { channel: "telegram", ok: true };
 }
 
+function isSafeUrl(raw) {
+  try {
+    const u = new URL(String(raw));
+    if (u.protocol !== "http:" && u.protocol !== "https:") return false;
+    const host = u.hostname.toLowerCase();
+    if (!host) return false;
+    const allowLocal = process.env.NODE_ENV !== "production";
+    if (host === "localhost" || host === "127.0.0.1" || host === "::1" || host.endsWith(".localhost")) {
+      return allowLocal;
+    }
+    if (host === "0.0.0.0" || host === "169.254.169.254" || host === "metadata.google.internal") return false;
+    if (/^(10\\.|192\\.168\\.|172\\.(1[6-9]|2[0-9]|3[0-1])\\.|169\\.254\\.)/.test(host)) {
+      return allowLocal;
+    }
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 async function sendWebhook(config, payload) {
   const url = config.url || config.webhookUrl;
   if (!url) throw new Error("Webhook URL missing");
+  if (!isSafeUrl(url)) throw new Error("Unsafe webhook URL");
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json", ...(config.headers || {}) },

@@ -40,8 +40,9 @@ export const RunsPage: React.FC = () => {
       </div>
 
       {loading && (
-        <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
+        <div className="flex flex-col items-center gap-3 py-12" role="status" aria-live="polite">
           <Spinner size="lg" />
+          <span className="text-sm text-text-muted">Загрузка...</span>
         </div>
       )}
 

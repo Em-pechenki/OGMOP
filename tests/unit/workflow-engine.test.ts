@@ -82,4 +82,40 @@ describe("workflow engine: executeWorkflow", () => {
     await executeWorkflow(run, workflow, { onUpdate: (p: any) => updates.push(p) });
     expect(updates.length).toBeGreaterThan(0);
   });
+
+  it("empty workflow completes as success", async () => {
+    const run: any = { input: {}, nodeStatuses: {}, nodeResults: {} };
+    const result: any = await executeWorkflow(run, { nodes: [], edges: [] }, {});
+    expect(result.status).toBe("success");
+    expect(Object.keys(result.nodeStatuses)).toHaveLength(0);
+  });
+
+  it("cycle does not hang and completes", async () => {
+    const workflow = {
+      nodes: [
+        { id: "a", type: "trigger.manual", data: {} },
+        { id: "b", type: "trigger.manual", data: {} },
+      ],
+      edges: [
+        { source: "a", target: "b" },
+        { source: "b", target: "a" },
+      ],
+    };
+    const run: any = { input: {}, nodeStatuses: {}, nodeResults: {} };
+    const result: any = await executeWorkflow(run, workflow, {});
+    expect(result.status).toBe("success");
+    expect(result.nodeStatuses.a).toBe("success");
+    expect(result.nodeStatuses.b).toBe("success");
+  });
+
+  it("unknown node type is skipped, not failed", async () => {
+    const workflow = {
+      nodes: [{ id: "x", type: "totally.unknown", data: {} }],
+      edges: [],
+    };
+    const run: any = { input: {}, nodeStatuses: {}, nodeResults: {} };
+    const result: any = await executeWorkflow(run, workflow, {});
+    expect(result.status).toBe("success");
+    expect(result.nodeStatuses.x).toBe("skipped");
+  });
 });

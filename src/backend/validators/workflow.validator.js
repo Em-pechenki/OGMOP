@@ -31,7 +31,20 @@ export const WorkflowCreateSchema = z.object({
 export const WorkflowUpdateSchema = WorkflowCreateSchema.partial();
 
 export const WorkflowRunSchema = z.object({
-  input: z.record(z.any()).optional().default({}),
+  input: z
+    .record(z.any())
+    .optional()
+    .default({})
+    .refine((obj) => {
+      if (!obj || typeof obj !== "object") return true;
+      const rp = obj.repoPath;
+      if (rp === undefined) return true;
+      if (typeof rp !== "string") return false;
+      if (rp.includes("\0")) return false;
+      const normalized = rp.replace(/\\\\/g, "/");
+      if (normalized.split("/").includes("..")) return false;
+      return true;
+    }, { message: "Invalid repoPath" }),
 });
 
 export const TemplateCreateSchema = z.object({

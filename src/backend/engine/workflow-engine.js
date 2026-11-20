@@ -7,16 +7,32 @@ import { analyze } from "../services/ai.service.js";
 import { notify } from "../services/notify.service.js";
 
 export function topologicalSort(nodes, edges) {
-  const nodeIds = (nodes || []).map((n) => n.id);
+  const safeNodes = Array.isArray(nodes) ? nodes.filter((n) => n && n.id !== undefined && n.id !== null) : [];
+  // dedupe by id, keep first occurrence
+  const seen = new Set();
+  const uniqueNodes = [];
+  for (const n of safeNodes) {
+    if (seen.has(n.id)) continue;
+    seen.add(n.id);
+    uniqueNodes.push(n);
+  }
+  const nodeIds = uniqueNodes.map((n) => n.id);
   const idSet = new Set(nodeIds);
   const adjacency = new Map(nodeIds.map((id) => [id, []]));
   const indegree = new Map(nodeIds.map((id) => [id, 0]));
 
-  (edges || []).forEach((e) => {
-    if (!idSet.has(e.source) || !idSet.has(e.target)) return;
+  const safeEdges = Array.isArray(edges) ? edges : [];
+  for (const e of safeEdges) {
+    if (!e || !idSet.has(e.source) || !idSet.has(e.target)) continue;
+    if (e.source === e.target) {
+      // self-loop: count as dependency so node is still appended later
+      indegree.set(e.target, (indegree.get(e.target) || 0) + 1);
+      adjacency.get(e.source).push(e.target);
+      continue;
+    }
     adjacency.get(e.source).push(e.target);
     indegree.set(e.target, (indegree.get(e.target) || 0) + 1);
-  });
+  }
 
   const queue = nodeIds.filter((id) => (indegree.get(id) || 0) === 0);
   const ordered = [];
@@ -24,15 +40,17 @@ export function topologicalSort(nodes, edges) {
     const id = queue.shift();
     ordered.push(id);
     for (const next of adjacency.get(id) || []) {
-      indegree.set(next, indegree.get(next) - 1);
+      indegree.set(next, (indegree.get(next) || 0) - 1);
       if (indegree.get(next) === 0) queue.push(next);
     }
   }
 
+  // append cycle / remaining nodes deterministically
   for (const id of nodeIds) {
     if (!ordered.includes(id)) ordered.push(id);
   }
-  return ordered.map((id) => (nodes || []).find((n) => n.id === id));
+  const byId = new Map(uniqueNodes.map((n) => [n.id, n]));
+  return ordered.map((id) => byId.get(id)).filter(Boolean);
 }
 
 function getNodeData(node) {
@@ -78,6 +96,13 @@ function compare(left, op, right) {
 function resolveRoot(input) {
   if (input?.repoPath) {
     const p = input.repoPath;
+    if (typeof p !== "string" || p.includes("\0")) {
+      throw new Error("Invalid repository path");
+    }
+    const normalized = p.replace(/\\\\/g, "/");
+    if (normalized.split("/").includes("..")) {
+      throw new Error("Invalid repository path");
+    }
     if (path.isAbsolute(p)) return p;
     return path.resolve(process.cwd(), p);
   }
@@ -137,6 +162,9 @@ async function handleNode(node, context) {
   if (type === "logic.regex") {
     const value = asString(getValue(data.left ?? data.value ?? "", context));
     const pattern = data.pattern || data.right || "";
+    if (typeof pattern !== "string" || pattern.length > 200) {
+      return { status: "success", output: { result: false, value, pattern } };
+    }
     let result = false;
     try { result = new RegExp(pattern).test(value); } catch { result = false; }
     return { status: "success", output: { result, value, pattern } };
@@ -187,53 +215,83 @@ async function handleNode(node, context) {
     return { status: "success", output: { notified: true, result } };
   }
 
-  // default
-  return { status: "success", output: { nodeId: node.id, type, data } };
+  // unknown node type -> skipped (not a hard failure)
+  // eslint-disable-next-line no-console
+  console.warn("[engine] unknown node type, skipping:", type, node && node.id);
+  return { status: "skipped", output: { nodeId: node && node.id, type, data, skipped: true, reason: "unknown node type" } };
 }
 
 function evalCondition(cond, context) {
-  // very small eval: support "input.x == 'y'"
+  // Safe (non-eval) mini-evaluator: supports "input.x OP 'literal'" / "nodeId.path OP value".
+  // Never executes arbitrary code.
   try {
-    // replace input.xxx
-    const js = cond.replace(/\binput\.(\w+)/g, (_, k) => JSON.stringify(context.input?.[k]));
-    // eslint-disable-next-line no-new-func
-    return Function(`"use strict"; return (${js});`)();
+    const m = String(cond).match(/^\s*(.+?)\s*(===|!==|==|!=|>=|<=|>|<)\s*(.+?)\s*$/);
+    if (!m) return false;
+    const leftExpr = m[1].trim();
+    const op = m[2];
+    const rightRaw = m[3].trim();
+    const left = getValue(leftExpr, context);
+    let right;
+    if (/^(['"]).*\1$/.test(rightRaw)) {
+      right = rightRaw.slice(1, -1);
+    } else if (rightRaw === "true") {
+      right = true;
+    } else if (rightRaw === "false") {
+      right = false;
+    } else if (rightRaw === "null") {
+      right = null;
+    } else {
+      right = getValue(rightRaw, context);
+    }
+    const opMap = { "==": "eq", "===": "eq", "!=": "ne", "!==": "ne", ">": "gt", "<": "lt", ">=": "gte", "<=": "lte" };
+    return compare(left, opMap[op] || op, right);
   } catch {
     return false;
   }
 }
 
 export async function executeWorkflow(run, workflow, { onUpdate } = {}) {
-  const nodes = workflow.nodes || [];
-  const edges = workflow.edges || [];
+  if (!workflow || typeof workflow !== "object") {
+    return {
+      status: "failed",
+      nodeStatuses: {},
+      nodeResults: {},
+      findings: [],
+      aiReport: null,
+      error: "Workflow is required",
+    };
+  }
+  const nodes = Array.isArray(workflow.nodes) ? workflow.nodes : [];
+  const edges = Array.isArray(workflow.edges) ? workflow.edges : [];
   const ordered = topologicalSort(nodes, edges);
 
   const nodeStatuses = {};
   const nodeResults = {};
   const context = {
-    input: run.input || {},
+    input: (run && run.input) || {},
     nodeOutputs: {},
     workflowId: workflow.id,
     workflowName: workflow.name,
   };
 
-  if (onUpdate) onUpdate({ status: "running", nodeStatuses: { ...nodeStatuses } });
+  if (typeof onUpdate === "function") onUpdate({ status: "running", nodeStatuses: { ...nodeStatuses } });
 
   for (const node of ordered) {
-    if (!node) continue;
+    if (!node || !node.id) continue;
     nodeStatuses[node.id] = "running";
-    if (onUpdate) onUpdate({ nodeStatuses: { ...nodeStatuses }, currentNode: node.id });
+    if (typeof onUpdate === "function") onUpdate({ nodeStatuses: { ...nodeStatuses }, currentNode: node.id });
 
     try {
       await new Promise((r) => setTimeout(r, 30));
       const result = await handleNode(node, context);
-      nodeStatuses[node.id] = result.status;
-      nodeResults[node.id] = result.output;
-      context.nodeOutputs[node.id] = result.output;
+      const status = (result && result.status) || "success";
+      nodeStatuses[node.id] = status;
+      nodeResults[node.id] = result && result.output ? result.output : null;
+      if (result && result.output) context.nodeOutputs[node.id] = result.output;
     } catch (err) {
       nodeStatuses[node.id] = "failed";
       nodeResults[node.id] = { error: err && err.message ? err.message : String(err) };
-      if (onUpdate) onUpdate({ nodeStatuses: { ...nodeStatuses }, nodeResults: { ...nodeResults } });
+      if (typeof onUpdate === "function") onUpdate({ nodeStatuses: { ...nodeStatuses }, nodeResults: { ...nodeResults } });
       return {
         status: "failed",
         nodeStatuses,
@@ -243,10 +301,11 @@ export async function executeWorkflow(run, workflow, { onUpdate } = {}) {
         error: err && err.message ? err.message : String(err),
       };
     }
-    if (onUpdate) onUpdate({ nodeStatuses: { ...nodeStatuses }, nodeResults: { ...nodeResults } });
+    if (typeof onUpdate === "function") onUpdate({ nodeStatuses: { ...nodeStatuses }, nodeResults: { ...nodeResults } });
   }
 
-  const allSuccess = Object.values(nodeStatuses).every((s) => s === "success" || s === "skipped");
+  const statuses = Object.values(nodeStatuses);
+  const allSuccess = statuses.length === 0 || statuses.every((s) => s === "success" || s === "skipped");
   const findings = collectFindings(context);
   const aiReport = collectAiReport(context);
   return {
@@ -262,13 +321,17 @@ export async function executeWorkflow(run, workflow, { onUpdate } = {}) {
 function collectFindings(context) {
   const all = [];
   for (const out of Object.values(context.nodeOutputs || {})) {
-    if (out && Array.isArray(out.findings)) all.push(...out.findings);
+    if (out && Array.isArray(out.findings)) {
+      for (const f of out.findings) {
+        if (f && typeof f === "object") all.push(f);
+      }
+    }
   }
-  // dedupe by id
   const seen = new Set();
   return all.filter((f) => {
-    if (seen.has(f.id)) return false;
-    seen.add(f.id);
+    const key = f && f.id ? f.id : JSON.stringify(f);
+    if (seen.has(key)) return false;
+    seen.add(key);
     return true;
   });
 }

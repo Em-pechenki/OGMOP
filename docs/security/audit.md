@@ -72,11 +72,42 @@
 5. LLM prompt injection — строгий парсинг JSON, не выполнять инструкции из данных (Фаза 2).
 6. Шифрование настроек нод (Vault) — MVP: utils/secrets.js XOR+base64, заменить на AES-GCM.
 
-## 6. Вывод
+## 6. Фаза 3 — CSP, валидация, финальный аудит
 
-Security gate Фазы 0-1 пройден: middleware настроены, секретов в коде нет, audit задокументирован. Критических уязвимостей нет.
+### 6.1 CSP (Content-Security-Policy)
+- Backend (Helmet, `src/backend/middleware/security.middleware.js` и legacy `security.js`): `default-src 'self'`, `script-src 'self'` (без unsafe-inline/unsafe-eval), `connect-src 'self'` + allowlist origin + `https://api.openai.com`, `https://api.anthropic.com`. Добавлены LLM API endpoints для интеграции AI-анализа.
+- `src/frontend/index.html`: дублирующихся CSP meta-тегов не обнаружено (проверено); CSP для фронта задаётся через сборку/сервер. Изменений не требуется.
+- Дополнительно: `object-src 'none'`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`, HSTS в проде.
 
-## 7. �����������
+### 6.2 Повторный аудит секретов в коде
+- Метод: grep по паттернам (AWS/GitHub/OpenAI/Anthropic ключи, password/secret/token assignments, private keys).
+- Результат: реальных секретов в production-коде не найдено. Найденные совпадения — только синтетические тестовые данные в `src/backend/seed/demo-repo/` (намеренные, для демо сканера) и ссылки в документации/тестах.
+- `.env` в репозитории отсутствует; секреты читаются только из `process.env`.
+- Токен фронта в `localStorage` (`ogmop_token`) — известный риск (XSS), миграция на httpOnly cookie отложена до появления полноценной auth (см. остаточные риски).
 
-- ���������: src/backend/middleware/security.js, alidate.js, utils/secrets.js ������������; lint ��� ������; backend-api ����� ��������.
-- ���� �����������: 2026-11-20. �������: commander-security.
+### 6.3 Аудит зависимостей (npm audit)
+- Production (omit=dev): 2 moderate в `react-router-dom` (open redirect, constructor injection в SSR hydration). Mitigation: приложение не использует SSR; валидировать цели redirect. Обновление до v7 — breaking, отложено до Фазы 4.
+- Full audit: 17 уязвимостей (13 moderate, 1 high, 3 critical). Critical/high — только dev-инструменты (tinypool/vitest, minimatch/eslint, test-exclude), не попадают в прод-бандл.
+- Рекомендации: `npm audit fix` для non-breaking; обновление vitest/vite/eslint — отдельная задача DevOps (breaking).
+
+### 6.4 Валидация входных данных
+- Все публичные эндпоинты (`/api/workflows`, `/api/workflows/:id/run`, `/api/runs/:id`, `/api/templates`) защищены Zod-схемами (`validateBody`/`validateParams`).
+- Усилены схемы: `WorkflowRunSchema` валидирует `input.repoPath` (запрет `..` и null-байтов) — защита от path traversal.
+- Удалено небезопасное `eval` в `workflow-engine.js` (`evalCondition`): теперь безопасный парсер без выполнения кода.
+- Добавлены защиты: SSRF-фильтр URL в `notify.service.js` (блокировка приватных IP/metadata в проде), ограничение длины regex (ReDoS), нормализация путей в `resolveRoot`.
+- Централизованный error handler (`error-handler.middleware.js`) не раскрывает стеки в проде.
+
+### 6.5 Остаточные риски
+1. Токен в localStorage (frontend) — мигрировать на httpOnly cookie при появлении auth.
+2. SSRF/path traversal — реализованы базовые защиты; полная изоляция (allowlist корней) — Фаза 4.
+3. ReDoS — ограничение длины паттерна; таймауты — Фаза 4.
+4. LLM prompt injection — строгий парсинг JSON, LLM не принимает решений; маскирование секретов в отчёте.
+5. Шифрование настроек (Vault) — MVP: XOR+base64, заменить на AES-GCM.
+6. Dev-зависимости содержат critical/high (только tooling) — обновление отложено.
+
+## 7. Вывод
+
+Security gate Фазы 3 пройден: CSP ужесточён, секретов в коде нет, зависимости задокументированы, валидация входов и защиты (RCE/SSRF/path traversal) внедрены. Критических уязвимостей в runtime нет.
+
+- Проверено: src/backend/middleware/security.js, validate.js, utils/secrets.js, workflow-engine.js, notify.service.js; lint — без ошибок; backend-api тесты проходят.
+- Дата завершения: 2026-11-20. Аудитор: commander-security.

@@ -10,56 +10,59 @@ npm run preview   # предпросмотр production-сборки
 npm run server    # backend на http://localhost:3001
 ```
 
-Проверка качества:
+Проверки качества:
 
 ```bash
 npm run lint
 npx tsc --noEmit
 npm test
+npm run build
 ```
 
 ## Деплой на GitHub Pages
 
-- Триггер: каждый `push` в `main` (и ручной `workflow_dispatch`).
+- Триггер: `push` в ветку `main` (или ручной `workflow_dispatch`).
 - Workflow: `.github/workflows/deploy.yml`.
-- Этапы: checkout → setup Node 20 → `npm ci` → `npm run build` → upload artifact `dist` → `deploy-pages`.
+- Шаги: checkout → setup Node 20 → `npm ci` → `npm run build` → upload artifact `dist` → `deploy-pages`.
 - URL: https://Em-pechenki.github.io/OGMOP/
+
+GitHub Pages настроен на источник **GitHub Actions** (`build_type=workflow`), см. `scripts/setup-github.ps1`.
 
 ## CI
 
 - Workflow: `.github/workflows/ci.yml`.
-- Этапы: checkout → setup Node 20 (кэш npm) → `npm ci` → lint (eslint) → typecheck (`tsc --noEmit`) → test (vitest) → build → Lighthouse CI.
-- Запускается на push/PR в `main` и `develop`.
+- Шаги: checkout → setup Node 20 (с кэшем npm) → `npm ci` → lint (eslint) → typecheck (`tsc --noEmit`) → test (vitest) → build → Lighthouse CI.
+- Триггеры: push/PR в `main` и `develop`, а также ручной запуск.
 
 ## Preview для PR
 
 - Workflow: `.github/workflows/preview.yml`.
-- Собирает PR с base `/OGMOP/pr-<number>/` и сохраняет артефакт `dist` (7 дней).
+- Сборка с base `/OGMOP/pr-<number>/`, артефакт `dist` хранится 7 дней.
 
 ## Lighthouse CI
 
 - Конфиг: `.lighthouserc.json`.
 - Пороги: performance ≥0.7 (warn), accessibility ≥0.9 (error), best-practices ≥0.9 (warn), SEO ≥0.9 (error).
 
-## Автоматический changelog
+## Мониторинг доступности Pages
 
-- Скрипт: `scripts/changelog.ps1`.
-- Генерирует секции CHANGELOG.md из conventional commits с момента последнего тега.
-- Запуск: `powershell -ExecutionPolicy Bypass -File scripts/changelog.ps1 [-Version 0.2.0]`.
+- Workflow: `.github/workflows/monitor.yml`.
+- Расписание: каждые 6 часов + ручной запуск.
+- Проверка HTTP 200 для https://Em-pechenki.github.io/OGMOP/ с 3 попытками.
 
 ## Оптимизация бандла
 
 - Vite `manualChunks`: vendor-react, vendor-flow, vendor-form.
-- Страницы lazy-loaded через `React.lazy` + `Suspense`.
-- Цель: основной бандл ≤ 200kb gzip.
+- Тяжёлые страницы lazy-loaded через `React.lazy` + `Suspense`.
+- Цель: чанк < 200kb gzip.
 
 ## Секреты
 
-- Секреты только через GitHub Secrets, никогда в коде.
-- Локальные `.env` файлы игнорируются (`.gitignore`).
+- Секреты хранятся только в GitHub Secrets, никогда в коде.
+- Локальные `.env` игнорируются (`.gitignore`).
 
 ## Скрипты автоматизации
 
-- `scripts/auto-commit.ps1` — автоматический коммит и пуш.
-- `scripts/setup-github.ps1` — настройка репозитория и Pages (требует `gh` CLI).
-- `scripts/changelog.ps1` — генерация CHANGELOG.md.
+- `scripts/auto-commit.ps1` — автокоммит и пуш.
+- `scripts/setup-github.ps1` — настройка репозитория и Pages (через `gh` CLI).
+- `scripts/changelog.ps1` — генерация `CHANGELOG.md` из conventional commits.

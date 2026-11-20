@@ -13,7 +13,8 @@ export function hashRoot(root) {
 export function buildScanCacheKey(scanner, root, config = {}) {
   const cfg = config && typeof config === "object" ? config : {};
   // exclude cache bypass flags from key
-  const { cache: _c, ...rest } = cfg;
+  const rest = { ...cfg };
+  delete rest.cache;
   return `${scanner}:${hashRoot(root)}:${stableStringify(rest)}`;
 }
 

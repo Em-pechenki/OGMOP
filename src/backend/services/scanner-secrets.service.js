@@ -6,7 +6,7 @@ import { cachedScan } from "./scan-cache.service.js";
 const SECRET_PATTERNS = [
   { name: "AWS Access Key", regex: /AKIA[0-9A-Z]{16}/g, severity: "critical" },
   { name: "AWS Secret Key", regex: /(?:aws_secret_access_key|aws_secret)\s*[:=]\s*["']?([A-Za-z0-9/+=]{40})["']?/gi, severity: "critical" },
-  { name: "Generic API Key", regex: /(?:api[_-]?key|apikey)\s*[:=]\s*["']([A-Za-z0-9_\-]{16,})["']/gi, severity: "high" },
+  { name: "Generic API Key", regex: /(?:api[_-]?key|apikey)\s*[:=]\s*["']([A-Za-z0-9_-]{16,})["']/gi, severity: "high" },
   { name: "Generic Secret/Token", regex: /(?:secret|token|password|passwd|pwd)\s*[:=]\s*["']([^"'\s]{6,})["']/gi, severity: "high" },
   { name: "GitHub Token", regex: /ghp_[A-Za-z0-9]{36}/g, severity: "critical" },
   { name: "Slack Token", regex: /xox[baprs]-[A-Za-z0-9-]{10,}/g, severity: "high" },
