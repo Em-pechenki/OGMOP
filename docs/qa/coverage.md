@@ -1,41 +1,44 @@
 # Отчёт о покрытии тестами — OGMOP
 
-> Обновляется после каждого прогона `npm run test:coverage`.
-> Цель: ≥ 60% по строкам/функциям.
+> Автоматически обновляется по результатам `npm run test:coverage`.
+> Цель: ≥ 60% по строкам/функциям для frontend/shared.
 
-## Последний прогон
+## Дата обновления: 2026-11-20
 
-- **Дата:** 2026-11-20
 - **Команда:** `npm run test:coverage`
-- **Всего тестов:** 68 passed, 3 todo (14 test files)
-- **Покрытие (All files):**
-  - Statements: 67.5%
-  - Branches: 51.94%
-  - Functions: 44.85%
-  - Lines: 67.5%
+- **Результат:** 17 test files passed, 1 skipped (a11y optional), 77 passed, 3 todo
+- **All files:** Statements 66.28%, Branches 52.52%, Functions 43.85%, Lines 66.28%
 
 ## Покрытие по модулям
 
 | Модуль | Stmts | Branch | Funcs | Lines | Примечание |
 |--------|-------|--------|-------|-------|------------|
-| src/frontend | ~60% | ~50% | ~45% | ~60% | UI-компоненты, страницы, store покрыты |
-| src/backend | ~70% | ~55% | ~50% | ~70% | API, engine, validators покрыты |
-| src/shared | ~80% | ~60% | ~60% | ~80% | Схемы и типы покрыты |
+| src/frontend | ~46% | ~59% | ~19% | ~46% | UI-компоненты, страницы, store покрыты частично |
+| src/shared | ~75% | ~0% | ~0% | ~75% | Схемы покрыты, типы не исполняются |
+| src/backend | excluded | — | — | — | Backend тестируется интеграционно (supertest) |
 
-## Непокрытые критические пути
+## Добавлено в Фазе 3
 
-- [ ] Сканеры (production-модули отсутствуют; тесты-заготовки в tests/unit/scanner-*.test.ts)
-- [ ] Компоненты нод/PropertyPanel/ResultsPanel покрыты базово
-- [ ] E2E (Playwright) не реализованы
+- `tests/e2e/critical-path.test.ts` — e2e критического пути: сборка сценария → запуск → результат → уведомление (webhook).
+- `tests/regression/scanner-stability.test.ts` — регрессия: повторные вызовы сканеров (secrets/SCA/SAST) стабильны, обязательные поля находок.
+- `tests/a11y/axe-optional.test.tsx` — опциональные a11y-тесты (axe-core, пропускаются если не установлен).
+- `tests/unit/seed-data.test.ts` — валидация seed-данных (workflow schema, CVE база).
+
+## Непокрытое
+
+- [ ] Производственные сканеры (частично покрыты regression-тестами).
+- [ ] Компоненты PropertyPanel/ResultsPanel.
+- [ ] E2E через Playwright (не установлен; используется Vitest + supertest).
 
 ## История
 
 | Дата | Commit | Lines % | Tests |
 |------|--------|---------|-------|
-| 2026-11-20 | текущий | 67.5 | 68 passed |
+| 2026-11-20 | phase 3 | 66.28 | 77 passed + 1 skipped + 3 todo |
 
-## Рекомендации QA
+## Замечания QA
 
-- Приоритет тестов: сканеры (секреты, SCA, SAST), workflow-движок, API.
-- Поднять покрытие до 60% к Фазе 3 — достигнуто (67.5%).
-- Добавить e2e (Playwright) для критических путей.
+- Линтинг: `npm run lint` содержит ошибки `no-explicit-any` в существующих тестах/src; новые тесты линт-чистые.
+- Typecheck: `npx tsc --noEmit` зелёный.
+- Сборка: `npm run build` успешна.
+- CI: lint/typecheck/test/build настроены в `.github/workflows/ci.yml`.
