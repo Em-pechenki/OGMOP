@@ -19,7 +19,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
   componentDidCatch(error: Error, info: React.ErrorInfo) {
     // eslint-disable-next-line no-console
-    console.error("ErrorBoundary caught:", error, info);
+    console.error("ErrorBoundary caught:", error?.message, error?.stack);
+    // eslint-disable-next-line no-console
+    console.error("Component stack:", info?.componentStack);
   }
 
   handleReset = () => {
