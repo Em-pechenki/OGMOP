@@ -59,9 +59,9 @@
 - В панели результатов показать находки, отсортированные по severity (critical/high/medium/low/info).
 - Ожидаемый результат на демо-репозитории: **32 находки**:
   - Secrets: 8 (2 critical, 5 high, 1 medium)
-  - SCA: 15 (1 critical, 12 high, 2 medium, 1 low) — включая Spring4Shell CVE-2022-22965
+  - SCA: 15 (1 critical, 10 high, 3 medium, 1 low) — включая Spring4Shell CVE-2022-22965
   - SAST: 9 (2 critical, 4 high, 2 medium, 1 low)
-- Показать AI-отчёт: summary, riskLevel, рекомендации.
+- Показать AI-отчёт: summary, список находок с объяснениями, рекомендации (riskLevel в mock-режиме может отсутствовать).
 - Показать результат уведомления (webhook может вернуть `ok: false` на example.com — это нормально для демо; run остаётся `success`).
 
 ## 6. Технические тезисы (1 мин)

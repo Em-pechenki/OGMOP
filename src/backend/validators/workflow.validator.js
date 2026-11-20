@@ -28,7 +28,12 @@ export const WorkflowCreateSchema = z.object({
   edges: z.array(EdgeSchema).optional().default([]),
 });
 
-export const WorkflowUpdateSchema = WorkflowCreateSchema.partial();
+export const WorkflowUpdateSchema = z.object({
+  name: z.string().min(1).max(200).optional(),
+  description: z.string().max(2000).optional(),
+  nodes: z.array(NodeSchema).optional(),
+  edges: z.array(EdgeSchema).optional(),
+});
 
 export const WorkflowRunSchema = z.object({
   input: z
