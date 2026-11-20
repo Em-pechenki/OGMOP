@@ -95,4 +95,4 @@
 
 - Движок выполнения Фазы 1 — заглушка: `src/backend/engine/workflow-engine.js` (`nodeHandler` возвращает success и эхо data, задержка 50 мс на ноду). Реальные сканеры/уведомления/AI — Фаза 2.
 - In-memory store сбрасывается при рестарте процесса.
-- OpenAPI-спецификация — планируется.
+- OpenAPI-спецификация: `docs/api/openapi.yaml` (черновик, поддерживается DEVOPS/BE).
