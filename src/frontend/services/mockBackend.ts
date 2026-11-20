@@ -406,7 +406,7 @@ async function handle(method: string, url: string, body?: any): Promise<any> {
     if (templates.size === 0) {
       for (const t of bundle.templates || []) templates.set(t.id, t);
     }
-    let list = Array.from(templates.values());
+    const list = Array.from(templates.values());
     const q = (body?.q || body?.search || "").toLowerCase();
     // query params come via url? handle below via searchParams not passed; check body
     return ok(list);
@@ -465,7 +465,7 @@ export async function mockRequest(method: string, url: string, body?: any, param
   }
   // parse query string from url
   let path = fullUrl;
-  let query: any = {};
+  const query: any = {};
   if (fullUrl.includes("?")) {
     const [p, q] = fullUrl.split("?");
     path = p;
@@ -479,7 +479,7 @@ export async function mockRequest(method: string, url: string, body?: any, param
     await loadBundle();
     const bundle = demoBundle!;
     if (templates.size === 0) for (const t of bundle.templates || []) templates.set(t.id, t);
-    let list = Array.from(templates.values());
+    const list = Array.from(templates.values());
     const q = (query.q || query.search || "").toLowerCase();
     if (q) list = list.filter((t: any) => (t.name || "").toLowerCase().includes(q) || (t.description || "").toLowerCase().includes(q) || (t.tags || []).some((tag: string) => tag.toLowerCase().includes(q)));
     if (query.tag) list = list.filter((t: any) => (t.tags || []).includes(query.tag));
