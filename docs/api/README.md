@@ -44,8 +44,9 @@
 
 ### Runs
 
+- `GET /api/runs` — список запусков.
 - `POST /api/workflows/:id/run` — запустить workflow (body: `{ "input": { ... } }`, опционально). Ответ `202`: `{ runId }`.
-- `GET /api/runs/:id` — статус запуска.
+- `GET /api/runs/:id` — статус запуска и результаты.
 
 Ответ `GET /api/runs/:id` (`src/backend/services/run.service.js` `getRunStatus`):
 

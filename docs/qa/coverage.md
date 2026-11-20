@@ -6,8 +6,8 @@
 ## Дата обновления: 2026-11-20
 
 - **Команда:** `npm run test:coverage`
-- **Результат:** 17 test files passed, 1 skipped (a11y optional), 77 passed, 3 todo
-- **All files:** Statements 66.28%, Branches 52.52%, Functions 43.85%, Lines 66.28%
+- **Результат:** 18 test files passed, 1 skipped (a11y optional), 83 passed, 3 todo
+- **All files:** Statements 71.54%, Branches 53.23%, Functions 47.36%, Lines 71.54%
 
 ## Покрытие по модулям
 
@@ -34,7 +34,7 @@
 
 | Дата | Commit | Lines % | Tests |
 |------|--------|---------|-------|
-| 2026-11-20 | phase 3 | 66.28 | 77 passed + 1 skipped + 3 todo |
+| 2026-11-20 | phase 5 (v1.0.0) | 71.54 | 83 passed + 1 skipped + 3 todo |
 
 ## Замечания QA
 

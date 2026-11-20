@@ -14,7 +14,7 @@ OGMOP — веб-приложение (React + Vite + TypeScript), публик�
 | Бэкенд | Node.js, Express 4, CORS, Zod |
 | Общее | TypeScript-типы (`src/shared`) |
 | CI/CD | GitHub Actions (lint, test, build, deploy → GitHub Pages) |
-| Тесты | Vitest (React Testing Library — планируется) |
+| Тесты | Vitest + React Testing Library + supertest |
 
 ## Структура каталогов
 
