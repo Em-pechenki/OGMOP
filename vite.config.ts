@@ -5,6 +5,7 @@ import path from "node:path";
 export default defineConfig({
   root: "src/frontend",
   base: process.env.VITE_BASE || "/OGMOP/",
+  publicDir: path.resolve(__dirname, "public"),
   plugins: [react()],
   build: {
     outDir: "../../dist",

@@ -88,7 +88,7 @@ function compare(left, op, right) {
     case "gte": return useNum ? l >= r : asString(left) >= asString(right);
     case "lte": return useNum ? l <= r : asString(left) <= asString(right);
     case "contains": return asString(left).includes(asString(right));
-    case "regex": try { return new RegExp(asString(right)).test(asString(left)); } catch { return false; }
+    case "regex": { const pat = asString(right); if (pat.length === 0 || pat.length > 200) return false; try { return new RegExp(pat).test(asString(left).slice(0, 10000)); } catch { return false; } }
     default: return false;
   }
 }

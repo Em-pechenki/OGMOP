@@ -9,7 +9,7 @@
  *   NOT cryptographically strong — MVP only; replace with AES-256-GCM + Vault for prod.
  */
 
-const crypto = require("crypto");
+import crypto from "node:crypto";
 
 const SECRET_KEY_NAMES = /password|passwd|secret|token|api[_-]?key|private[_-]?key|credential|auth/i;
 
@@ -63,32 +63,53 @@ function xorBuffer(buf, keyBuf) {
   return out;
 }
 
+function deriveKey() {
+  return crypto.createHash("sha256").update(getEncryptionKey()).digest();
+}
+
 function encrypt(plaintext) {
   if (plaintext === null || plaintext === undefined) return plaintext;
-  const key = getEncryptionKey();
-  const keyBuf = crypto.createHash("sha256").update(key).digest();
+  const key = deriveKey();
   const iv = crypto.randomBytes(12);
-  const data = Buffer.from(String(plaintext), "utf8");
-  const xored = xorBuffer(data, keyBuf);
-  // Prefix with iv for format stability (iv not used in xor, but reserved for future AES).
-  const payload = Buffer.concat([iv, xored]);
-  return "enc:" + payload.toString("base64");
+  const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
+  const enc = Buffer.concat([cipher.update(String(plaintext), "utf8"), cipher.final()]);
+  const tag = cipher.getAuthTag();
+  const payload = Buffer.concat([iv, tag, enc]);
+  return "aes:" + payload.toString("base64");
 }
 
 function decrypt(ciphertext) {
   if (ciphertext === null || ciphertext === undefined) return ciphertext;
   const s = String(ciphertext);
-  if (!s.startsWith("enc:")) return s; // not encrypted, return as-is
-  try {
-    const key = getEncryptionKey();
-    const keyBuf = crypto.createHash("sha256").update(key).digest();
-    const payload = Buffer.from(s.slice(4), "base64");
-    const xored = payload.slice(12);
-    const data = xorBuffer(xored, keyBuf);
-    return data.toString("utf8");
-  } catch (e) {
-    return null;
+  if (s.startsWith("aes:")) {
+    try {
+      const key = deriveKey();
+      const payload = Buffer.from(s.slice(4), "base64");
+      const iv = payload.slice(0, 12);
+      const tag = payload.slice(12, 28);
+      const enc = payload.slice(28);
+      const decipher = crypto.createDecipheriv("aes-256-gcm", key, iv);
+      decipher.setAuthTag(tag);
+      const dec = Buffer.concat([decipher.update(enc), decipher.final()]);
+      return dec.toString("utf8");
+    } catch (e) {
+      return null;
+    }
   }
+  if (s.startsWith("enc:")) {
+    // legacy XOR+base64 (MVP) — kept for backward compatibility
+    try {
+      const key = getEncryptionKey();
+      const keyBuf = crypto.createHash("sha256").update(key).digest();
+      const payload = Buffer.from(s.slice(4), "base64");
+      const xored = payload.slice(12);
+      const data = xorBuffer(xored, keyBuf);
+      return data.toString("utf8");
+    } catch (e) {
+      return null;
+    }
+  }
+  return s; // not encrypted, return as-is
 }
 
 function redactForLog(value) {

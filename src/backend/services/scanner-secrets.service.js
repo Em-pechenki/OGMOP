@@ -17,23 +17,33 @@ const SECRET_PATTERNS = [
   { name: "Hardcoded password assignment", regex: /\b(?:dbPassword|password)\s*=\s*"[^"]{4,}"/gi, severity: "medium" },
 ];
 
+const MAX_SCAN_DEPTH = 20;
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
+
 function collectFiles(root, extensions) {
   const out = [];
-  function walk(dir) {
+  function walk(dir, depth) {
+    if (depth > MAX_SCAN_DEPTH) return;
     let entries;
     try { entries = fs.readdirSync(dir, { withFileTypes: true }); } catch { return; }
     for (const e of entries) {
+      if (e.isSymbolicLink()) continue;
       const full = path.join(dir, e.name);
       if (e.isDirectory()) {
         if (e.name === "node_modules" || e.name === ".git" || e.name === "build" || e.name === "target") continue;
-        walk(full);
+        walk(full, depth + 1);
       } else if (e.isFile()) {
         const ext = path.extname(e.name).toLowerCase();
-        if (!extensions || extensions.includes(ext)) out.push(full);
+        if (!extensions || extensions.includes(ext)) {
+          try {
+            const st = fs.statSync(full);
+            if (st.size <= MAX_FILE_BYTES) out.push(full);
+          } catch { /* skip */ }
+        }
       }
     }
   }
-  walk(root);
+  walk(root, 0);
   return out;
 }
 

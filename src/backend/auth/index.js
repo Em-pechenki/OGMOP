@@ -32,7 +32,10 @@ function verifyToken(token) {
     const jwt = require("jsonwebtoken");
     const secret = process.env.AUTH_SECRET;
     if (secret) {
-      const payload = jwt.verify(token, secret, { algorithms: ["HS256"] });
+      const opts = { algorithms: ["HS256"] };
+      if (process.env.JWT_ISSUER) opts.issuer = process.env.JWT_ISSUER;
+      if (process.env.JWT_AUDIENCE) opts.audience = process.env.JWT_AUDIENCE;
+      const payload = jwt.verify(token, secret, opts);
       return payload && typeof payload === "object" ? payload : null;
     }
   } catch (e) {

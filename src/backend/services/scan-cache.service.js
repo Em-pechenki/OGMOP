@@ -36,7 +36,17 @@ export function getScanCache(key) {
   return Array.isArray(entry.value) ? entry.value.map((x) => (x && typeof x === "object" ? { ...x } : x)) : entry.value;
 }
 
+const MAX_CACHE_ENTRIES = 500;
 export function setScanCache(key, value, ttlMs = DEFAULT_TTL_MS) {
+  if (cache.size >= MAX_CACHE_ENTRIES) {
+    // evict oldest entry
+    let oldestKey = null;
+    let oldestTime = Infinity;
+    for (const [k, v] of cache.entries()) {
+      if (v.createdAt < oldestTime) { oldestTime = v.createdAt; oldestKey = k; }
+    }
+    if (oldestKey) cache.delete(oldestKey);
+  }
   cache.set(key, {
     value: Array.isArray(value) ? value.map((x) => (x && typeof x === "object" ? { ...x } : x)) : value,
     expiresAt: Date.now() + (Number.isFinite(ttlMs) ? ttlMs : DEFAULT_TTL_MS),
