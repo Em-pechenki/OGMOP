@@ -9,3 +9,5 @@ export interface FlowEdge {
   animated?: boolean;
   style?: Record<string, unknown>;
 }
+
+export type Edge = FlowEdge;

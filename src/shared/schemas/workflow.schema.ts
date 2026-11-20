@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { flowNodeSchema, flowEdgeSchema } from "./node.schema";
+import { flowNodeSchema } from "./node.schema";
+import { flowEdgeSchema } from "./edge.schema";
 
 export const workflowSchema = z.object({
   id: z.string().min(1),

@@ -49,11 +49,27 @@ Template *..1 Workflow
 ```
 
 ## Zod-схемы
-Валидация: `src/shared/schemas/` (`node.schema.ts`, `workflow.schema.ts`, `finding.schema.ts`).
+Валидация: `src/shared/schemas/`:
+- `node.schema.ts` — `flowNodeSchema`, `flowEdgeSchema` (re-exported), `nodeTypeSchema`, `nodeDataSchema`, `positionSchema`.
+- `edge.schema.ts` — `flowEdgeSchema`.
+- `workflow.schema.ts` — `workflowSchema`.
+- `finding.schema.ts` — `findingSchema`, `severitySchema`.
+- `run.schema.ts` — `runResultSchema`, `nodeResultSchema`, `runStatusSchema`, `nodeRunStatusSchema`.
+- `template.schema.ts` — `templateSchema`.
+- `notification.schema.ts` — `notifyChannelSchema`, `notifyConfigSchema`.
+- `scanner.schema.ts` — `scannerTypeSchema`, `scanConfigSchema`.
+- `llm.schema.ts` — `llmRequestSchema`, `llmResponseSchema`, `aiReportSchema`.
+Все схемы реэкспортируются из `src/shared/schemas/index.ts`.
+
+## Модели (in-memory)
+`src/backend/models/`: `workflow.model.ts`, `finding.model.ts`, `run.model.ts`, `template.model.ts`, `index.ts`.
+
+## Миграции
+`src/backend/migrations/` — README (MVP без БД; миграции появятся при переходе на БД).
 
 ## Seed-данные
 - `src/backend/seed/demo-workflow.json` — пример сценария.
-- `src/backend/seed/cve-database.json` — справочник CVE (~20 записей).
+- `src/backend/seed/cve-database.json` — справочник CVE (20 записей).
 - `src/backend/seed/demo-repo/` — учебный Kotlin/Spring Boot проект.
 ```
 

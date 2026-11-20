@@ -85,3 +85,11 @@ export interface FlowNode {
   width?: number;
   height?: number;
 }
+
+// Aliases expected by the department spec.
+export type Node = FlowNode;
+export type TriggerNode = TriggerNodeData;
+export type LogicNode = LogicNodeData;
+export type NotifyNode = NotifyNodeData;
+export type ScannerNode = ScannerNodeData;
+export type AiNode = AiNodeData;

@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { notifyConfigSchema } from "./notification.schema";
+import { scanConfigSchema } from "./scanner.schema";
 
 export const positionSchema = z.object({
   x: z.number(),
@@ -43,14 +45,14 @@ export const notifyNodeDataSchema = z.object({
   kind: z.literal("notify"),
   channel: z.enum(["telegram", "smtp", "webhook"]),
   label: z.string().optional(),
-  config: z.record(z.string(), z.unknown()),
+  config: notifyConfigSchema,
 });
 
 export const scannerNodeDataSchema = z.object({
   kind: z.literal("scanner"),
   scannerType: z.enum(["secrets", "sca", "sast"]),
   label: z.string().optional(),
-  config: z.record(z.string(), z.unknown()),
+  config: scanConfigSchema,
 });
 
 export const aiNodeDataSchema = z.object({
@@ -70,18 +72,6 @@ export const nodeDataSchema = z.discriminatedUnion("kind", [
   scannerNodeDataSchema,
   aiNodeDataSchema,
 ]);
-
-export const flowEdgeSchema = z.object({
-  id: z.string().min(1),
-  source: z.string().min(1),
-  target: z.string().min(1),
-  sourceHandle: z.string().nullable().optional(),
-  targetHandle: z.string().nullable().optional(),
-  label: z.string().optional(),
-  condition: z.string().optional(),
-  animated: z.boolean().optional(),
-  style: z.record(z.string(), z.unknown()).optional(),
-});
 
 export const flowNodeSchema = z.object({
   id: z.string().min(1),
