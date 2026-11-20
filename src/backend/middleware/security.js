@@ -1,3 +1,4 @@
 // Re-export the ESM security middleware bundle for backward compatibility.
-export { applySecurity, errorHandler, getAllowedOrigins } from "./security.middleware.js";
+import { applySecurity, errorHandler, getAllowedOrigins } from "./security.middleware.js";
+export { applySecurity, errorHandler, getAllowedOrigins };
 export default { applySecurity, errorHandler, getAllowedOrigins };
