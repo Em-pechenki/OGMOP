@@ -7,7 +7,7 @@
 
 OGMOP - визуальный конструктор security-workflow для репозиториев: drag-and-drop редактор графа (React Flow), сканеры (secrets / SCA / SAST для Kotlin + Spring Boot + Gradle), AI-анализ находок, шаблоны workflow, уведомления и CI/CD. Деплой на GitHub Pages.
 
-Актуальная версия: **v1.1.0** (Cyber Garden 2026, трек <AI Security Workflow>).
+Актуальная версия: **v1.2.0** (Cyber Garden 2026, трек <AI Security Workflow>).
 
 - **Демо (GitHub Pages):** https://Em-pechenki.github.io/OGMOP/
 - **Демо-сценарий:** [docs/demo.md](docs/demo.md)
@@ -75,6 +75,7 @@ OGMOP/
 - [ADR](docs/architecture/decisions.md)
 - [API-контракт](docs/api/README.md) и [OpenAPI](docs/api/openapi.yaml)
 - [Узлы workflow](docs/nodes.md)
+- [Шаблоны workflow](docs/templates.md)
 - [Дизайн-токены](docs/design/tokens.md)
 - [План на 30 часов](docs/plan-30h.md)
 - [Бэклог](docs/backlog.md)
@@ -124,6 +125,25 @@ npm run build      # production-сборка
 - Автоматический при push в `main` (workflow `.github/workflows/deploy.yml`).
 - URL: https://Em-pechenki.github.io/OGMOP/
 - Подробнее: [docs/deploy.md](docs/deploy.md).
+
+## Готовые шаблоны workflow
+
+В библиотеке (`/templates`) и через API (`/api/templates`) доступны готовые шаблоны — сохранённые графы workflow, которые можно применить в редакторе, скопировать как JSON или использовать как основу для своего сценария. Подробное описание: [docs/templates.md](docs/templates.md).
+
+Каталог готовых шаблонов:
+
+- **Базовый security-scan** — `trigger.manual → secrets → SCA → SAST → AI → webhook` (полный цикл).
+- **Быстрый поиск секретов** — `trigger.manual → secrets → AI → Telegram` (быстрый триаж утечек).
+- **Ночной SCA/SAST** — `trigger.schedule → SCA → SAST → AI → SMTP` (регулярный контроль по расписанию).
+- **CI gate** — `trigger.manual → secrets → SCA → SAST → logic.compare → webhook` (gate для CI/CD).
+
+Главная страница (`/`) — лендинг GitHub Pages-сборки: заголовок, подзаголовок, CTA «Открыть редактор»/«Шаблоны» и карточки возможностей (конструктор, сканеры, AI-отчёты). URL: https://Em-pechenki.github.io/OGMOP/.
+
+## Новое в v1.2.0
+
+- Документация готовых шаблонов: [docs/templates.md](docs/templates.md) (модель, каталог, API, применение, лендинг).
+- README: описание готовых шаблонов и главной страницы (лендинга), актуальная версия v1.2.0.
+- CHANGELOG обновлён до v1.2.0.
 
 ## Новое в v1.1.0
 

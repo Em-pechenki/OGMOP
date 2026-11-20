@@ -16,6 +16,21 @@
 ### Other
 - phase 4-5 final run - tests 84 passed, coverage 71.55%, lighthouse 98/100/100/100 (b2ad910)
 
+## [1.2.0] - 2026-11-21
+
+### Added
+- `docs/templates.md`: описание готовых шаблонов workflow (модель `Template`, каталог из 4 шаблонов, применение в UI и через API, публикация/поиск, ограничения MVP).
+- README: раздел «Готовые шаблоны workflow» и «Главная страница (лендинг)», ссылка на `docs/templates.md`.
+- Каталог готовых шаблонов: «Базовый security-scan», «Быстрый поиск секретов», «Ночной SCA/SAST», «CI gate» (полные JSON-примеры).
+- Документация лендинга GitHub Pages: маршрут `/`, CTA, карточки возможностей, URL production.
+
+### Changed
+- README: актуальная версия поднята до v1.2.0.
+- API-описание шаблонов синхронизировано с `src/backend/validators/workflow.validator.js` (patch/put, tags, author, isPublic).
+
+### Fixed
+- Уточнены инструкции применения шаблона как workflow (получить `workflow` → создать workflow → запустить).
+
 ## [1.1.0] - 2026-11-21
 
 ### Added
