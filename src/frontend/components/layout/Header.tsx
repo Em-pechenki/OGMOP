@@ -18,8 +18,7 @@ export const Header: React.FC = () => {
           </span>
           <span className="font-semibold text-text">OGMOP</span>
         </NavLink>
-        <nav className="flex items-center gap-1">
-          {navItems.map((item) => (
+        <nav className="flex items-center gap-1 overflow-x-auto" aria-label="Основная навигация">          {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}

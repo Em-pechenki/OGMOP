@@ -1,6 +1,7 @@
 // Scanner: secrets (regex-based). No external scanners.
 import fs from "node:fs";
 import path from "node:path";
+import { cachedScan } from "./scan-cache.service.js";
 
 const SECRET_PATTERNS = [
   { name: "AWS Access Key", regex: /AKIA[0-9A-Z]{16}/g, severity: "critical" },
@@ -42,42 +43,43 @@ function mask(value) {
 }
 
 export async function scanSecrets({ root, config = {} } = {}) {
-  const findings = [];
-  const extensions = config.extensions || [".kt", ".kts", ".java", ".properties", ".yml", ".yaml", ".json", ".env", ".gradle"];
-  const files = collectFiles(root, extensions);
-  for (const file of files) {
-    let content;
-    try { content = fs.readFileSync(file, "utf8"); } catch { continue; }
-    const lines = content.split(/\r?\n/);
-    for (const pat of SECRET_PATTERNS) {
-      pat.regex.lastIndex = 0;
-      let m;
-      while ((m = pat.regex.exec(content)) !== null) {
-        // find line number
-        const idx = m.index;
-        let lineNo = 1;
-        let acc = 0;
-        for (let i = 0; i < lines.length; i++) {
-          acc += lines[i].length + 1;
-          if (acc > idx) { lineNo = i + 1; break; }
+  return cachedScan("secrets", root, config, async () => {
+    const findings = [];
+    const extensions = config.extensions || [".kt", ".kts", ".java", ".properties", ".yml", ".yaml", ".json", ".env", ".gradle"];
+    const files = collectFiles(root, extensions);
+    for (const file of files) {
+      let content;
+      try { content = fs.readFileSync(file, "utf8"); } catch { continue; }
+      const lines = content.split(/\r?\n/);
+      for (const pat of SECRET_PATTERNS) {
+        pat.regex.lastIndex = 0;
+        let m;
+        while ((m = pat.regex.exec(content)) !== null) {
+          const idx = m.index;
+          let lineNo = 1;
+          let acc = 0;
+          for (let i = 0; i < lines.length; i++) {
+            acc += lines[i].length + 1;
+            if (acc > idx) { lineNo = i + 1; break; }
+          }
+          const matched = m[0];
+          findings.push({
+            id: `secret-${findings.length + 1}`,
+            scanner: "secrets",
+            severity: pat.severity,
+            file: path.relative(root, file).replace(/\\/g, "/"),
+            line: lineNo,
+            title: `${pat.name} detected`,
+            message: `${pat.name} detected`,
+            snippet: mask(matched),
+            cve: null,
+          });
         }
-        const matched = m[0];
-        findings.push({
-          id: `secret-${findings.length + 1}`,
-          scanner: "secrets",
-          severity: pat.severity,
-          file: path.relative(root, file).replace(/\\/g, "/"),
-          line: lineNo,
-          title: `${pat.name} detected`,
-          message: `${pat.name} detected`,
-          snippet: mask(matched),
-          cve: null,
-        });
+        pat.regex.lastIndex = 0;
       }
-      pat.regex.lastIndex = 0;
     }
-  }
-  return findings;
+    return findings;
+  });
 }
 
 export default { scanSecrets };

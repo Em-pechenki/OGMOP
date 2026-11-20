@@ -91,18 +91,22 @@ Template *..1 Workflow
 `Node = FlowNode`, `Edge = FlowEdge`, `TriggerNode`, `LogicNode`, `NotifyNode`, `ScannerNode`, `AiNode`.
 `ScanResult` описывает результат работы сканера (находки, статус, длительность).
 
-## Пример FlowNode
+## Финальная проверка типов (Фаза 4–5)
 
-```json
-{
-  "id": "n1",
-  "type": "scanner.secrets",
-  "position": { "x": 10, "y": 20 },
-  "data": {
-    "kind": "scanner",
-    "scannerType": "secrets",
-    "label": "Secrets scan",
-    "config": { "scannerType": "secrets", "targetPath": "./demo-repo" }
-  }
-}
-```
+- Команда: `npx tsc --noEmit` — 0 ошибок (strict mode).
+- Общие типы `src/shared/types/` импортируются FE и BE без дублирования локальных типов.
+- Zod-схемы `src/shared/schemas/` соответствуют TypeScript-типам (проверено тестами `tests/unit/shared-schemas.test.ts`, `tests/unit/seed-data.test.ts`).
+- Seed-данные: `demo-workflow.json` валидируется `workflowSchema`, `cve-database.json` — массив CVE-записей.
+
+## Консистентность FE/BE
+
+- FE (`src/frontend/store/workflowStore.ts`, `EditorPage.tsx`) использует `NodeData`, `NodeType` из `@shared/types` и `@xyflow/react` Node/Edge как транспортный слой.
+- BE-модели (`src/backend/models/*.ts`) работают с shared-типами `Workflow`, `Finding`, `RunResult`, `Template`.
+- BE JS-слой (`src/backend/store/memory.store.js`) создаёт объекты, совместимые со shared-типами; структура проверена smoke/backend-api тестами.
+- При добавлении поля в shared-типы требуется обновление Zod-схемы и (при необходимости) memory.store.
+
+## Проверка seed-загрузки
+
+- `tests/unit/seed-data.test.ts` — 2 теста, зелёные.
+- `src/backend/seed/demo-repo/` используется сканерами SCA/SAST/Secrets (тесты `scanner-*.test.ts`).
+EOF

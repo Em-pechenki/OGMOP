@@ -1,6 +1,7 @@
 // Scanner: SAST (basic rules for Kotlin/Spring Boot).
 import fs from "node:fs";
 import path from "node:path";
+import { cachedScan } from "./scan-cache.service.js";
 
 const RULES = [
   {
@@ -80,40 +81,42 @@ function collectFiles(root, extensions) {
 }
 
 export async function scanSast({ root, config = {} } = {}) {
-  const findings = [];
-  const extensions = config.extensions || [".kt", ".java"];
-  const files = collectFiles(root, extensions);
-  for (const file of files) {
-    let content;
-    try { content = fs.readFileSync(file, "utf8"); } catch { continue; }
-    const lines = content.split(/\r?\n/);
-    for (const rule of RULES) {
-      rule.regex.lastIndex = 0;
-      let m;
-      while ((m = rule.regex.exec(content)) !== null) {
-        const idx = m.index;
-        let lineNo = 1;
-        let acc = 0;
-        for (let i = 0; i < lines.length; i++) {
-          acc += lines[i].length + 1;
-          if (acc > idx) { lineNo = i + 1; break; }
+  return cachedScan("sast", root, config, async () => {
+    const findings = [];
+    const extensions = config.extensions || [".kt", ".java"];
+    const files = collectFiles(root, extensions);
+    for (const file of files) {
+      let content;
+      try { content = fs.readFileSync(file, "utf8"); } catch { continue; }
+      const lines = content.split(/\r?\n/);
+      for (const rule of RULES) {
+        rule.regex.lastIndex = 0;
+        let m;
+        while ((m = rule.regex.exec(content)) !== null) {
+          const idx = m.index;
+          let lineNo = 1;
+          let acc = 0;
+          for (let i = 0; i < lines.length; i++) {
+            acc += lines[i].length + 1;
+            if (acc > idx) { lineNo = i + 1; break; }
+          }
+          findings.push({
+            id: `sast-${findings.length + 1}`,
+            scanner: "sast",
+            severity: rule.severity,
+            file: path.relative(root, file).replace(/\\/g, "/"),
+            line: lineNo,
+            title: rule.name,
+            message: rule.message + ` (${rule.name})`,
+            snippet: m[0].slice(0, 120),
+            cve: null,
+          });
         }
-        findings.push({
-          id: `sast-${findings.length + 1}`,
-          scanner: "sast",
-          severity: rule.severity,
-          file: path.relative(root, file).replace(/\\/g, "/"),
-          line: lineNo,
-          title: rule.name,
-          message: rule.message + ` (${rule.name})`,
-          snippet: m[0].slice(0, 120),
-          cve: null,
-        });
+        rule.regex.lastIndex = 0;
       }
-      rule.regex.lastIndex = 0;
     }
-  }
-  return findings;
+    return findings;
+  });
 }
 
 export default { scanSast };

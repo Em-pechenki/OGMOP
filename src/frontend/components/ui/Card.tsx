@@ -20,8 +20,8 @@ export const Card: React.FC<CardProps> = ({
 }) => {
   return (
     <div
-      className={`bg-white rounded-lg border border-border shadow-card ${
-        hoverable ? "hover:shadow-hover transition-shadow" : ""
+      className={`bg-white rounded-lg border border-border shadow-card transition-all duration-200 ease-out ${
+        hoverable ? "hover:shadow-hover hover:-translate-y-0.5" : ""
       } ${paddingClasses[padding]} ${className}`}
       {...rest}
     >

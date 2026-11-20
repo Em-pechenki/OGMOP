@@ -59,7 +59,7 @@ function authenticate(req, res, next) {
   req.user = user;
   // If auth required and no valid user -> 401
   if (isAuthRequired() && !user) {
-    return res.status(401).json({ error: "Authentication required", requestId: req.id });
+    return res.status(401).json({ data: null, error: "Authentication required", requestId: req.id });
   }
   return next();
 }
@@ -69,7 +69,7 @@ function requireAuth(req, res, next) {
   const token = parseBearer(req);
   const user = token ? verifyToken(token) : null;
   if (!user) {
-    return res.status(401).json({ error: "Authentication required", requestId: req.id });
+    return res.status(401).json({ data: null, error: "Authentication required", requestId: req.id });
   }
   req.user = user;
   return next();
@@ -78,11 +78,11 @@ function requireAuth(req, res, next) {
 function requireRole(role) {
   return function (req, res, next) {
     if (!req.user) {
-      return res.status(401).json({ error: "Authentication required", requestId: req.id });
+      return res.status(401).json({ data: null, error: "Authentication required", requestId: req.id });
     }
     const roles = Array.isArray(req.user.roles) ? req.user.roles : [req.user.role].filter(Boolean);
     if (!roles.includes(role) && req.user.role !== role) {
-      return res.status(403).json({ error: "Forbidden", requestId: req.id });
+      return res.status(403).json({ data: null, error: "Forbidden", requestId: req.id });
     }
     return next();
   };

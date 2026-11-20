@@ -1,6 +1,7 @@
 // Scanner: SCA (Gradle Kotlin DSL + CVE database).
 import fs from "node:fs";
 import path from "node:path";
+import { cachedScan } from "./scan-cache.service.js";
 
 function readCveDb(cvePath) {
   try {
@@ -28,7 +29,6 @@ function cmpVersion(a, b) {
   return 0;
 }
 
-// affectedVersions like ">=5.3.0 <5.3.18" or ">=1.0.0 <=1.2.3"
 function inRange(version, range) {
   const parts = String(range || "").trim().split(/\s+/);
   for (const part of parts) {
@@ -48,7 +48,6 @@ function inRange(version, range) {
 
 function parseDependencies(content) {
   const deps = [];
-  // implementation("group:artifact:version") or implementation("group:artifact:version") with quotes
   const regex = /(?:implementation|api|compile|runtimeOnly|testImplementation)\s*\(\s*["']([^"']+)["']\s*\)/g;
   let m;
   while ((m = regex.exec(content)) !== null) {
@@ -58,52 +57,60 @@ function parseDependencies(content) {
       deps.push({ group: parts[0], artifact: parts[1], version: parts[2], coord });
     }
   }
-  // also handle variable versions? skip for MVP
   return deps;
 }
 
 export async function scanSca({ root, config = {} } = {}) {
-  const findings = [];
-  const cvePath = config.cvePath || path.join(root, "..", "..", "seed", "cve-database.json");
-  // resolve relative to backend root if not found
-  let dbPath = cvePath;
-  if (!fs.existsSync(dbPath)) {
-    // try common locations
-    const candidates = [
-      path.join(process.cwd(), "src", "backend", "seed", "cve-database.json"),
-      path.join(process.cwd(), "cve-database.json"),
-    ];
-    dbPath = candidates.find((p) => fs.existsSync(p)) || dbPath;
-  }
-  const db = readCveDb(dbPath);
-  const gradlePath = path.join(root, "build.gradle.kts");
-  let content = "";
-  try { content = fs.readFileSync(gradlePath, "utf8"); } catch {
-    // search for any build.gradle.kts
-    // simple: none
-  }
-  const deps = parseDependencies(content);
-  for (const dep of deps) {
-    const pkg = `${dep.group}:${dep.artifact}`;
-    for (const cve of db) {
-      if (cve.package !== pkg) continue;
-      if (inRange(dep.version, cve.affectedVersions)) {
-        findings.push({
-          id: `sca-${findings.length + 1}`,
-          scanner: "sca",
-          severity: cve.severity,
-          file: "build.gradle.kts",
-          line: null,
-          title: `${cve.title} (${cve.id})`,
-          message: `${cve.title} (${cve.id}) in ${pkg}:${dep.version}`,
-          snippet: `${pkg}:${dep.version}`,
-          cve: cve.id,
-          fixedVersion: cve.fixedVersion,
-        });
+  return cachedScan("sca", root, config, async () => {
+    const findings = [];
+    const cvePath = config.cvePath || null;
+    let dbPath = cvePath;
+    if (!dbPath || !fs.existsSync(dbPath)) {
+      const candidates = [
+        path.join(process.cwd(), "src", "backend", "seed", "cve-database.json"),
+        path.join(process.cwd(), "cve-database.json"),
+        path.resolve(root, "..", "..", "seed", "cve-database.json"),
+      ];
+      dbPath = candidates.find((p) => fs.existsSync(p)) || dbPath;
+    }
+    const db = readCveDb(dbPath);
+    const gradlePath = path.join(root, "build.gradle.kts");
+    let content = "";
+    try { content = fs.readFileSync(gradlePath, "utf8"); } catch {
+      // search for any build.gradle.kts (one level)
+      try {
+        const entries = fs.readdirSync(root, { withFileTypes: true });
+        for (const e of entries) {
+          if (e.isFile() && e.name === "build.gradle.kts") {
+            content = fs.readFileSync(path.join(root, e.name), "utf8");
+            break;
+          }
+        }
+      } catch { /* ignore */ }
+    }
+    const deps = parseDependencies(content);
+    for (const dep of deps) {
+      const pkg = `${dep.group}:${dep.artifact}`;
+      for (const cve of db) {
+        if (cve.package !== pkg) continue;
+        if (inRange(dep.version, cve.affectedVersions)) {
+          findings.push({
+            id: `sca-${findings.length + 1}`,
+            scanner: "sca",
+            severity: cve.severity,
+            file: "build.gradle.kts",
+            line: null,
+            title: `${cve.title} (${cve.id})`,
+            message: `${cve.title} (${cve.id}) in ${pkg}:${dep.version}`,
+            snippet: `${pkg}:${dep.version}`,
+            cve: cve.id,
+            fixedVersion: cve.fixedVersion,
+          });
+        }
       }
     }
-  }
-  return findings;
+    return findings;
+  });
 }
 
 export default { scanSca };

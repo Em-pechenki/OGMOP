@@ -64,7 +64,7 @@ function applySecurity(app, options) {
           scriptSrc: ["'self'"],
           styleSrc: ["'self'", "'unsafe-inline'"],
           imgSrc: ["'self'", "data:", "https:"],
-          connectSrc: ["'self'", ...allowedOrigins],
+          connectSrc: ["'self'", ...allowedOrigins, "https://api.openai.com", "https://api.anthropic.com"],
           fontSrc: ["'self'", "data:"],
           objectSrc: ["'none'"],
           baseUri: ["'self'"],
@@ -105,7 +105,7 @@ function applySecurity(app, options) {
       max,
       standardHeaders: true,
       legacyHeaders: false,
-      message: { error: "Too many requests, please try again later." },
+      message: { data: null, error: "Too many requests, please try again later." },
     })
   );
   // Stricter limit for auth endpoints (if any).
@@ -116,7 +116,7 @@ function applySecurity(app, options) {
       max: authMax,
       standardHeaders: true,
       legacyHeaders: false,
-      message: { error: "Too many authentication attempts." },
+      message: { data: null, error: "Too many authentication attempts." },
     })
   );
 
@@ -156,7 +156,7 @@ function errorHandler(err, req, res, _next) {
   if (err && /CORS/.test(err.message || "")) code = 403;
 
   const message = code >= 500 ? "Internal server error" : err && err.message ? err.message : "Error";
-  const body = { error: message, requestId: req && req.id };
+  const body = { data: null, error: message, requestId: req && req.id };
   if (!isProd && code >= 500 && err && err.stack) body.stack = err.stack;
   res.status(code).json(body);
 }

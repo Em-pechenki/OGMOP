@@ -1,6 +1,4 @@
 // Notification service: Telegram / SMTP / HTTP webhook.
-import https from "node:https";
-
 function maskSecrets(obj) {
   try {
     return JSON.parse(JSON.stringify(obj, (k, v) => {

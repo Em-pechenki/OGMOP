@@ -2,6 +2,7 @@ import helmet from "helmet";
 import cors from "cors";
 import rateLimit from "express-rate-limit";
 import express from "express";
+import { logger } from "../utils/logger.js";
 
 function parseOrigins(value) {
   return String(value || "")
@@ -49,7 +50,7 @@ export function applySecurity(app, options) {
           scriptSrc: ["'self'"],
           styleSrc: ["'self'", "'unsafe-inline'"],
           imgSrc: ["'self'", "data:", "https:"],
-          connectSrc: ["'self'", ...allowedOrigins],
+          connectSrc: ["'self'", ...allowedOrigins, "https://api.openai.com", "https://api.anthropic.com"],
           fontSrc: ["'self'", "data:"],
           objectSrc: ["'none'"],
           baseUri: ["'self'"],
@@ -88,7 +89,7 @@ export function applySecurity(app, options) {
       max,
       standardHeaders: true,
       legacyHeaders: false,
-      message: { error: "Too many requests, please try again later." },
+      message: { data: null, error: "Too many requests, please try again later." },
     })
   );
   app.use(
@@ -98,7 +99,7 @@ export function applySecurity(app, options) {
       max: authMax,
       standardHeaders: true,
       legacyHeaders: false,
-      message: { error: "Too many authentication attempts." },
+      message: { data: null, error: "Too many authentication attempts." },
     })
   );
 
@@ -123,17 +124,18 @@ export function applySecurity(app, options) {
 export function errorHandler(err, req, res, _next) {
   const status = err && (err.status || err.statusCode) ? err.status || err.statusCode : 500;
   const isProd = process.env.NODE_ENV === "production";
-  if (!isProd) {
-    console.error("[security:error]", req && req.id, err && err.stack ? err.stack : err);
-  } else {
-    console.error("[security:error]", req && req.id, err && err.message);
-  }
-
   let code = status;
   if (err && /CORS/.test(err.message || "")) code = 403;
+  if (!(code >= 400 && code < 600)) code = 500;
 
   const message = code >= 500 ? "Internal server error" : err && err.message ? err.message : "Error";
-  const body = { error: message, requestId: req && req.id };
+
+  logger.error(err instanceof Error ? err : new Error(String(message)), {
+    requestId: req && req.id,
+    status: code,
+  });
+
+  const body = { data: null, error: message, requestId: req && req.id };
   if (!isProd && code >= 500 && err && err.stack) body.stack = err.stack;
   res.status(code).json(body);
 }

@@ -1,6 +1,5 @@
 import React from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
-import type { NodeData } from "@shared/types";
 import { useRunStore } from "@frontend/store/runStore";
 
 const ICON = "logic.svg";

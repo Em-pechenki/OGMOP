@@ -36,7 +36,7 @@ function validate(input) {
       const schema = input;
       const result = runSchema(schema, req.body);
       if (!result.success) {
-        return res.status(400).json({ error: "Validation failed", issues: formatIssues(result.error) });
+        return res.status(400).json({ data: null, error: "Validation failed", issues: formatIssues(result.error) });
       }
       if (schema) req.body = result.data;
       return next();
@@ -57,7 +57,7 @@ function validate(input) {
       }
     }
     if (collected.length) {
-      return res.status(400).json({ error: "Validation failed", issues: collected });
+      return res.status(400).json({ data: null, error: "Validation failed", issues: collected });
     }
     return next();
   };

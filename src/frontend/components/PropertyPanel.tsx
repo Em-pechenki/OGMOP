@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { useWorkflowStore } from "@frontend/store/workflowStore";
 import type { NodeData } from "@shared/types";
 

@@ -93,7 +93,7 @@ function cvePath() {
     path.resolve(process.cwd(), "cve-database.json"),
   ];
   for (const c of candidates) {
-    try { if (fs.existsSync(c)) return c; } catch {}
+    try { if (fs.existsSync(c)) return c; } catch (e) { /* ignore */ }
   }
   return candidates[0];
 }
@@ -163,7 +163,7 @@ async function handleNode(node, context) {
   if (type === "ai.analyze") {
     // collect findings from all previous scanner nodes
     const allFindings = [];
-    for (const [nid, out] of Object.entries(context.nodeOutputs || {})) {
+    for (const [, out] of Object.entries(context.nodeOutputs || {})) {
       if (out && Array.isArray(out.findings)) allFindings.push(...out.findings);
     }
     const report = await analyze(allFindings);

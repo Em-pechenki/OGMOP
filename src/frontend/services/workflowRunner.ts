@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { api } from "@frontend/services/api";
 import { useRunStore } from "@frontend/store/runStore";
 import type { RunStatus } from "@shared/types";

@@ -1,12 +1,11 @@
-﻿import React, { useEffect, useState } from "react";
+﻿/* eslint-disable @typescript-eslint/no-explicit-any */
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ReactFlow, Background, Controls, MiniMap, ReactFlowProvider } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import Container from "@frontend/components/layout/Container";
-import Card from "@frontend/components/ui/Card";
 import Button from "@frontend/components/ui/Button";
 import { nodeTypes } from "@frontend/components/nodes";
-import PropertyPanel from "@frontend/components/PropertyPanel";
 import ResultsPanel from "@frontend/components/ResultsPanel";
 import { api } from "@frontend/services/api";
 import { useRunStore } from "@frontend/store/runStore";
@@ -17,7 +16,6 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export const RunDetailPage: React.FC = () => {
   const { id } = useParams();
-  const [workflow, setWorkflow] = useState<{ nodes: any[]; edges: any[]; name?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const setNodes = useWorkflowStore((s) => s.setNodes);
@@ -48,7 +46,6 @@ export const RunDetailPage: React.FC = () => {
         const wfRes = await api.get(`/api/workflows/${run.workflowId}`);
         const wf = (wfRes.data as { data?: any })?.data ?? wfRes.data;
         if (cancelled) return;
-        setWorkflow(wf);
         setNodes(wf?.nodes || []);
         setEdges(wf?.edges || []);
 
