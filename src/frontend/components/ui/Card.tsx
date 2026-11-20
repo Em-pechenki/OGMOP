@@ -27,7 +27,7 @@ export const Card: React.FC<CardProps> = ({
     >
       {(title || subtitle) && (
         <div className="mb-3">
-          {title && <h3 className="text-base font-semibold text-text">{title}</h3>}
+          {title && <h2 className="text-base font-semibold text-text">{title}</h2>}
           {subtitle && <p className="text-sm text-text-muted">{subtitle}</p>}
         </div>
       )}

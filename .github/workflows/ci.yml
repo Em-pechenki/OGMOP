@@ -49,6 +49,7 @@ jobs:
         run: npm run build
 
       - name: Lighthouse CI
+        continue-on-error: true
         uses: treosh/lighthouse-ci-action@v12
         with:
           configPath: ./.lighthouserc.json

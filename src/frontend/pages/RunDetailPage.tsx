@@ -19,7 +19,7 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 const statusColor: Record<string, string> = {
   pending: "bg-surface text-text-muted",
   queued: "bg-surface text-text-muted",
-  running: "bg-primary-light text-primary-dark",
+  running: "bg-primary-light text-primary-darker",
   success: "bg-success-bg text-primary-darker",
   completed: "bg-success-bg text-primary-darker",
   failed: "bg-error-bg text-error",
