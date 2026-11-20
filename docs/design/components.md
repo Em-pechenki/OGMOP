@@ -595,3 +595,81 @@ interface PreviewPaneProps {
 - `success`: контент.
 
 Skeleton использует `--color-surface` с shimmer-анимацией.
+
+---
+
+
+
+---
+
+## 20. ThemeToggle (переключатель темы)
+
+**Назначение**: переключение темы интерфейса (light/dark/system) в Header/Sidebar. Сохранение в `localStorage('ogmop:theme')`.
+
+### Варианты (variant)
+| Вариант | Описание | Где |
+|---------|----------|-----|
+| `icon` | Кнопка-иконка (sun/moon/monitor) | Header |
+| `segmented` | 3 сегмента (Светлая / Тёмная / Системная) | Settings |
+
+### Поведение
+- Размеры: sm (32px), md (40px) — как Button icon.
+- Иконки: `sun` (light), `moon` (dark), `monitor` (system). SVG из `public/icons/`.
+- Активная тема подсвечивается фоном `--color-primary-light` и иконкой `--color-primary`; неактивные — `--color-text-muted`.
+- Анимация: иконка rotate 180° + fade (`--duration-normal`), фон плавно (`--duration-slow`).
+- Применение: добавляет/снимает класс `dark` на `<html>`, сохраняет в `localStorage('ogmop:theme')`. При `system` — подписка на `matchMedia('(prefers-color-scheme: dark)')`.
+
+### Props
+```ts
+interface ThemeToggleProps {
+  variant?: "icon" | "segmented";
+  size?: "sm" | "md";
+  showLabel?: boolean;
+  className?: string;
+}
+```
+
+### A11y
+- `role="switch"` (icon) или `role="radiogroup"` (segmented); `aria-checked` / `aria-pressed`.
+- `aria-label`: «Переключить тему»; для segmented — «Выбрать тему».
+- Клавиатура: Enter/Space переключает; в segmented — стрелки ←/→.
+- Focus ring `--shadow-focus`. Touch-target >= 44px на mobile.
+
+---
+
+## 21. LanguageSwitcher (переключатель языка)
+
+**Назначение**: смена языка интерфейса (ru/en). Расположение: Header (компактный) и Settings (полный).
+
+### Поддерживаемые локали
+| Код | Название | По умолчанию |
+|-----|----------|--------------|
+| `ru` | Русский | да |
+| `en` | English | нет |
+
+Расширение — через i18n-словарь (`src/frontend/i18n/`).
+
+### Поведение
+- Компактный (Header): кнопка с кодом локали (`RU`/`EN`) + chevron; dropdown со списком языков.
+- Полный (Settings): segmented/radio-список с названием языка на нём самом («Русский», «English»).
+- При смене: обновляет `i18n.changeLanguage()`, сохраняет `localStorage('ogmop:locale')`, перерисовывает UI без перезагрузки.
+- Dropdown: `--color-surface-elevated`, `--shadow-modal`, `--radius-lg`, z-index `--z-dropdown`.
+
+### Props
+```ts
+interface LanguageSwitcherProps {
+  variant?: "compact" | "full";
+  size?: "sm" | "md";
+  className?: string;
+}
+```
+
+### A11y
+- Trigger: `aria-haspopup="listbox"`, `aria-expanded`.
+- Список: `role="listbox"`, элементы `role="option"`, `aria-selected`.
+- Клавиатура: Enter/Space открывает; Esc закрывает; стрелки навигация; Enter выбирает.
+- Focus ring `--shadow-focus`. Touch-target >= 44px.
+
+### Синхронизация с темой
+- Переключатели независимы; значения сохраняются раздельно (`ogmop:theme`, `ogmop:locale`).
+- Первый визит: тема = `system` (prefers-color-scheme), язык = язык браузера (`navigator.language` -> `ru`/`en`, fallback `ru`).

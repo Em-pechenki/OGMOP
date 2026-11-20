@@ -85,6 +85,57 @@
 | error | `--color-error` | error-bg | красный крест |
 | disabled | `--color-border` | surface | полупрозрачность 0.5 |
 
+### 1.7 Тёмная тема (dark mode overrides)
+
+Переключение: класс `dark` на `<html>` (или корневом контейнере). Источник истины — `prefers-color-scheme`, переопределяется выбором пользователя (localStorage `ogmop:theme`). Все токены ниже **переопределяют** значения из `:root` при активном `.dark`.
+
+| Токен | Light | Dark | Примечание |
+|-------|-------|------|------------|
+| `--color-bg` | `#FFFFFF` | `#0B0F14` | Фон страницы |
+| `--color-surface` | `#F6F8FA` | `#121821` | Поверхности/карточки |
+| `--color-surface-elevated` | `#FFFFFF` | `#1A2230` | Всплывающие панели |
+| `--color-text` | `#01000C` | `#E6EAF0` | Основной текст |
+| `--color-text-muted` | `#494B52` | `#A8B0BD` | Вторичный текст |
+| `--color-text-subtle` | `#6B7280` | `#7A8290` | Подсказки |
+| `--color-border` | `#E9F0F7` | `#262D38` | Границы |
+| `--color-border-strong` | `#D1D5DB` | `#3A4352` | Акцентные границы |
+| `--color-divider` | `#EEF2F7` | `#1E2530` | Разделители |
+| `--color-secondary-light` | `#F6F8FA` | `#121821` | Фон surface-alt |
+| `--color-primary` | `#50B848` | `#50B848` | Бренд (без изменений) |
+| `--color-primary-light` | `#E9F7F3` | `#1B3A24` | Фоны/выделения |
+| `--color-success-bg` | `#E9F7F3` | `#1B3A24` | Фон успеха |
+| `--color-warning` | `#FEECCC` | `#3A3320` | Фон предупреждения |
+| `--color-warning-text` | `#B8860B` | `#FFD54F` | Текст предупреждения |
+| `--color-warning-bg` | `#FEECCC` | `#3A3320` | Фон предупреждения |
+| `--color-error` | `#D32F2F` | `#EF5350` | Ошибка |
+| `--color-error-bg` | `#FDECEA` | `#3A1F22` | Фон ошибки |
+| `--color-info` | `#D9ECFF` | `#1A2A3A` | Информация (фон) |
+| `--color-info-text` | `#1565C0` | `#64B5F6` | Текст информации |
+| `--color-risk-critical` | `#D32F2F` | `#EF5350` | Критический риск |
+| `--color-risk-critical-bg` | `#FDECEA` | `#3A1F22` |  |
+| `--color-risk-high` | `#E65100` | `#FF8A65` |  |
+| `--color-risk-high-bg` | `#FFF3E0` | `#3A2A1F` |  |
+| `--color-risk-medium` | `#B8860B` | `#FFD54F` |  |
+| `--color-risk-medium-bg` | `#FEECCC` | `#3A3320` |  |
+| `--color-risk-low` | `#50B848` | `#5CBF54` |  |
+| `--color-risk-low-bg` | `#E9F7F3` | `#1B3A24` |  |
+| `--color-risk-info` | `#494B52` | `#A8B0BD` |  |
+| `--color-risk-info-bg` | `#F6F8FA` | `#121821` |  |
+| `--color-node-trigger` | `#50B848` | `#5CBF54` |  |
+| `--color-node-trigger-bg` | `#E9F7F3` | `#1B3A24` |  |
+| `--color-node-logic` | `#494B52` | `#A8B0BD` |  |
+| `--color-node-logic-bg` | `#F6F8FA` | `#121821` |  |
+| `--color-node-scanner` | `#E65100` | `#FF8A65` |  |
+| `--color-node-scanner-bg` | `#FFF3E0` | `#3A2A1F` |  |
+| `--color-node-notify` | `#1976D2` | `#64B5F6` |  |
+| `--color-node-notify-bg` | `#D9ECFF` | `#1A2A3A` |  |
+| `--color-node-ai` | `#7B1FA2` | `#CE93D8` |  |
+| `--color-node-ai-bg` | `#F3E5F5` | `#2A1F3A` |  |
+| `--shadow-card` | `0 0 24px rgba(0,0,0,0.03)` | `0 0 24px rgba(0,0,0,0.4)` | Усиленная тень в dark |
+| `--shadow-hover` | `0 4px 12px rgba(0,0,0,0.08)` | `0 4px 12px rgba(0,0,0,0.5)` |  |
+
+Контраст (dark, WCAG AA): текст `#E6EAF0` на `#0B0F14` ≈ 15:1 ✅; muted `#A8B0BD` ≈ 8.5:1 ✅; цветные тексты используются с font-weight ≥ 600.
+
 ---
 
 ## 2. Типографика
