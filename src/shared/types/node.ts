@@ -26,6 +26,7 @@ export interface TriggerNodeData {
   label?: string;
   schedule?: string;
   params?: Record<string, unknown>;
+  [key: string]: unknown;
 }
 
 export interface LogicNodeData {
@@ -37,6 +38,7 @@ export interface LogicNodeData {
   left?: string;
   right?: string;
   pattern?: string;
+  [key: string]: unknown;
 }
 
 export interface NotifyNodeData {
@@ -44,6 +46,7 @@ export interface NotifyNodeData {
   channel: NotifyChannel;
   label?: string;
   config: NotifyConfig;
+  [key: string]: unknown;
 }
 
 export interface ScannerNodeData {
@@ -51,6 +54,7 @@ export interface ScannerNodeData {
   scannerType: ScannerType;
   label?: string;
   config: ScanConfig;
+  [key: string]: unknown;
 }
 
 export interface AiNodeData {
@@ -61,6 +65,7 @@ export interface AiNodeData {
   prompt?: string;
   temperature?: number;
   maxTokens?: number;
+  [key: string]: unknown;
 }
 
 export type NodeData =
