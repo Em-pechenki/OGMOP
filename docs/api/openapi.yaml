@@ -1,7 +1,7 @@
 openapi: 3.0.3
 info:
   title: OGMOP API
-  version: 0.2.0
+  version: 1.0.0
   description: |
     Backend API for OGMOP — AI Security Workflow platform.
     Единый формат ответов: `{ "data": <T>, "error": null }` при успехе,
@@ -166,6 +166,18 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseError"
+  /api/runs:
+    get:
+      tags: [Runs]
+      summary: List runs
+      operationId: listRuns
+      responses:
+        "200":
+          description: List of runs
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseRunList"
   /api/runs/{id}:
     get:
       tags: [Runs]
@@ -317,8 +329,8 @@ components:
       enum: [critical, high, medium, low, info]
     RunStatus:
       type: string
-      enum: [pending, running, success, error, cancelled]
-      description: Статус запуска (backend использует queued|running|success|failed|cancelled)
+      enum: [queued, running, success, failed, cancelled]
+      description: Статус запуска (backend in-memory store)
     NodeRunStatus:
       type: string
       enum: [idle, running, success, error, skipped]
