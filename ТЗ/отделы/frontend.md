@@ -10,6 +10,7 @@
 
 ## Стек
 - React 18, Vite 5, TypeScript 5, Tailwind CSS 3.
+- React Flow (drag-and-drop конструктор нод).
 - React Router 6, React Hook Form + Zod (формы/валидация).
 - Axios/Fetch для API.
 - Vitest + React Testing Library (тесты).

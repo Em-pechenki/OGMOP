@@ -11,7 +11,10 @@
 ## Стек
 - Node.js 20+, Express 4, TypeScript (или JS).
 - Zod/Joi для валидации.
-- Prisma/Drizzle (если БД) или in-memory (для хакатона).
+- In-memory store (для хакатона) + опционально SQLite.
+- Сканеры: secrets (regex), SCA (Gradle + CVE JSON), SAST (Kotlin/Spring Boot правила).
+- LLM-интеграция: OpenAI/Claude API.
+- Уведомления: Telegram Bot API, SMTP (nodemailer), HTTP webhook.
 - Vitest/Jest для тестов.
 
 ## Артефакты

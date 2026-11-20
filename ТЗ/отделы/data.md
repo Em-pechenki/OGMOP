@@ -15,9 +15,9 @@
 - JSON Schema (опционально).
 
 ## Артефакты
-1. `src/shared/types/index.ts` — все сущности.
+1. `src/shared/types/index.ts` — Node, Edge, Workflow, TriggerNode, LogicNode, NotifyNode, ScannerNode, Finding, Severity, RunStatus, ScanResult.
 2. `src/backend/models/*.ts` — модели.
-3. `src/backend/seed/*.json` — seed-данные.
+3. `src/backend/seed/*.json` — seed-данные (пример workflow, CVE справочник).
 4. `docs/data/schema.md` — описание схемы.
 
 ## Задачи по фазам
