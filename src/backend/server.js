@@ -1,5 +1,5 @@
 import express from "express";
-import { securityMiddleware } from "./middleware/security.middleware.js";
+import { applySecurity } from "./middleware/security.middleware.js";
 import { notFoundHandler, errorHandler } from "./middleware/error-handler.middleware.js";
 import healthRoutes from "./routes/health.routes.js";
 import workflowRoutes from "./routes/workflow.routes.js";
@@ -9,10 +9,8 @@ import templateRoutes from "./routes/template.routes.js";
 export function createApp() {
   const app = express();
 
-  // security + parsing
-  securityMiddleware().forEach((m) => app.use(m));
-  app.use(express.json({ limit: "2mb" }));
-  app.use(express.urlencoded({ extended: true }));
+  // Security middleware (SEC): helmet, CORS, rate-limit, body limits, request-id.
+  applySecurity(app);
 
   // routes
   app.use("/api", healthRoutes);
@@ -20,7 +18,7 @@ export function createApp() {
   app.use("/api", runRoutes);
   app.use("/api/templates", templateRoutes);
 
-  // 404 + error handler
+  // 404 + error handler (unified { data, error } format)
   app.use(notFoundHandler);
   app.use(errorHandler);
 
