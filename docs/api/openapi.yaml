@@ -299,6 +299,10 @@ components:
     ApiResponseRun:
       allOf:
         - $ref: "#/components/schemas/ApiResponse"
+    ApiResponseRunList:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+      description: "data = Run[]"
     ApiResponseTemplate:
       allOf:
         - $ref: "#/components/schemas/ApiResponse"
