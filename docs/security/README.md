@@ -1,6 +1,6 @@
 # Безопасность — OGMOP
 
-Статус: Фаза 5 завершена — финальный аудит пройден, security gate открыт.
+Статус: Фаза 6 завершена — финальный аудит новой фазы пройден, security gate открыт.
 
 - Модель угроз: `docs/security/threat-model.md` (STRIDE).
 - CORS/Helmet/rate-limit: реализованы (`src/backend/middleware/security.middleware.js`).

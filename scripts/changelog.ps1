@@ -102,8 +102,8 @@ if ($Version) {
 
 # Заменяем секцию Unreleased (или добавляем)
 if ($content -match "(?s)## \[Unreleased\].*?(?=\n## |\z)") {
-    $newSection = "$header`n`n$generated`n`n"
-    $content = [regex]::Replace($content, "(?s)## \[Unreleased\].*?(?=\n## |\z)", $newSection.TrimEnd(), 1)
+    $newSection = "$header`n`n$generated`n"
+    $content = [regex]::Replace($content, "(?s)## \[Unreleased\].*?(?=\n## |\z)", $newSection, 1)
 } else {
     $content = $content -replace "(# Changelog[^\n]*\n)", "`$1`n$header`n`n$generated`n`n"
 }

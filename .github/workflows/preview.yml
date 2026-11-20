@@ -52,7 +52,7 @@ jobs:
               "Download it from the **Actions** tab and serve with `npx serve dist`.",
               "",
               "_Base path: `/OGMOP/pr-${{ github.event.pull_request.number }}/`_"
-            ].join("\\n");
+            ].join("\n");
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,

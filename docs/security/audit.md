@@ -167,3 +167,61 @@ Security gate Фазы 3 пройден: CSP ужесточён, секрето�
 - **Логирование**: структурированные логи без стеков в проде, correlation-id (X-Request-Id).
 
 **Итог**: приложение готово к демо; критических и высоких уязвимостей в runtime нет.
+
+## 10. Фаза 6 — Новая фаза улучшений (финальный аудит)
+
+Дата: 2026-11-21. Аудитор: commander-security.
+
+### 10.1 Проверка новых эндпоинтов (generate, ci/run)
+
+- Поиск по `src/backend/routes`, `src/backend/controllers`, `src/backend/services`, `tests/`, `docs/` и `.github/` новых маршрутов `generate` и `ci/run` не выявил реализованных HTTP-эндпоинтов в текущей кодовой базе (star-задачи CI/CD и AI-генерации пока не реализованы).
+- Все **существующие** публичные эндпоинты (`/api/health`, `/api/workflows`, `/api/workflows/:id`, `/api/workflows/:id/run`, `/api/runs`, `/api/runs/:id`, `/api/templates`, `/api/templates/:id`) защищены Zod-схемами (`validateBody`/`validateParams`); тела ограничены 1MB, rate-limit 300/15 мин на `/api/`.
+- При появлении `generate`/`ci/run` бэкенд обязан подключить валидацию до деплоя; схемы должны блокировать path traversal, null-байты и приватные URL (SSRF), а секреты (GitHub token и т.п.) принимать только через env/зашифрованные настройки и маскировать в ответах.
+
+### 10.2 Валидация входных данных
+
+- `WorkflowCreateSchema`/`WorkflowUpdateSchema` ограничивают длину имени/описания, валидируют структуру нод/рёбер.
+- `WorkflowRunSchema` блокирует `..` и null-байты в `input.repoPath`.
+- `IdParamSchema` требует непустой id.
+- `TemplateCreateSchema` ограничивает поля шаблона.
+- Error handler не раскрывает стеки в проде; ответы в едином формате `{ data, error }`.
+
+### 10.3 Безопасное хранение токенов
+
+- Реализовано в `src/backend/utils/secrets.js`: AES-256-GCM (IV + auth tag), ключ из `SECRET_ENCRYPTION_KEY`/env, маскирование `maskSecret`/`maskObject`, расшифровка legacy `enc:`.
+- Секреты в коде отсутствуют; чтение только из `process.env`.
+- Токен фронта в `localStorage` (`ogmop_token`) — известный XSS-риск, миграция на httpOnly cookie отложена до появления полноценной auth (остаточный риск).
+
+### 10.4 CSP
+
+- `src/backend/middleware/security.middleware.js` (и re-export `security.js`): Helmet + CSP `default-src 'self'`, `script-src 'self'` (без unsafe-inline/unsafe-eval), `img-src 'self' data:`, `connect-src 'self' + allowlist + LLM API`, `object-src 'none'`, `frame-ancestors 'none'`, `base-uri 'self'`, `form-action 'self'`, HSTS в проде.
+- Изменений в CSP в фазе 6 не требуется.
+
+### 10.5 Аудит зависимостей
+
+- Production (`--omit=dev`): 2 moderate в `react-router-dom` (open redirect, constructor injection в SSR hydration). Приложение не использует SSR; обновление до v7 — breaking, отложено.
+- Full audit: critical/high только в dev-инструментах (vitest/tinypool/eslint/minimatch), не попадают в прод-бандл.
+- Рекомендации прежние: `npm audit fix` для non-breaking; обновление vitest/vite/eslint — отдельная задача DevOps.
+
+### 10.6 Проверка кода
+
+- Секретов в production-коде не найдено (синтетические в `src/backend/seed/demo-repo/` — намеренные тестовые данные).
+- SSRF-фильтр, path traversal, symlink-защита, ReDoS-лимиты, header injection, JWT hardening — внедрены в фазе 4, регрессий не обнаружено.
+- Линт и backend-api тесты проходят.
+
+### 10.7 Остаточные риски
+
+1. Токен фронта в `localStorage` (XSS) — миграция на httpOnly cookie отложена.
+2. Dev-зависимости содержат critical/high (только tooling) — обновление breaking, отложено.
+3. Production: 2 moderate в `react-router-dom` — обновление до v7 отложено.
+4. Полная изоляция сканируемых репозиториев (allowlist корней) — базовая защита реализована; полная — post-MVP.
+5. ReDoS: ограничение длины паттерна/ввода; таймауты regex — post-MVP.
+6. LLM prompt injection: строгий парсинг JSON, LLM не принимает решений; секреты маскируются в отчёте.
+
+### 10.8 Вывод
+
+Security gate фазы 6 пройден: критических/высоких уязвимостей в runtime нет, валидация входов и защиты (RCE/SSRF/path traversal/ReDoS) действуют, CSP и rate-limiting активны, секреты не хранятся в коде. Отчёт финальный.
+
+- Проверено: `src/backend/middleware/security.middleware.js`, `validate.middleware.js`, `auth/`, `utils/secrets.js`, `engine/workflow-engine.js`, `notify.service.js`; `npm test` — 85 passed; `npm audit --omit=dev` — 2 moderate (react-router-dom).
+- Аудитор: commander-security. Дата завершения: 2026-11-21.
+
