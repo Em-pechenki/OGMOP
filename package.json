@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite --root src/frontend",
-    "build": "vite build --root src/frontend",
-    "preview": "vite preview --root src/frontend",
+    "dev": "vite -c vite.config.ts",
+    "build": "vite build -c vite.config.ts",
+    "preview": "vite preview -c vite.config.ts",
     "lint": "eslint src --ext .ts,.tsx",
     "test": "vitest run",
     "server": "node src/backend/index.js"
