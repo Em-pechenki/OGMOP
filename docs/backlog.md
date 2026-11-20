@@ -102,8 +102,10 @@ DESIGN, FE, BE, DATA, DEVOPS, QA, DOCS, SEC.
 - [ ] Тестовый репозиторий (Kotlin/Spring Boot/Gradle) с секретами, уязвимыми deps, SAST-проблемами.
 
 ### DEVOPS
-- [ ] Lighthouse CI.
-- [ ] Автоматический changelog.
+- [x] Lighthouse CI.
+- [x] Автоматический changelog.
+- [x] Code-splitting / оптимизация бандла.
+- [x] Preview-деплои для PR (опционально).
 
 ### QA
 - [ ] Юнит-тесты сканеров (секреты, SCA, SAST).

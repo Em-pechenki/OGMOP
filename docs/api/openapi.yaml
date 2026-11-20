@@ -1,14 +1,27 @@
 openapi: 3.0.3
 info:
   title: OGMOP API
-  version: 0.1.0
-  description: Backend API for OGMOP AI Security Workflow platform.
+  version: 0.2.0
+  description: |
+    Backend API for OGMOP — AI Security Workflow platform.
+    Единый формат ответов: `{ "data": <T>, "error": null }` при успехе,
+    `{ "data": null, "error": "<message>", "details"?: <any> }` при ошибке.
+    In-memory store сбрасывается при рестарте процесса.
 servers:
   - url: http://localhost:3001
+    description: Локальный бэкенд (PORT переопределяет порт)
+tags:
+  - name: Health
+  - name: Workflows
+  - name: Runs
+  - name: Templates
+  - name: Engine
 paths:
   /api/health:
     get:
+      tags: [Health]
       summary: Health check
+      operationId: getHealth
       responses:
         "200":
           description: OK
@@ -18,7 +31,9 @@ paths:
                 $ref: "#/components/schemas/ApiResponseHealth"
   /api/workflows:
     get:
+      tags: [Workflows]
       summary: List workflows
+      operationId: listWorkflows
       responses:
         "200":
           description: List of workflows
@@ -27,7 +42,9 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiResponseWorkflowList"
     post:
+      tags: [Workflows]
       summary: Create workflow
+      operationId: createWorkflow
       requestBody:
         required: true
         content:
@@ -43,15 +60,21 @@ paths:
                 $ref: "#/components/schemas/ApiResponseWorkflow"
         "400":
           description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
   /api/workflows/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
     get:
+      tags: [Workflows]
       summary: Get workflow by id
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
+      operationId: getWorkflow
       responses:
         "200":
           description: Workflow
@@ -61,14 +84,14 @@ paths:
                 $ref: "#/components/schemas/ApiResponseWorkflow"
         "404":
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
     put:
-      summary: Update workflow
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
+      tags: [Workflows]
+      summary: Update workflow (full)
+      operationId: updateWorkflow
       requestBody:
         content:
           application/json:
@@ -81,20 +104,44 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ApiResponseWorkflow"
+        "404":
+          description: Not found
+    patch:
+      tags: [Workflows]
+      summary: Update workflow (partial)
+      operationId: patchWorkflow
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseWorkflow"
+        "404":
+          description: Not found
     delete:
+      tags: [Workflows]
       summary: Delete workflow
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
+      operationId: deleteWorkflow
       responses:
         "200":
           description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseDeleted"
+        "404":
+          description: Not found
   /api/workflows/{id}/run:
     post:
-      summary: Run workflow
+      tags: [Runs, Engine]
+      summary: Run workflow (start engine execution)
+      operationId: runWorkflow
       parameters:
         - in: path
           name: id
@@ -105,10 +152,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                input:
-                  type: object
+              $ref: "#/components/schemas/WorkflowRun"
       responses:
         "202":
           description: Run started
@@ -118,9 +162,15 @@ paths:
                 $ref: "#/components/schemas/ApiResponseRunStart"
         "404":
           description: Workflow not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
   /api/runs/{id}:
     get:
-      summary: Get run status
+      tags: [Runs]
+      summary: Get run status and results
+      operationId: getRun
       parameters:
         - in: path
           name: id
@@ -136,40 +186,73 @@ paths:
                 $ref: "#/components/schemas/ApiResponseRun"
         "404":
           description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseError"
   /api/templates:
     get:
+      tags: [Templates]
       summary: List templates
+      operationId: listTemplates
       responses:
         "200":
           description: List of templates
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseTemplateList"
     post:
+      tags: [Templates]
       summary: Create template
+      operationId: createTemplate
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TemplateCreate"
       responses:
         "201":
           description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseTemplate"
+        "400":
+          description: Validation error
   /api/templates/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
     get:
+      tags: [Templates]
       summary: Get template
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
+      operationId: getTemplate
       responses:
         "200":
           description: Template
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseTemplate"
+        "404":
+          description: Not found
     delete:
+      tags: [Templates]
       summary: Delete template
-      parameters:
-        - in: path
-          name: id
-          required: true
-          schema:
-            type: string
+      operationId: deleteTemplate
       responses:
         "200":
           description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseDeleted"
+        "404":
+          description: Not found
 components:
   schemas:
     ApiResponse:
@@ -180,21 +263,48 @@ components:
         error:
           type: string
           nullable: true
+    ApiResponseError:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
     ApiResponseHealth:
       allOf:
         - $ref: "#/components/schemas/ApiResponse"
+      description: data = { status, project, uptime, timestamp }
+    ApiResponseDeleted:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+      description: data = { deleted: true }
+    ApiResponseRunStart:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+      description: data = { runId }
     ApiResponseWorkflow:
       allOf:
         - $ref: "#/components/schemas/ApiResponse"
     ApiResponseWorkflowList:
       allOf:
         - $ref: "#/components/schemas/ApiResponse"
-    ApiResponseRunStart:
-      allOf:
-        - $ref: "#/components/schemas/ApiResponse"
     ApiResponseRun:
       allOf:
         - $ref: "#/components/schemas/ApiResponse"
+    ApiResponseTemplate:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+    ApiResponseTemplateList:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+        project:
+          type: string
+        uptime:
+          type: number
+        timestamp:
+          type: string
+          format: date-time
     Position:
       type: object
       properties:
@@ -202,6 +312,31 @@ components:
           type: number
         y:
           type: number
+    Severity:
+      type: string
+      enum: [critical, high, medium, low, info]
+    RunStatus:
+      type: string
+      enum: [pending, running, success, error, cancelled]
+      description: Статус запуска (backend использует queued|running|success|failed|cancelled)
+    NodeRunStatus:
+      type: string
+      enum: [idle, running, success, error, skipped]
+    NodeType:
+      type: string
+      enum:
+        - trigger.manual
+        - trigger.schedule
+        - logic.if
+        - logic.compare
+        - logic.regex
+        - notify.telegram
+        - notify.smtp
+        - notify.webhook
+        - scanner.secrets
+        - scanner.sca
+        - scanner.sast
+        - ai.analyze
     Node:
       type: object
       required: [id, type]
@@ -209,11 +344,20 @@ components:
         id:
           type: string
         type:
-          type: string
+          $ref: "#/components/schemas/NodeType"
         position:
           $ref: "#/components/schemas/Position"
         data:
           type: object
+          description: Данные ноды (дискриминированный union по полю kind). См. docs/nodes.md.
+        selected:
+          type: boolean
+        draggable:
+          type: boolean
+        width:
+          type: number
+        height:
+          type: number
     Edge:
       type: object
       required: [source, target]
@@ -224,6 +368,50 @@ components:
           type: string
         target:
           type: string
+        sourceHandle:
+          type: string
+          nullable: true
+        targetHandle:
+          type: string
+          nullable: true
+        label:
+          type: string
+        condition:
+          type: string
+          description: "'true' | 'false' | произвольная метка для ветвления"
+        animated:
+          type: boolean
+        style:
+          type: object
+    Workflow:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Node"
+        edges:
+          type: array
+          items:
+            $ref: "#/components/schemas/Edge"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        version:
+          type: integer
+        templateId:
+          type: string
+        metadata:
+          type: object
     WorkflowCreate:
       type: object
       properties:
@@ -254,8 +442,16 @@ components:
           type: array
           items:
             $ref: "#/components/schemas/Edge"
+    WorkflowRun:
+      type: object
+      properties:
+        input:
+          type: object
+          additionalProperties: true
+          description: Входные данные для запуска workflow
     Run:
       type: object
+      description: Статус выполнения workflow (backend in-memory)
       properties:
         id:
           type: string
@@ -266,13 +462,199 @@ components:
           enum: [queued, running, success, failed, cancelled]
         nodeStatuses:
           type: object
+          additionalProperties:
+            type: string
+            enum: [idle, running, success, error, skipped]
         nodeResults:
           type: object
+          additionalProperties:
+            $ref: "#/components/schemas/NodeResult"
         startedAt:
           type: string
+          format: date-time
         finishedAt:
           type: string
+          format: date-time
           nullable: true
         error:
           type: string
           nullable: true
+    NodeResult:
+      type: object
+      properties:
+        nodeId:
+          type: string
+        status:
+          $ref: "#/components/schemas/NodeRunStatus"
+        startedAt:
+          type: string
+          format: date-time
+        finishedAt:
+          type: string
+          format: date-time
+        durationMs:
+          type: number
+        output:
+          description: Выход ноды (зависит от типа)
+        error:
+          type: string
+        findings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Finding"
+        logs:
+          type: array
+          items:
+            type: string
+    Finding:
+      type: object
+      required: [id, severity, title]
+      properties:
+        id:
+          type: string
+        severity:
+          $ref: "#/components/schemas/Severity"
+        title:
+          type: string
+        description:
+          type: string
+        file:
+          type: string
+        line:
+          type: integer
+        column:
+          type: integer
+        ruleId:
+          type: string
+        scanner:
+          type: string
+          enum: [secrets, sca, sast]
+        cve:
+          type: string
+        packageName:
+          type: string
+        package:
+          type: string
+        version:
+          type: string
+        fixedVersion:
+          type: string
+        recommendation:
+          type: string
+        snippet:
+          type: string
+    AiReport:
+      type: object
+      required: [summary, recommendations]
+      properties:
+        summary:
+          type: string
+        riskLevel:
+          $ref: "#/components/schemas/Severity"
+        findings:
+          type: array
+          items:
+            $ref: "#/components/schemas/Finding"
+        recommendations:
+          type: array
+          items:
+            type: string
+        generatedAt:
+          type: string
+          format: date-time
+    Template:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        workflow:
+          $ref: "#/components/schemas/Workflow"
+        author:
+          type: string
+        tags:
+          type: array
+          items:
+            type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+        isPublic:
+          type: boolean
+    TemplateCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        workflow:
+          $ref: "#/components/schemas/Workflow"
+    ScanConfig:
+      type: object
+      required: [scannerType]
+      properties:
+        scannerType:
+          type: string
+          enum: [secrets, sca, sast]
+        targetPath:
+          type: string
+        repoUrl:
+          type: string
+        includePatterns:
+          type: array
+          items:
+            type: string
+        excludePatterns:
+          type: array
+          items:
+            type: string
+        options:
+          type: object
+          additionalProperties: true
+    NotifyConfig:
+      type: object
+      required: [channel]
+      properties:
+        channel:
+          type: string
+          enum: [telegram, smtp, webhook]
+        botToken:
+          type: string
+        chatId:
+          type: string
+        host:
+          type: string
+        port:
+          type: integer
+        secure:
+          type: boolean
+        user:
+          type: string
+        password:
+          type: string
+        from:
+          type: string
+        to:
+          type: array
+          items:
+            type: string
+        subject:
+          type: string
+        url:
+          type: string
+        method:
+          type: string
+          enum: [GET, POST, PUT, PATCH]
+        headers:
+          type: object
+          additionalProperties:
+            type: string
+        bodyTemplate:
+          type: string

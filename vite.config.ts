@@ -4,11 +4,21 @@ import path from "node:path";
 
 export default defineConfig({
   root: "src/frontend",
-  base: "/OGMOP/",
+  base: process.env.VITE_BASE || "/OGMOP/",
   plugins: [react()],
   build: {
     outDir: "../../dist",
     emptyOutDir: true,
+    chunkSizeWarningLimit: 500,
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          "vendor-flow": ["@xyflow/react"],
+          "vendor-form": ["react-hook-form", "zod", "zustand", "axios"],
+        },
+      },
+    },
   },
   resolve: {
     alias: {

@@ -20,3 +20,6 @@ export interface Finding {
   recommendation?: string;
   snippet?: string;
 }
+
+// Alias used by phase-2 scanning results.
+export type ScanFinding = Finding;

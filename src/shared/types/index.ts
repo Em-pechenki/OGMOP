@@ -7,6 +7,7 @@ export * from "./template";
 export * from "./notification";
 export * from "./scanner";
 export * from "./llm";
+export * from "./events";
 
 export interface ApiResponse<T> {
   data: T;
