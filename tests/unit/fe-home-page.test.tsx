@@ -15,9 +15,9 @@ describe("FE: HomePage", () => {
     );
     expect(screen.getByText("Cyber Garden 2026")).toBeInTheDocument();
     expect(screen.getByText(/AI Security Workflow/i)).toBeInTheDocument();
-    expect(screen.getByText("Конструктор")).toBeInTheDocument();
-    expect(screen.getByText("Сканеры")).toBeInTheDocument();
-    expect(screen.getByText("AI-отчёты")).toBeInTheDocument();
+    expect(screen.getByText("Визуальный конструктор")).toBeInTheDocument();
+    expect(screen.getByText("Сканеры безопасности")).toBeInTheDocument();
+    expect(screen.getByText("AI-анализ")).toBeInTheDocument();
   });
 
   it("navigates to editor", async () => {
@@ -44,7 +44,7 @@ describe("FE: HomePage", () => {
       </MemoryRouter>
     );
     const user = userEvent.setup();
-    await user.click(screen.getByText(/^Шаблоны$/i));
+    await user.click(screen.getByText(/Все шаблоны/i));
     await waitFor(() => expect(screen.getByText("Templates route")).toBeInTheDocument());
   });
 });

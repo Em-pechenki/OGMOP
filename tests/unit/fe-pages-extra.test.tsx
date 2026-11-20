@@ -9,7 +9,7 @@ import { HomePage } from "../../src/frontend/pages/HomePage";
 describe("fe pages extra", () => {
   it("renders TemplatesPage", () => {
     render(<MemoryRouter><TemplatesPage /></MemoryRouter>);
-    expect(screen.getByText(/Шаблоны/i)).toBeInTheDocument();
+    expect(screen.getByText(/Библиотека шаблонов/i)).toBeInTheDocument();
   });
   it("renders ServerErrorPage", () => {
     render(<MemoryRouter><ServerErrorPage /></MemoryRouter>);

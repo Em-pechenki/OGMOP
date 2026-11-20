@@ -31,7 +31,6 @@ export const HomePage: React.FC = () => {
             <div className="animate-slide-up">
               <div className="flex items-center gap-2 mb-4">
                 <img src="/OGMOP/logo.svg" alt="OGMOP" className="h-8 w-auto" />
-                <span className="text-xs font-semibold text-primary uppercase tracking-widest">Cyber Garden 2026</span>
               </div>
               <p className="text-xs font-semibold text-primary uppercase tracking-widest mb-2">Cyber Garden 2026 · Банк «Центр-инвест»</p>
               <h1 className="text-3xl sm:text-4xl font-bold text-text leading-tight mb-4">Безопасность кода — визуально и просто</h1>
@@ -39,7 +38,7 @@ export const HomePage: React.FC = () => {
               <p className="text-base sm:text-lg text-text-muted max-w-xl mb-6">Собирайте сценарии проверки из блоков, запускайте собственные сканеры (секреты, SCA, SAST), получайте AI-объяснения и уведомления. Деплой на GitHub Pages.</p>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-4 animate-fade-in">
                 <Link to="/editor" className="w-full sm:w-auto"><Button size="lg" className="w-full sm:w-auto">Открыть редактор</Button></Link>
-                <Link to="/templates" className="w-full sm:w-auto"><Button variant="secondary" size="lg" className="w-full sm:w-auto">Шаблоны</Button></Link>
+                <Link to="/templates" className="w-full sm:w-auto"><Button variant="secondary" size="lg" className="w-full sm:w-auto">Все шаблоны</Button></Link>
                 <Link to="/docs" className="hidden sm:inline-flex w-full sm:w-auto"><Button variant="ghost" size="sm" className="w-full sm:w-auto">Документация</Button></Link>
               </div>
               <div className="flex flex-wrap items-center gap-3 text-xs text-text-subtle">
@@ -156,7 +155,7 @@ export const HomePage: React.FC = () => {
         <Container>
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-semibold text-text">Готовые шаблоны</h2>
-            <Link to="/templates" className="text-sm text-primary hover:underline">Все шаблоны →</Link>
+            <Link to="/templates" className="text-sm text-primary hover:underline">Перейти к шаблонам →</Link>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {highlightTemplates.map((t) => (
@@ -184,7 +183,7 @@ export const HomePage: React.FC = () => {
             <h2 className="text-2xl font-semibold text-text mb-2">Готовы проверить свой код?</h2>
             <p className="text-base text-text-muted mb-6">Создайте первый workflow за 2 минуты.</p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-              <Link to="/editor"><Button size="lg">Открыть редактор</Button></Link>
+              <Link to="/editor"><Button size="lg">Начать работу</Button></Link>
               <Link to="/templates"><Button variant="secondary" size="lg">Посмотреть шаблоны</Button></Link>
             </div>
           </div>

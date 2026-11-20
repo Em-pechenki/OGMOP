@@ -46,7 +46,7 @@ describe("fe TemplatesPage", () => {
   it("shows empty state on no templates", async () => {
     getMock.mockResolvedValue({ data: { data: [] } });
     render(<MemoryRouter><TemplatesPage /></MemoryRouter>);
-    await waitFor(() => expect(screen.getByText(/Шаблоны не найдены/i)).toBeInTheDocument());
+    await waitFor(() => expect(screen.getByText(/Шаблонов пока нет/i)).toBeInTheDocument());
   });
 
   it("creates template", async () => {

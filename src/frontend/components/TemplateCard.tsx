@@ -172,5 +172,5 @@ const TemplateCard: React.FC<TemplateCardProps> = ({
   );
 };
 
-export const TemplateCard = TemplateCard;
+export { TemplateCard };
 export default TemplateCard;
