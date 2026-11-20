@@ -60,3 +60,36 @@ export const aiReportSchema = z.object({
 export const llmJsonSchema = aiReportSchema;
 export const aiReportJsonSchema = aiReportSchema;
 export const llmStructuredResponseSchema = aiReportSchema;
+
+export const LLM_JSON_SCHEMA = {
+  type: "object",
+  properties: {
+    summary: { type: "string" },
+    riskLevel: { type: "string", enum: ["critical", "high", "medium", "low", "info"] },
+    findings: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          id: { type: "string" },
+          severity: { type: "string", enum: ["critical", "high", "medium", "low", "info"] },
+          title: { type: "string" },
+          description: { type: "string" },
+          file: { type: "string" },
+          line: { type: "number" },
+          ruleId: { type: "string" },
+          scanner: { type: "string", enum: ["secrets", "sca", "sast"] },
+          recommendation: { type: "string" },
+        },
+        required: ["id", "severity", "title"],
+      },
+    },
+    recommendations: { type: "array", items: { type: "string" } },
+    generatedAt: { type: "string" },
+  },
+  required: ["summary", "findings", "recommendations"],
+  additionalProperties: false,
+} as const;
+
+export const AI_REPORT_JSON_SCHEMA = LLM_JSON_SCHEMA;
+export const llmJsonSchemaObject = LLM_JSON_SCHEMA;

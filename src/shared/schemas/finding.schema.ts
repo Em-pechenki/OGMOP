@@ -20,3 +20,5 @@ export const findingSchema = z.object({
   recommendation: z.string().optional(),
   snippet: z.string().optional(),
 });
+
+export const scanFindingSchema = findingSchema;

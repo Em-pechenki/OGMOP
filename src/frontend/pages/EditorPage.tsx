@@ -14,7 +14,11 @@ import Container from "@frontend/components/layout/Container";
 import Button from "@frontend/components/ui/Button";
 import Card from "@frontend/components/ui/Card";
 import { useToast } from "@frontend/components/ui/Toast";
-import type { NodeData, NodeType } from "@shared/types";
+import { nodeTypes } from "@frontend/components/nodes";
+import PropertyPanel from "@frontend/components/PropertyPanel";
+import { api } from "@frontend/services/api";
+import { runWorkflow } from "@frontend/services/workflowRunner";
+import type { NodeData } from "@shared/types";
 
 interface PaletteItem {
   nodeType: NodeType;
@@ -73,10 +77,9 @@ export const EditorPageInner: React.FC = () => {
       };
       const node: Node<NodeData> = {
         id: `node_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-        type: "default",
+        type: (item.data as { kind?: string }).kind || "default",
         position,
         data: { ...item.data },
-        style: { border: `2px solid ${item.color}`, borderRadius: 8, padding: 8, background: "#fff", minWidth: 160 },
       };
       addNode(node);
     },

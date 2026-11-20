@@ -7,3 +7,4 @@ export * from "./template.schema";
 export * from "./notification.schema";
 export * from "./scanner.schema";
 export * from "./llm.schema";
+export * from "./events.schema";

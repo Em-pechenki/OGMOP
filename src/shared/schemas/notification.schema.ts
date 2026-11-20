@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { severitySchema, findingSchema } from "./finding.schema";
+import { aiReportSchema } from "./llm.schema";
 
 export const notifyChannelSchema = z.enum(["telegram", "smtp", "webhook"]);
 
@@ -18,4 +20,16 @@ export const notifyConfigSchema = z.object({
   method: z.enum(["GET", "POST", "PUT", "PATCH"]).optional(),
   headers: z.record(z.string(), z.string()).optional(),
   bodyTemplate: z.string().optional(),
+});
+
+export const notificationPayloadSchema = z.object({
+  channel: notifyChannelSchema.optional(),
+  title: z.string().optional(),
+  message: z.string().min(1),
+  summary: z.string().optional(),
+  severity: severitySchema.optional(),
+  findings: z.array(findingSchema).optional(),
+  aiReport: aiReportSchema.optional(),
+  metadata: z.record(z.string(), z.unknown()).optional(),
+  timestamp: z.string().optional(),
 });
