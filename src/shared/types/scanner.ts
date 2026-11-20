@@ -60,4 +60,3 @@ export interface ScanResult {
   metadata?: Record<string, unknown>;
 }
 
-export type ScanFinding = Finding;
