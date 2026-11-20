@@ -70,14 +70,6 @@ export function generateWorkflow(payload) {
   const notifyId = add("notify", { kind: "notify", channel, label: `Уведомление: ${channel}`, config: { channel } });
   edges.push({ id: `e_${prev}_${notifyId}`, source: prev, target: notifyId });
 
-  // optional logic node for PR/branch keywords
-  if (/pr|pull request|ветк|branch/i.test(description)) {
-    const logicId = add("logic", { kind: "logic", logicType: "if", label: "Логика: if/else", condition: "pr.opened == true" });
-    // insert before scanners: rebuild edges roughly by appending extra edge trigger->logic? keep simple chain already built; add logic as parallel not necessary.
-    // Remove logic node to avoid dangling? Instead keep it appended at end before notify? We'll leave as extra terminal node.
-    edges.push({ id: `e_${triggerId}_${logicId}`, source: triggerId, target: logicId });
-  }
-
   return {
     name,
     description,

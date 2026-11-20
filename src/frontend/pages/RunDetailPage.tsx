@@ -1,6 +1,7 @@
 ﻿import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ReactFlow, Background, Controls, MiniMap, ReactFlowProvider } from "@xyflow/react";
+import { AnimatedEdge } from "@frontend/components/edges/AnimatedEdge";
 import "@xyflow/react/dist/style.css";
 import Container from "@frontend/components/layout/Container";
 import Card from "@frontend/components/ui/Card";
@@ -155,7 +156,7 @@ export const RunDetailPage: React.FC = () => {
         </div>
         <div className="flex flex-col lg:flex-row gap-4 lg:h-[calc(100vh-200px)]">
           <div className="flex-1 min-h-[320px] rounded-lg border border-border overflow-hidden bg-surface">
-            <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} fitView>
+            <ReactFlow nodes={nodes} edges={edges} nodeTypes={nodeTypes} edgeTypes={{ animated: AnimatedEdge }} defaultEdgeOptions={{ type: "animated", animated: true }} fitView minZoom={0.2} maxZoom={2}>
               <Background />
               <Controls />
               <MiniMap

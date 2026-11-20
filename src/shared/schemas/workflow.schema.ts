@@ -3,7 +3,7 @@ import { flowNodeSchema } from "./node.schema";
 import { flowEdgeSchema } from "./edge.schema";
 
 export const workflowSchema = z.object({
-  id: z.string().min(1),
+  id: z.string().min(1).optional(),
   name: z.string().min(1),
   description: z.string().optional(),
   nodes: z.array(flowNodeSchema),

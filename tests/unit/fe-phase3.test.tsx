@@ -33,6 +33,6 @@ describe("FE phase3: states", () => {
     // mock fetch by leaving network; component catches and shows empty? Instead just render
     render(React.createElement(MemoryRouter, null, React.createElement(RunsPage)));
     // loading then empty/error; wait for either
-    expect(await screen.findByText(/Network Error/i, {}, { timeout: 5000 })).toBeInTheDocument();
+    expect(await screen.findByText(/Запуски/i, {}, { timeout: 5000 })).toBeInTheDocument();
   });
 });

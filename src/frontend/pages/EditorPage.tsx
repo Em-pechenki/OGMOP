@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   ReactFlow,
@@ -16,6 +16,8 @@ import Button from "@frontend/components/ui/Button";
 import Card from "@frontend/components/ui/Card";
 import { useToast } from "@frontend/components/ui/Toast";
 import { nodeTypes } from "@frontend/components/nodes";
+import { AnimatedEdge } from "@frontend/components/edges/AnimatedEdge";
+import { AiGenerationModal } from "@frontend/components/AiGenerationModal";
 import PropertyPanel from "@frontend/components/PropertyPanel";
 import { api } from "@frontend/services/api";
 import type { NodeData, NodeType } from "@shared/types";
@@ -29,16 +31,17 @@ interface PaletteItem {
 
 const PALETTE: PaletteItem[] = [
   { nodeType: "trigger.manual", label: "Триггер: ручной запуск", color: "#50B848", data: { kind: "trigger", triggerType: "manual", label: "Триггер: ручной запуск" } },
-  { nodeType: "trigger.schedule", label: "Триггер: по расписанию", color: "#50B848", data: { kind: "trigger", triggerType: "schedule", label: "Триггер: по расписанию", schedule: "0 14 * * *" } },
+  { nodeType: "trigger.schedule", label: "Триггер: расписание", color: "#50B848", data: { kind: "trigger", triggerType: "schedule", label: "Триггер: расписание", schedule: "0 14 * * *" } },
   { nodeType: "logic.if", label: "Логика: if/else", color: "#494B52", data: { kind: "logic", logicType: "if", label: "Логика: if/else", condition: "" } },
   { nodeType: "logic.compare", label: "Логика: сравнение", color: "#494B52", data: { kind: "logic", logicType: "compare", label: "Логика: сравнение", operator: "eq" } },
   { nodeType: "logic.regex", label: "Логика: regex", color: "#494B52", data: { kind: "logic", logicType: "regex", label: "Логика: regex", pattern: "" } },
-  { nodeType: "scanner.secrets", label: "Сканер: секреты", color: "#D32F2F", data: { kind: "scanner", scannerType: "secrets", label: "Сканер: секреты", config: { scannerType: "secrets" } } },
+  { nodeType: "scanner.secrets", label: "Сканер: Secrets", color: "#D32F2F", data: { kind: "scanner", scannerType: "secrets", label: "Сканер: Secrets", config: { scannerType: "secrets" } } },
   { nodeType: "scanner.sca", label: "Сканер: SCA", color: "#E65100", data: { kind: "scanner", scannerType: "sca", label: "Сканер: SCA", config: { scannerType: "sca" } } },
   { nodeType: "scanner.sast", label: "Сканер: SAST", color: "#B8860B", data: { kind: "scanner", scannerType: "sast", label: "Сканер: SAST", config: { scannerType: "sast" } } },
   { nodeType: "notify.telegram", label: "Уведомление: Telegram", color: "#1976D2", data: { kind: "notify", channel: "telegram", label: "Уведомление: Telegram", config: { channel: "telegram" } } },
   { nodeType: "notify.smtp", label: "Уведомление: SMTP", color: "#1976D2", data: { kind: "notify", channel: "smtp", label: "Уведомление: SMTP", config: { channel: "smtp" } } },
   { nodeType: "notify.webhook", label: "Уведомление: Webhook", color: "#1976D2", data: { kind: "notify", channel: "webhook", label: "Уведомление: Webhook", config: { channel: "webhook" } } },
+  { nodeType: "ai.analyze", label: "AI-анализ", color: "#7B1FA2", data: { kind: "ai", label: "AI-анализ", model: "gpt-4o" } },
 ];
 
 const nodeColor = (data: NodeData) => {
@@ -49,6 +52,8 @@ const nodeColor = (data: NodeData) => {
   return "#7B1FA2";
 };
 
+const edgeTypes = { animated: AnimatedEdge };
+
 export const EditorPageInner: React.FC = () => {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect, addNode, setNodes, setEdges } =
     useWorkflowStore();
@@ -56,6 +61,7 @@ export const EditorPageInner: React.FC = () => {
   const [stored, setStored] = useLocalStorage<string>("ogmop_workflow", "");
   const { show } = useToast();
   const navigate = useNavigate();
+  const [aiOpen, setAiOpen] = useState(false);
 
   const onDragStart = (event: React.DragEvent, item: PaletteItem) => {
     event.dataTransfer.setData("application/ogmop-node", JSON.stringify(item));
@@ -67,21 +73,33 @@ export const EditorPageInner: React.FC = () => {
       event.preventDefault();
       const raw = event.dataTransfer.getData("application/ogmop-node");
       if (!raw) return;
-      const item = JSON.parse(raw) as PaletteItem;
+      let item: PaletteItem;
+      try {
+        item = JSON.parse(raw) as PaletteItem;
+      } catch {
+        return;
+      }
       const bounds = reactFlowWrapper.current?.getBoundingClientRect();
-      const position = {
-        x: event.clientX - (bounds?.left ?? 0) - 80,
-        y: event.clientY - (bounds?.top ?? 0) - 20,
-      };
+      const gridSize = 20;
+      const x = Math.max(0, Math.round(((event.clientX - (bounds?.left ?? 0) - 80) / gridSize)) * gridSize);
+      const y = Math.max(0, Math.round(((event.clientY - (bounds?.top ?? 0) - 20) / gridSize)) * gridSize);
+      // auto-position: avoid exact overlap
+      let finalX = x;
+      let finalY = y;
+      const exists = nodes.some((n) => n.position.x === finalX && n.position.y === finalY);
+      if (exists) {
+        finalX += gridSize * 2;
+        finalY += gridSize * 2;
+      }
       const node: Node<NodeData> = {
         id: `node_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
         type: (item.data as { kind?: string }).kind || "default",
-        position,
+        position: { x: finalX, y: finalY },
         data: { ...item.data },
       };
       addNode(node);
     },
-    [addNode]
+    [addNode, nodes]
   );
 
   const onDragOver = useCallback((event: React.DragEvent) => {
@@ -124,15 +142,21 @@ export const EditorPageInner: React.FC = () => {
       const res = await api.post("/api/workflows", { name: "Workflow", nodes, edges });
       const wf = (res.data as { data?: { id?: string } })?.data;
       const id = wf?.id;
-      if (!id) throw new Error("Не удалось сохранить workflow");
+      if (!id) throw new Error("Не удалось создать workflow");
       const runRes = await api.post(`/api/workflows/${id}/run`, { input: {} });
       const runId = (runRes.data as { data?: { runId?: string } })?.data?.runId;
-      if (!runId) throw new Error("Не получен runId");
+      if (!runId) throw new Error("Не удалось запустить");
       show("Запуск начат", "info");
       navigate(`/run/${runId}`);
     } catch (e) {
       show((e as Error).message, "error");
     }
+  };
+
+  const applyGenerated = (wf: { name?: string; nodes: any[]; edges: any[] }) => {
+    setNodes(wf.nodes || []);
+    setEdges(wf.edges || []);
+    show("AI-workflow применён к холсту", "success");
   };
 
   return (
@@ -143,6 +167,7 @@ export const EditorPageInner: React.FC = () => {
           <Button variant="secondary" onClick={load}>Загрузить</Button>
           <Button onClick={save}>Сохранить (local)</Button>
           <Button variant="ghost" onClick={clear}>Очистить</Button>
+          <Button variant="secondary" onClick={() => setAiOpen(true)}>AI-генерация</Button>
           <Button onClick={handleRun}>Запустить</Button>
         </div>
       </div>
@@ -171,11 +196,22 @@ export const EditorPageInner: React.FC = () => {
             nodes={nodes}
             edges={edges}
             nodeTypes={nodeTypes}
+            edgeTypes={edgeTypes}
+            defaultEdgeOptions={{ type: "animated", animated: true }}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
             onDrop={onDrop}
             onDragOver={onDragOver}
+            deleteKeyCode={["Delete", "Backspace"]}
+            selectionKeyCode="Shift"
+            multiSelectionKeyCode="Control"
+            panOnScroll
+            zoomOnScroll
+            snapToGrid
+            snapGrid={[20, 20]}
+            minZoom={0.2}
+            maxZoom={2}
             fitView
           >
             <Background />
@@ -187,6 +223,8 @@ export const EditorPageInner: React.FC = () => {
           <PropertyPanel />
         </div>
       </div>
+
+      <AiGenerationModal open={aiOpen} onClose={() => setAiOpen(false)} onApply={applyGenerated} />
     </Container>
   );
 };
