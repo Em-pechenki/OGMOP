@@ -12,7 +12,7 @@ describe("FE: pages", () => {
     render(
       React.createElement(MemoryRouter, null, React.createElement(EditorPage))
     );
-    expect(await screen.findByText("Редактор workflow")).toBeInTheDocument();
+    expect(await screen.findByText("Конструктор workflow")).toBeInTheDocument();
   });
 
   it("renders RunDetailPage", () => {

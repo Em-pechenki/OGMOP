@@ -98,8 +98,20 @@ function cvePath() {
   return candidates[0];
 }
 
+function resolveType(node) {
+  const t = node && node.type;
+  if (t && String(t).includes(".")) return String(t);
+  const d = (node && node.data) || {};
+  if (d.kind === "trigger") return `trigger.${d.triggerType || "manual"}`;
+  if (d.kind === "logic") return `logic.${d.logicType || "if"}`;
+  if (d.kind === "scanner") return `scanner.${d.scannerType || "secrets"}`;
+  if (d.kind === "notify") return `notify.${d.channel || "webhook"}`;
+  if (d.kind === "ai") return "ai.analyze";
+  return String(t || "");
+}
+
 async function handleNode(node, context) {
-  const type = node.type;
+  const type = resolveType(node);
   const data = getNodeData(node);
 
   if (type === "trigger.manual" || type === "trigger.schedule") {

@@ -28,12 +28,12 @@ interface PaletteItem {
 }
 
 const PALETTE: PaletteItem[] = [
-  { nodeType: "trigger.manual", label: "Триггер: кнопка", color: "#50B848", data: { kind: "trigger", triggerType: "manual", label: "Триггер: кнопка" } },
-  { nodeType: "trigger.schedule", label: "Триггер: расписание", color: "#50B848", data: { kind: "trigger", triggerType: "schedule", label: "Триггер: расписание", schedule: "0 14 * * *" } },
+  { nodeType: "trigger.manual", label: "Триггер: Ручной запуск", color: "#50B848", data: { kind: "trigger", triggerType: "manual", label: "Триггер: Ручной запуск" } },
+  { nodeType: "trigger.schedule", label: "Триггер: По расписанию", color: "#50B848", data: { kind: "trigger", triggerType: "schedule", label: "Триггер: По расписанию", schedule: "0 14 * * *" } },
   { nodeType: "logic.if", label: "Логика: if/else", color: "#494B52", data: { kind: "logic", logicType: "if", label: "Логика: if/else", condition: "" } },
-  { nodeType: "logic.compare", label: "Логика: сравнение", color: "#494B52", data: { kind: "logic", logicType: "compare", label: "Логика: сравнение", operator: "eq" } },
+  { nodeType: "logic.compare", label: "Логика: Сравнение", color: "#494B52", data: { kind: "logic", logicType: "compare", label: "Логика: Сравнение", operator: "eq" } },
   { nodeType: "logic.regex", label: "Логика: regex", color: "#494B52", data: { kind: "logic", logicType: "regex", label: "Логика: regex", pattern: "" } },
-  { nodeType: "scanner.secrets", label: "Сканер: секреты", color: "#D32F2F", data: { kind: "scanner", scannerType: "secrets", label: "Сканер: секреты", config: { scannerType: "secrets" } } },
+  { nodeType: "scanner.secrets", label: "Сканер: Секреты", color: "#D32F2F", data: { kind: "scanner", scannerType: "secrets", label: "Сканер: Секреты", config: { scannerType: "secrets" } } },
   { nodeType: "scanner.sca", label: "Сканер: SCA", color: "#E65100", data: { kind: "scanner", scannerType: "sca", label: "Сканер: SCA", config: { scannerType: "sca" } } },
   { nodeType: "scanner.sast", label: "Сканер: SAST", color: "#B8860B", data: { kind: "scanner", scannerType: "sast", label: "Сканер: SAST", config: { scannerType: "sast" } } },
   { nodeType: "notify.telegram", label: "Уведомление: Telegram", color: "#1976D2", data: { kind: "notify", channel: "telegram", label: "Уведомление: Telegram", config: { channel: "telegram" } } },
@@ -43,7 +43,6 @@ const PALETTE: PaletteItem[] = [
 
 const nodeColor = (data: NodeData) => {
   const item = PALETTE.find((p) => p.nodeType === (data as { nodeType?: string }).nodeType);
-  // fallback by kind
   if (item) return item.color;
   if (data.kind === "trigger") return "#50B848";
   if (data.kind === "logic") return "#494B52";
@@ -107,7 +106,7 @@ export const EditorPageInner: React.FC = () => {
       setEdges(parsed.edges || []);
       show("Workflow загружен", "success");
     } catch {
-      show("Ошибка загрузки", "error");
+      show("Ошибка парсинга", "error");
     }
   };
 
@@ -122,7 +121,7 @@ export const EditorPageInner: React.FC = () => {
       const res = await api.post("/api/workflows", { name: "Workflow", nodes, edges });
       const wf = (res.data as { data?: { id?: string } })?.data;
       const id = wf?.id;
-      if (!id) throw new Error("Не удалось сохранить workflow");
+      if (!id) throw new Error("Не удалось создать workflow");
       show("Запуск...", "info");
       await runWorkflow(id);
       show("Запуск завершён", "success");
@@ -131,11 +130,10 @@ export const EditorPageInner: React.FC = () => {
     }
   };
 
-
   return (
     <Container size="full">
       <div className="py-4 flex items-center justify-between gap-3">
-        <h1 className="text-xl font-semibold text-text">Редактор workflow</h1>
+        <h1 className="text-xl font-semibold text-text">Конструктор workflow</h1>
         <div className="flex gap-2">
           <Button variant="secondary" onClick={load}>Загрузить</Button>
           <Button onClick={save}>Сохранить (local)</Button>

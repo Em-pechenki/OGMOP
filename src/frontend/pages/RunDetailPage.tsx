@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+﻿import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { ReactFlow, Background, Controls, MiniMap, ReactFlowProvider } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
@@ -52,7 +52,6 @@ export const RunDetailPage: React.FC = () => {
         setNodes(wf?.nodes || []);
         setEdges(wf?.edges || []);
 
-        // poll if running
         if (run.status === "running" || run.status === "pending" || run.status === "queued") {
           while (!cancelled) {
             await sleep(800);
