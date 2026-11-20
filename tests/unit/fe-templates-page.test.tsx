@@ -55,8 +55,6 @@ describe("fe TemplatesPage", () => {
     render(<MemoryRouter><TemplatesPage /></MemoryRouter>);
     await waitFor(() => screen.getAllByText(/Создать шаблон/i).length > 0);
     fireEvent.click(screen.getAllByText(/Создать шаблон/i)[0]);
-    const nameInput = screen.getByLabelText(/Название/i) || screen.getAllByRole("textbox")[0];
-    // fallback: find first textbox
     fireEvent.change(screen.getAllByRole("textbox")[0], { target: { value: "New" } });
     fireEvent.click(screen.getByText(/^Создать$/i));
     await waitFor(() => expect(postMock).toHaveBeenCalled());
