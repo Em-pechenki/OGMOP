@@ -53,7 +53,7 @@ export const TemplatesPage: React.FC = () => {
     );
   });
 
-  const useTemplate = (t: Template) => {
+  const applyTemplate = (t: Template) => {
     try {
       setNodes((t.workflow?.nodes as any) || []);
       setEdges((t.workflow?.edges as any) || []);
@@ -191,7 +191,8 @@ export const TemplatesPage: React.FC = () => {
                     {typeof t.usageCount === "number" ? ` · Использований: ${t.usageCount}` : ""}
                   </p>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    <Button size="sm" onClick={() => useTemplate(t)}>
+                    <Button size="sm" onClick={() => applyTemplate(t)}>
+D:\OGMOP\src\frontend\pages\TemplatesPage.tsx
                       Использовать
                     </Button>
                     <Button size="sm" variant="secondary" onClick={() => copyJson(t)}>
