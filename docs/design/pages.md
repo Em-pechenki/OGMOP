@@ -65,7 +65,7 @@ Drag-and-drop редактор сценариев проверки безопа�
 2. **Left Sidebar** (палитра нод):
    - Поиск по нодам.
    - Группы: Triggers, Logic, Scanners, Notify, AI.
-   - Каждая нода — draggable карточка (иконка + название + краткое описание).
+   - Каждая нода — компактная draggable карточка по спеке `components.md` §22 (NodePalette): иконка 16px + название + цветовая полоска типа; подзаголовок только на desktop.
    - Collapse групп.
 3. **Canvas**: React Flow, grid, minimap, controls. Drop подсветка.
 4. **Right Properties Panel** (320px, collapsible):

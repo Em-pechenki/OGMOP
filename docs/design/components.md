@@ -673,3 +673,84 @@ interface LanguageSwitcherProps {
 ### Синхронизация с темой
 - Переключатели независимы; значения сохраняются раздельно (`ogmop:theme`, `ogmop:locale`).
 - Первый визит: тема = `system` (prefers-color-scheme), язык = язык браузера (`navigator.language` -> `ru`/`en`, fallback `ru`).
+
+---
+
+## 22. NodePalette (палитра узлов редактора)
+
+**Назначение**: перетаскиваемый список доступных узлов в левой панели редактора (`/editor`), источник drag-and-drop на холст.
+
+### Структура
+
+- Контейнер: вертикальный список групп с заголовками (Triggers, Logic, Scanners, Notify, AI). Группа сворачиваемая (chevron), состояние свёрнутости сохраняется в `localStorage('ogmop:palette')`.
+- Поиск (Input type=search, size sm) над группами, debounce 200ms, очистка rightAdornment.
+- Элемент списка — **компактная карточка** (PaletteItem), высота 40px (desktop) / 44px (mobile, touch-target), padding `8px 12px`, radius `--radius-md`, граница `--color-border`, фон `--color-bg`.
+- Левая полоска 3px — цвет типа ноды (цветовая кодировка, см. ниже).
+- Содержимое: иконка 16px + название (`--text-sm`, font-weight 500, `--color-text`, truncate) + опциональный подзаголовок (`--text-xs`, `--color-text-subtle`, truncate) на desktop; на mobile — только иконка + название.
+- Вся карточка — drag handle: `cursor: grab` / `grabbing`, `draggable`.
+
+### Цветовая кодировка
+
+| Группа / подтип | Цвет полоски (токен) | Hex (light) | Иконка (`public/icons/`) |
+|-----------------|----------------------|-------------|--------------------------|
+| `trigger.*` | `--color-node-trigger` | `#50B848` | `trigger.svg` |
+| `logic.*` | `--color-node-logic` | `#494B52` | `logic.svg` |
+| `scanner.*` (база) | `--color-node-scanner` | `#E65100` | `scanner.svg` |
+| `scanner.secrets` | + точка `--color-risk-critical` | `#D32F2F` | `scanner.svg` (точка 8px слева от названия) |
+| `scanner.sca` | + точка `--color-risk-high` | `#E65100` | `scanner.svg` |
+| `scanner.sast` | + точка `--color-risk-medium` | `#B8860B` | `scanner.svg` |
+| `notify.*` | `--color-node-notify` | `#1976D2` | `notify.svg` |
+| `ai.*` | `--color-node-ai` | `#7B1FA2` | `ai.svg` |
+
+- Точка подтипа сканера (8px) ставится перед названием, цвет по severity подтипа; для не-сканеров точки нет.
+- В тёмной теме используются dark-значения тех же токенов (`--color-node-*`, `--color-risk-*`).
+- Цвета только через токены; hex в компонентах запрещён (использовать классы `text-node-*`, `bg-node-*-bg` и т.п.).
+
+### Иконки
+
+- Размер 16×16px (`h-4 w-4`), `aria-hidden="true"`, выравнивание по центру слева.
+- SVG из `public/icons/`, `loading="lazy"`, `decoding="async"`.
+- В dark mode иконки сохраняют фирменный цвет (stroke в SVG фиксирован); при необходимости FE может перекрашивать через inline-SVG + `currentColor`, но базовый вариант — фиксированные stroke.
+
+### Состояния PaletteItem
+
+| Состояние | Визуал |
+|-----------|--------|
+| `default` | граница `--color-border`, фон `--color-bg`, текст `--color-text` |
+| `hover` | фон `--color-surface`, граница `--color-border-strong`, `--duration-fast` |
+| `dragging` | opacity 0.7, scale 0.98, тень снята (`shadow-none`), курсор `grabbing` |
+| `focus` | кольцо `--shadow-focus` |
+| `disabled` | opacity 0.5, cursor not-allowed (опц. для недоступных нод) |
+
+### Состояния контейнера
+
+- **Loading**: 3 skeleton-строки (shimmer) высотой 40px.
+- **Empty search**: иконка search 32px `--color-text-subtle`, текст «Ничего не найдено», кнопка ghost sm «Сбросить поиск».
+- **Empty palette**: не применяется (палитра всегда содержит базовый набор).
+
+### Responsive
+
+- **≥1024 (lg)**: вертикальный список в Sidebar 240px, название + подзаголовок.
+- **768–1023 (md)**: вертикальный список в Sidebar 200px, только название (подзаголовок скрыт).
+- **<768 (sm)**: горизонтальная полоса компактных pill (icon + код/короткое имя) высотой 44px, горизонтальный скролл со snap, `aria-label` у контейнера.
+
+### A11y
+
+- Группа: контейнер `role="group"` с `aria-labelledby` (заголовок группы).
+- Карточка: `role="button"` (или draggable элемент с `aria-roledescription="draggable node"`), `tabIndex={0}`, `aria-label="{label}"`.
+- Клавиатура: Enter/Space добавляет ноду в центр холста (альтернатива drag); стрелки перемещают фокус между карточками.
+- Touch-target ≥ 44px на mobile.
+- При `prefers-reduced-motion: reduce` — без scale/transition, только цвет.
+
+### Анимации
+
+- Hover/transition: `--duration-fast` (120ms), `--ease-standard`.
+- Drag start: `--duration-fast`.
+- Группа collapse: высота/opacity `--duration-normal` (200ms).
+
+---
+
+### Синхронизация с остальными спеками
+
+- NodeCard (§11) использует те же цвета типов и иконки; PaletteItem — упрощённая (компактная) версия NodeCard.
+- Empty/loading/error состояния контейнера — по общим правилам §13.
