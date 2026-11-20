@@ -1,5 +1,6 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
+import path from "node:path";
 
 export default defineConfig({
   root: "src/frontend",
@@ -11,8 +12,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@shared": "/src/shared",
-      "@frontend": "/src/frontend",
+      "@shared": path.resolve(__dirname, "src/shared"),
+      "@frontend": path.resolve(__dirname, "src/frontend"),
     },
   },
   server: {

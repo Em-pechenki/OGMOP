@@ -1,0 +1,278 @@
+openapi: 3.0.3
+info:
+  title: OGMOP API
+  version: 0.1.0
+  description: Backend API for OGMOP AI Security Workflow platform.
+servers:
+  - url: http://localhost:3001
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseHealth"
+  /api/workflows:
+    get:
+      summary: List workflows
+      responses:
+        "200":
+          description: List of workflows
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseWorkflowList"
+    post:
+      summary: Create workflow
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowCreate"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseWorkflow"
+        "400":
+          description: Validation error
+  /api/workflows/{id}:
+    get:
+      summary: Get workflow by id
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Workflow
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseWorkflow"
+        "404":
+          description: Not found
+    put:
+      summary: Update workflow
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WorkflowUpdate"
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseWorkflow"
+    delete:
+      summary: Delete workflow
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+  /api/workflows/{id}/run:
+    post:
+      summary: Run workflow
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                input:
+                  type: object
+      responses:
+        "202":
+          description: Run started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseRunStart"
+        "404":
+          description: Workflow not found
+  /api/runs/{id}:
+    get:
+      summary: Get run status
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Run status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseRun"
+        "404":
+          description: Not found
+  /api/templates:
+    get:
+      summary: List templates
+      responses:
+        "200":
+          description: List of templates
+    post:
+      summary: Create template
+      responses:
+        "201":
+          description: Created
+  /api/templates/{id}:
+    get:
+      summary: Get template
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Template
+    delete:
+      summary: Delete template
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Deleted
+components:
+  schemas:
+    ApiResponse:
+      type: object
+      properties:
+        data:
+          nullable: true
+        error:
+          type: string
+          nullable: true
+    ApiResponseHealth:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+    ApiResponseWorkflow:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+    ApiResponseWorkflowList:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+    ApiResponseRunStart:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+    ApiResponseRun:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponse"
+    Position:
+      type: object
+      properties:
+        x:
+          type: number
+        y:
+          type: number
+    Node:
+      type: object
+      required: [id, type]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+        position:
+          $ref: "#/components/schemas/Position"
+        data:
+          type: object
+    Edge:
+      type: object
+      required: [source, target]
+      properties:
+        id:
+          type: string
+        source:
+          type: string
+        target:
+          type: string
+    WorkflowCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Node"
+        edges:
+          type: array
+          items:
+            $ref: "#/components/schemas/Edge"
+    WorkflowUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        nodes:
+          type: array
+          items:
+            $ref: "#/components/schemas/Node"
+        edges:
+          type: array
+          items:
+            $ref: "#/components/schemas/Edge"
+    Run:
+      type: object
+      properties:
+        id:
+          type: string
+        workflowId:
+          type: string
+        status:
+          type: string
+          enum: [queued, running, success, failed, cancelled]
+        nodeStatuses:
+          type: object
+        nodeResults:
+          type: object
+        startedAt:
+          type: string
+        finishedAt:
+          type: string
+          nullable: true
+        error:
+          type: string
+          nullable: true

@@ -1,13 +1,20 @@
-const express = require("express");
-const cors = require("cors");
+import { createApp } from "./server.js";
 
-const app = express();
-app.use(cors());
-app.use(express.json());
+const app = createApp();
+const PORT = process.env.PORT || 3001;
 
-app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok", project: "OGMOP" });
+const server = app.listen(PORT, () => {
+  // eslint-disable-next-line no-console
+  console.log(`OGMOP backend on :${PORT}`);
 });
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`OGMOP backend on :${PORT}`));
+function shutdown(signal) {
+  // eslint-disable-next-line no-console
+  console.log(`Received ${signal}, shutting down gracefully...`);
+  server.close(() => process.exit(0));
+}
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
+
+export default app;

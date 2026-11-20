@@ -16,14 +16,18 @@
     "server": "node src/backend/index.js"
   },
   "dependencies": {
+    "@xyflow/react": "^13.0.2",
+    "axios": "^1.21.1",
     "cors": "^2.8.5",
     "express": "^4.19.2",
     "express-rate-limit": "^8.7.5",
     "helmet": "^8.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hook-form": "^7.92.0",
     "react-router-dom": "^6.26.0",
-    "zod": "^4.6.7"
+    "zod": "^4.6.7",
+    "zustand": "^5.1.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",
