@@ -1,0 +1,61 @@
+name: Integration Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  workflow_dispatch:
+
+concurrency:
+  group: integration-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    name: Backend + Frontend integration
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Start backend
+        env:
+          PORT: 3001
+          NODE_ENV: test
+        run: |
+          npm run server &
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:3001/api/health >/dev/null; then
+              echo "backend ready"
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "backend failed to start"
+          exit 1
+
+      - name: Run integration tests
+        env:
+          VITE_API_URL: http://localhost:3001
+        run: npx vitest run tests/integration tests/e2e tests/smoke
+
+      - name: Stop backend
+        if: always()
+        run: pkill -f "src/backend/index.js" || true
