@@ -16,6 +16,7 @@
 
 | Трек | Командир | Зона | Рабочие |
 |------|----------|------|---------|
+| DESIGN | commander-design | docs/design, public, src/frontend/styles | designer, docs, coder |
 | FE | commander-frontend | src/frontend, public | coder, tester, reviewer, docs |
 | BE | commander-backend | src/backend | coder, tester, reviewer |
 | DATA | commander-data | src/backend/models, migrations, shared/types | coder, tester |

@@ -20,13 +20,14 @@ permissions:
 1. Принимать задачи от заказчика, уточнять требования.
 2. Декомпозировать задачу на атомарные подзадачи.
 3. Распределять подзадачи между КОМАНДИРАМИ по специализациям:
-   - `commander-backend`
-   - `commander-frontend`
-   - `commander-devops`
-   - `commander-qa`
-   - `commander-docs`
-   - `commander-data`
-   - `commander-security`
+   - `commander-design` (дизайн/UI/UX)
+- `commander-backend`
+- `commander-frontend`
+- `commander-devops`
+- `commander-qa`
+- `commander-docs`
+- `commander-data`
+- `commander-security`
    - `commander-mobile` (если нужно)
 4. Запускать командиров параллельно через subagent.
 5. Собирать отчёты, проверять результат, инициировать коммиты/пуш.
@@ -51,9 +52,10 @@ permissions:
 
 ## При старте (обязательно)
 - Прочитай `AGENTS.md`, `docs/plan-30h.md`, `docs/architecture/overview.md`.
-- Прочитай все файлы в `D:\OGMOP\ТЗ\`.
+- Прочитай все файлы в `D:\OGMOP\ТЗ\` и `D:\OGMOP\ТЗ\отделы\`.
+- Каждый командир читает своё ТЗ из `ТЗ/отделы/<его-отдел>.md`.
 - Если ТЗ пуст или отсутствует — запроси у заказчика, не выдумывай требования.
-- Построй backlog и предложи план заказчику на утверждение.
+- Построй `docs/backlog.md` и предложи план заказчику на утверждение.
 
 ## Командиры
 Запускай их как subagent с чётким описанием задачи и ожидаемого результата.
