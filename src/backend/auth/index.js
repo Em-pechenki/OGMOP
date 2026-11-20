@@ -12,7 +12,9 @@
  * Secrets come from env only: AUTH_SECRET, AUTH_TOKEN.
  */
 
-const crypto = require("crypto");
+import crypto from "node:crypto";
+import { createRequire } from "node:module";
+const require = createRequire(import.meta.url);
 
 function isAuthRequired() {
   return String(process.env.AUTH_REQUIRED || "").toLowerCase() === "true";
@@ -91,7 +93,15 @@ function requireRole(role) {
   };
 }
 
-module.exports = {
+export {
+  authenticate,
+  requireAuth,
+  requireRole,
+  verifyToken,
+  isAuthRequired,
+};
+
+export default {
   authenticate,
   requireAuth,
   requireRole,

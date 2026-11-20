@@ -120,7 +120,16 @@ function redactForLog(value) {
   return maskObject(value);
 }
 
-module.exports = {
+export {
+  maskSecret,
+  maskObject,
+  isSecretKey,
+  encrypt,
+  decrypt,
+  redactForLog,
+};
+
+export default {
   maskSecret,
   maskObject,
   isSecretKey,

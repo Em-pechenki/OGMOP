@@ -31,7 +31,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       if (this.props.fallback) return this.props.fallback;
       return (
         <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4 px-4 py-16 text-center">
-          <div className="text-5xl" aria-hidden>
+          <div className="text-5xl" aria-hidden="true">
             ⚠️
           </div>
           <h2 className="text-xl font-semibold text-text">Что-то пошло не так</h2>
@@ -53,7 +53,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             </button>
             <button
               type="button"
-              onClick={() => (window.location.href = "/")}
+              onClick={() => (window.location.href = "/OGMOP/")}
               className="rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium text-text hover:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/40"
             >
               На главную

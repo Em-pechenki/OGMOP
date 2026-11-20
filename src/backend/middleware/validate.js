@@ -1,6 +1,6 @@
 "use strict";
 
-const { z } = require("zod");
+import { z } from "zod";
 
 /**
  * Zod validation middleware factory.
@@ -66,4 +66,6 @@ function validate(input) {
 // Helpers to build common schemas reusing zod.
 validate.z = z;
 
-module.exports = { validate, z };
+export { validate, z };
+
+export default { validate, z };

@@ -25,7 +25,7 @@ api.interceptors.response.use(
     const message =
       (err.response?.data as { error?: string } | undefined)?.error ||
       err.message ||
-      "Неизвестная ошибка";
+      "Network error";
     return Promise.reject(new Error(message));
   }
 );
