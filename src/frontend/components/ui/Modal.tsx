@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useI18n } from "@frontend/hooks/useI18n";
 
 export interface ModalProps {
   open: boolean;
@@ -13,6 +14,7 @@ export interface ModalProps {
 const sizeClasses = { sm: "max-w-sm", md: "max-w-md", lg: "max-w-2xl" };
 
 export const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, footer, size = "md" }) => {
+  const { t } = useI18n();
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
@@ -42,7 +44,7 @@ export const Modal: React.FC<ModalProps> = ({ open, onClose, title, children, fo
             <button
               onClick={onClose}
               className="text-text-muted hover:text-text text-xl leading-none"
-              aria-label="Закрыть"
+              aria-label={t("common.close")}
             >
               ×
             </button>

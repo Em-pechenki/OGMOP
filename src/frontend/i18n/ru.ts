@@ -95,4 +95,15 @@ export const ru = {
   "a11y.skipToContent": "Перейти к основному содержимому",
   "footer.copy": "© 2026 OGMOP — Cyber Garden",
   "footer.hackathon": "Хакатон «Центр-инвест»",
+
+  "common.retry": "Повторить",
+  "common.goHome": "На главную",
+
+  "notfound.desc": "Запрашиваемая страница не существует или была перемещена.",
+
+  "servererror.title": "Ошибка сервера",
+  "servererror.desc": "Что-то пошло не так на стороне сервера. Попробуйте позже.",
+
+  "errorboundary.title": "Что-то пошло не так",
+  "errorboundary.desc": "Произошла непредвиденная ошибка. Попробуйте обновить страницу или вернуться назад.",
 } as const;

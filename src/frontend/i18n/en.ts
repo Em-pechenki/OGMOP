@@ -95,4 +95,15 @@ export const en = {
   "a11y.skipToContent": "Skip to main content",
   "footer.copy": "© 2026 OGMOP — Cyber Garden",
   "footer.hackathon": "Center-invest hackathon",
+
+  "common.retry": "Retry",
+  "common.goHome": "Home",
+
+  "notfound.desc": "The requested page does not exist or has been moved.",
+
+  "servererror.title": "Server error",
+  "servererror.desc": "Something went wrong on the server side. Try again later.",
+
+  "errorboundary.title": "Something went wrong",
+  "errorboundary.desc": "An unexpected error occurred. Try refreshing the page or going back.",
 } as const;

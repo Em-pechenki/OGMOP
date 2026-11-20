@@ -1,4 +1,5 @@
 import React from "react";
+import { I18nContext } from "@frontend/i18n/I18nContext";
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -11,6 +12,8 @@ interface ErrorBoundaryState {
 }
 
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  static contextType = I18nContext;
+  context!: React.ContextType<typeof I18nContext>;
   state: ErrorBoundaryState = { hasError: false, error: null };
 
   static getDerivedStateFromError(error: Error): ErrorBoundaryState {
