@@ -11,11 +11,13 @@ import TemplateCard from "@frontend/components/TemplateCard";
 import { useToast } from "@frontend/components/ui/Toast";
 import { api } from "@frontend/services/api";
 import { useWorkflowStore } from "@frontend/store/workflowStore";
+import { useI18n } from "@frontend/hooks/useI18n";
 import type { Template } from "@shared/types";
 
 const TAGS = ["secrets", "sca", "sast", "notify", "ai", "trigger", "logic"];
 
 export const TemplatesPage: React.FC = () => {
+  const { t } = useI18n();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -42,7 +44,7 @@ export const TemplatesPage: React.FC = () => {
       setTemplates(Array.isArray(data) ? data : []);
     } catch (e) {
       setTemplates([]);
-      setError((e as Error).message || "Не удалось загрузить шаблоны");
+      setError((e as Error).message || t("templates.loadError"));
     } finally {
       setLoading(false);
     }
@@ -72,41 +74,41 @@ export const TemplatesPage: React.FC = () => {
 
   const resetFilters = () => { setSearch(""); setActiveTags([]); setSort("popular"); };
 
-  const applyTemplate = (t: Template) => {
+  const applyTemplate = (tpl: Template) => {
     try {
-      setNodes((t.workflow?.nodes as any) || []);
-      setEdges((t.workflow?.edges as any) || []);
-      show("Шаблон загружен в редактор", "success");
+      setNodes((tpl.workflow?.nodes as any) || []);
+      setEdges((tpl.workflow?.edges as any) || []);
+      show(t("templates.toast.loaded"), "success");
       navigate("/editor");
     } catch {
-      show("Не удалось применить шаблон", "error");
+      show(t("templates.toast.applyError"), "error");
     }
   };
 
-  const copyJson = async (t: Template) => {
+  const copyJson = async (tpl: Template) => {
     try {
-      await navigator.clipboard.writeText(JSON.stringify(t.workflow, null, 2));
-      show("JSON скопирован", "success");
+      await navigator.clipboard.writeText(JSON.stringify(tpl.workflow, null, 2));
+      show(t("templates.toast.jsonCopied"), "success");
     } catch {
-      show("Не удалось скопировать", "error");
+      show(t("templates.toast.copyError"), "error");
     }
   };
 
-  const remove = async (t: Template) => {
-    if (!window.confirm("Удалить шаблон?")) return;
+  const remove = async (tpl: Template) => {
+    if (!window.confirm(t("templates.confirm.delete"))) return;
     try {
-      await api.delete(`/api/templates/${t.id}`);
-      show("Шаблон удалён", "success");
+      await api.delete(`/api/templates/${tpl.id}`);
+      show(t("templates.toast.deleted"), "success");
       load();
     } catch (e) {
       show((e as Error).message, "error");
     }
   };
 
-  const togglePublish = async (t: Template) => {
+  const togglePublish = async (tpl: Template) => {
     try {
-      await api.patch(`/api/templates/${t.id}`, { isPublic: !t.isPublic });
-      show(t.isPublic ? "Снят с публикации" : "Опубликован", "success");
+      await api.patch(`/api/templates/${tpl.id}`, { isPublic: !tpl.isPublic });
+      show(tpl.isPublic ? t("templates.toast.unpublished") : t("templates.toast.published"), "success");
       load();
     } catch (e) {
       show((e as Error).message, "error");
@@ -119,14 +121,14 @@ export const TemplatesPage: React.FC = () => {
     setCreateOpen(true);
   };
 
-  const openEdit = (t: Template) => {
-    setEditing(t);
+  const openEdit = (tpl: Template) => {
+    setEditing(tpl);
     setForm({
-      name: t.name,
-      description: t.description || "",
-      tags: (t.tags || []).join(", "),
-      workflowJson: t.workflow ? JSON.stringify(t.workflow) : "",
-      isPublic: !!t.isPublic,
+      name: tpl.name,
+      description: tpl.description || "",
+      tags: (tpl.tags || []).join(", "),
+      workflowJson: tpl.workflow ? JSON.stringify(tpl.workflow) : "",
+      isPublic: !!tpl.isPublic,
     });
     setCreateOpen(true);
   };
@@ -145,20 +147,20 @@ export const TemplatesPage: React.FC = () => {
         workflow = { name: form.name, nodes: [], edges: [] };
       }
       const tags = form.tags.split(",").map((s) => s.trim()).filter(Boolean);
-      const payload = { name: form.name || "Новый шаблон", description: form.description, workflow, tags, isPublic: form.isPublic };
+      const payload = { name: form.name || t("templates.modal.createTitle"), description: form.description, workflow, tags, isPublic: form.isPublic };
       if (editing) {
         await api.patch(`/api/templates/${editing.id}`, payload);
-        show("Шаблон обновлён", "success");
+        show(t("templates.toast.updated"), "success");
       } else {
         await api.post("/api/templates", payload);
-        show("Шаблон создан", "success");
+        show(t("templates.toast.created"), "success");
       }
       setCreateOpen(false);
       setEditing(null);
       setForm({ name: "", description: "", tags: "", workflowJson: "", isPublic: false });
       load();
     } catch (e) {
-      show((e as Error).message || "Ошибка создания", "error");
+      show((e as Error).message || t("templates.toast.createError"), "error");
     } finally {
       setSaving(false);
     }
@@ -168,18 +170,18 @@ export const TemplatesPage: React.FC = () => {
     setSaving(true);
     try {
       await api.post("/api/templates", {
-        name: form.name || "Новый шаблон",
+        name: form.name || t("templates.modal.createTitle"),
         description: form.description,
         workflow: form.workflowJson.trim() ? JSON.parse(form.workflowJson) : { nodes: [], edges: [] },
         tags: form.tags.split(",").map((s) => s.trim()).filter(Boolean),
         isPublic: true,
       });
-      show("Шаблон опубликован", "success");
+      show(t("templates.toast.publishedFull"), "success");
       setPublishOpen(false);
       setForm({ name: "", description: "", tags: "", workflowJson: "", isPublic: false });
       load();
     } catch (e) {
-      show((e as Error).message || "Ошибка публикации", "error");
+      show((e as Error).message || t("templates.toast.publishError"), "error");
     } finally {
       setSaving(false);
     }
@@ -197,12 +199,12 @@ export const TemplatesPage: React.FC = () => {
       <div className="py-6 sm:py-8 flex flex-col gap-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl sm:text-2xl font-semibold text-text">Библиотека шаблонов</h1>
+            <h1 className="text-xl sm:text-2xl font-semibold text-text">{t("templates.title")}</h1>
             <Badge variant="default">{filtered.length}</Badge>
           </div>
           <div className="flex gap-2">
-            <Button onClick={openCreate}>Создать шаблон</Button>
-            <Button variant="secondary" onClick={openPublish}>Опубликовать</Button>
+            <Button onClick={openCreate}>{t("templates.create")}</Button>
+            <Button variant="secondary" onClick={openPublish}>{t("templates.publish")}</Button>
           </div>
         </div>
 
@@ -210,33 +212,33 @@ export const TemplatesPage: React.FC = () => {
           <div className="flex-1">
             <Input
               type="search"
-              placeholder="Поиск по названию/описанию/тегам"
+              placeholder={t("templates.search")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              aria-label="Поиск шаблонов"
+              aria-label={t("templates.searchAria")}
             />
           </div>
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value)}
             className="rounded-lg border border-border bg-white px-3 py-2 text-sm text-text"
-            aria-label="Сортировка"
+            aria-label={t("templates.sort")}
           >
-            <option value="popular">Популярные</option>
-            <option value="new">Новые</option>
-            <option value="name-asc">По имени A→Z</option>
-            <option value="name-desc">По имени Z→A</option>
+            <option value="popular">{t("templates.sort.popular")}</option>
+            <option value="new">{t("templates.sort.new")}</option>
+            <option value="name-asc">{t("templates.sort.nameAsc")}</option>
+            <option value="name-desc">{t("templates.sort.nameDesc")}</option>
           </select>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2" role="group" aria-label="Фильтры по тегам">
+        <div className="flex flex-wrap items-center gap-2" role="group" aria-label={t("templates.filterTags")}>
           <button
             type="button"
             onClick={() => toggleTag("all")}
             aria-pressed={activeTags.length === 0}
             className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${activeTags.length === 0 ? "bg-primary text-white border-primary" : "bg-surface text-text-muted border-border"}`}
           >
-            Все
+            {t("templates.all")}
           </button>
           {TAGS.map((tag) => (
             <button
@@ -250,27 +252,27 @@ export const TemplatesPage: React.FC = () => {
             </button>
           ))}
           {hasActiveFilters && (
-            <Button size="sm" variant="ghost" onClick={resetFilters}>Сбросить</Button>
+            <Button size="sm" variant="ghost" onClick={resetFilters}>{t("templates.reset")}</Button>
           )}
         </div>
 
-        <div aria-live="polite" className="text-xs text-text-muted">Найдено {filtered.length} шаблонов</div>
+        <div aria-live="polite" className="text-xs text-text-muted">{t("templates.found", { count: filtered.length })}</div>
 
         {loading && (
           <div className="flex flex-col items-center gap-3 py-12" role="status" aria-live="polite" aria-busy="true">
             <Spinner size="lg" />
-            <span className="text-sm text-text-muted">Загрузка шаблонов</span>
+            <span className="text-sm text-text-muted">{t("templates.loading")}</span>
           </div>
         )}
 
         {!loading && error && (
           <Card>
             <div className="flex flex-col items-center gap-3 py-6 text-center" role="alert">
-              <p className="text-lg font-semibold text-error">Не удалось загрузить шаблоны</p>
+              <p className="text-lg font-semibold text-error">{t("templates.loadError")}</p>
               <p className="text-sm text-text-muted">{error}</p>
               <div className="flex gap-2">
-                <Button onClick={load}>Повторить</Button>
-                <Button variant="ghost" onClick={() => navigate("/")}>На главную</Button>
+                <Button onClick={load}>{t("common.retry")}</Button>
+                <Button variant="ghost" onClick={() => navigate("/")}>{t("common.goHome")}</Button>
               </div>
             </div>
           </Card>
@@ -280,11 +282,11 @@ export const TemplatesPage: React.FC = () => {
           <Card>
             <div className="flex flex-col items-center gap-3 py-8 text-center" role="status">
               <img src="/OGMOP/icons/logic.svg" alt="" className="w-16 h-16 opacity-40" />
-              <h2 className="text-xl font-semibold text-text">Шаблонов пока нет</h2>
-              <p className="text-sm text-text-muted max-w-xs">Создайте первый шаблон из workflow или используйте готовые.</p>
+              <h2 className="text-xl font-semibold text-text">{t("templates.empty")}</h2>
+              <p className="text-sm text-text-muted max-w-xs">{t("templates.emptyDesc")}</p>
               <div className="flex gap-2">
-                <Button onClick={openCreate}>Опубликовать</Button>
-                <Button variant="secondary" onClick={() => navigate("/editor")}>Создать вручную</Button>
+                <Button onClick={openCreate}>{t("templates.emptyCreate")}</Button>
+                <Button variant="secondary" onClick={() => navigate("/editor")}>{t("templates.emptyManual")}</Button>
               </div>
             </div>
           </Card>
@@ -294,9 +296,9 @@ export const TemplatesPage: React.FC = () => {
           <Card>
             <div className="flex flex-col items-center gap-3 py-8 text-center" role="status">
               <img src="/OGMOP/icons/logic.svg" alt="" className="w-12 h-12 opacity-40" />
-              <h2 className="text-lg font-semibold text-text">Ничего не найдено</h2>
-              <p className="text-sm text-text-muted">Попробуйте изменить запрос или сбросить фильтры.</p>
-              <Button variant="ghost" onClick={resetFilters}>Сбросить фильтры</Button>
+              <h2 className="text-lg font-semibold text-text">{t("templates.notFound")}</h2>
+              <p className="text-sm text-text-muted">{t("templates.notFoundDesc")}</p>
+              <Button variant="ghost" onClick={resetFilters}>{t("templates.resetFilters")}</Button>
             </div>
           </Card>
         )}
@@ -320,57 +322,57 @@ export const TemplatesPage: React.FC = () => {
         )}
       </div>
 
-      <Modal open={createOpen} onClose={() => { setCreateOpen(false); setEditing(null); }} title={editing ? "Редактировать шаблон" : "Новый шаблон"} size="lg">
+      <Modal open={createOpen} onClose={() => { setCreateOpen(false); setEditing(null); }} title={editing ? t("templates.modal.editTitle") : t("templates.modal.createTitle")} size="lg">
         <div className="flex flex-col gap-3">
           <label className="flex flex-col gap-1 text-sm text-text-muted">
-            <span>Название</span>
+            <span>{t("templates.field.name")}</span>
             <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           </label>
           <label className="flex flex-col gap-1 text-sm text-text-muted">
-            <span>Описание</span>
+            <span>{t("templates.field.desc")}</span>
             <textarea className="rounded-md border border-border bg-white px-3 py-2 text-sm text-text" rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} maxLength={2000} />
           </label>
           <label className="flex flex-col gap-1 text-sm text-text-muted">
-            <span>Теги (через запятую)</span>
+            <span>{t("templates.field.tags")}</span>
             <Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
           </label>
           <label className="flex flex-col gap-1 text-sm text-text-muted">
-            <span>Workflow JSON (необязательно)</span>
+            <span>{t("templates.field.workflowJson")}</span>
             <textarea className="rounded-md border border-border bg-white px-3 py-2 text-sm text-text font-mono" rows={6} value={form.workflowJson} onChange={(e) => setForm({ ...form, workflowJson: e.target.value })} placeholder='{"nodes":[],"edges":[]}' />
           </label>
           <label className="flex items-center gap-2 text-sm text-text-muted">
             <input type="checkbox" checked={form.isPublic} onChange={(e) => setForm({ ...form, isPublic: e.target.checked })} />
-            Публичный
+            {t("templates.field.public")}
           </label>
         </div>
         <div className="mt-4 flex justify-end gap-2">
-          <Button variant="ghost" onClick={() => { setCreateOpen(false); setEditing(null); }}>Отмена</Button>
-          <Button onClick={submitCreate} disabled={saving}>{saving ? "Сохранение..." : "Создать"}</Button>
-          <Button onClick={submitCreate} disabled={saving}>{saving ? "Сохранение..." : "Опубликовать"}</Button>
+          <Button variant="ghost" onClick={() => { setCreateOpen(false); setEditing(null); }}>{t("common.cancel")}</Button>
+          <Button onClick={submitCreate} disabled={saving}>{saving ? t("common.saving") : t("templates.create")}</Button>
+          <Button onClick={submitCreate} disabled={saving}>{saving ? t("common.saving") : t("templates.publish")}</Button>
         </div>
       </Modal>
 
       <Modal open={publishOpen} onClose={() => setPublishOpen(false)} title="Публикация шаблона" size="md">
         <div className="flex flex-col gap-3">
           <label className="flex flex-col gap-1 text-sm text-text-muted">
-            <span>Название</span>
+            <span>{t("templates.field.name")}</span>
             <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           </label>
           <label className="flex flex-col gap-1 text-sm text-text-muted">
-            <span>Описание</span>
+            <span>{t("templates.field.desc")}</span>
             <textarea className="rounded-md border border-border bg-white px-3 py-2 text-sm text-text" rows={3} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
           </label>
           <label className="flex flex-col gap-1 text-sm text-text-muted">
-            <span>Теги</span>
+            <span>{t("templates.field.tagsShort")}</span>
             <Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
           </label>
           <label className="flex flex-col gap-1 text-sm text-text-muted">
-            <span>Workflow JSON</span>
+            <span>{t("templates.field.workflowJsonShort")}</span>
             <textarea className="rounded-md border border-border bg-white px-3 py-2 text-sm text-text font-mono" rows={4} value={form.workflowJson} onChange={(e) => setForm({ ...form, workflowJson: e.target.value })} placeholder='{"nodes":[],"edges":[]}' />
           </label>
         </div>
         <div className="mt-4 flex justify-end gap-2">
-          <Button variant="ghost" onClick={() => setPublishOpen(false)}>Отмена</Button>
+          <Button variant="ghost" onClick={() => setPublishOpen(false)}>{t("common.cancel")}</Button>
           <Button onClick={submitPublish} disabled={saving}>{saving ? "Сохранение..." : "Опубликовать"}</Button>
         </div>
       </Modal>
@@ -380,7 +382,7 @@ export const TemplatesPage: React.FC = () => {
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap gap-1">
               {(previewTpl.tags || []).map((tag) => (<Badge key={tag} variant="default">{tag}</Badge>))}
-              {previewTpl.isPublic && <Badge variant="info">Публичный</Badge>}
+              {previewTpl.isPublic && <Badge variant="info">{t("templates.field.public")}</Badge>}
             </div>
             <p className="text-sm text-text-muted">{previewTpl.description}</p>
             <div className="bg-surface rounded-lg p-4 min-h-[160px] flex items-center justify-center">
@@ -393,7 +395,7 @@ export const TemplatesPage: React.FC = () => {
             <div className="flex justify-end gap-2">
               <Button onClick={() => { applyTemplate(previewTpl); setPreviewTpl(null); }}>Использовать</Button>
               <Button variant="secondary" onClick={() => copyJson(previewTpl)}>Копировать JSON</Button>
-              <Button variant="ghost" onClick={() => setPreviewTpl(null)}>Закрыть</Button>
+              <Button variant="ghost" onClick={() => setPreviewTpl(null)}>{t("common.close")}</Button>
             </div>
           </div>
         )}

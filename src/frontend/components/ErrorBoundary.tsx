@@ -39,9 +39,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
           <div className="text-5xl" aria-hidden="true">
             ⚠️
           </div>
-          <h2 className="text-xl font-semibold text-text">Что-то пошло не так</h2>
+          <h2 className="text-xl font-semibold text-text">{this.context.t("errorboundary.title")}</h2>
           <p className="max-w-md text-sm text-text-muted">
-            Произошла непредвиденная ошибка. Попробуйте обновить страницу или вернуться назад.
+            {this.context.t("errorboundary.desc")}
           </p>
           {this.state.error?.message && (
             <pre className="max-w-full overflow-auto rounded bg-surface p-2 text-xs text-text-subtle">
@@ -54,14 +54,14 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
               onClick={this.handleReset}
               className="rounded-lg bg-primary-darker px-4 py-2 text-sm font-medium text-white hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-primary/40"
             >
-              Повторить
+              {this.context.t("common.retry")}
             </button>
             <button
               type="button"
               onClick={() => (window.location.href = import.meta.env.BASE_URL || "/OGMOP/")}
               className="rounded-lg border border-border bg-white px-4 py-2 text-sm font-medium text-text hover:bg-surface focus:outline-none focus:ring-2 focus:ring-primary/40"
             >
-              На главную
+              {this.context.t("common.goHome")}
             </button>
           </div>
         </div>

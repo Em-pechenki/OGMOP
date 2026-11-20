@@ -5,8 +5,10 @@ import Card from "@frontend/components/ui/Card";
 import Button from "@frontend/components/ui/Button";
 import Spinner from "@frontend/components/ui/Spinner";
 import { api } from "@frontend/services/api";
+import { useI18n } from "@frontend/hooks/useI18n";
 
 export const RunsPage: React.FC = () => {
+  const { t } = useI18n();
   const [runs, setRuns] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -20,7 +22,7 @@ export const RunsPage: React.FC = () => {
       setRuns(Array.isArray(data) ? data : []);
     } catch (e) {
       setRuns([]);
-      setError((e as Error).message || "Не удалось загрузить запуски");
+      setError((e as Error).message || t("runs.loadError"));
     } finally {
       setLoading(false);
     }
@@ -33,16 +35,16 @@ export const RunsPage: React.FC = () => {
   return (
     <Container>
       <div className="py-6 sm:py-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-xl sm:text-2xl font-semibold text-text">Запуски</h1>
+        <h1 className="text-xl sm:text-2xl font-semibold text-text">{t("runs.title")}</h1>
         <Link to="/editor">
-          <Button className="w-full sm:w-auto">Новый workflow</Button>
+          <Button className="w-full sm:w-auto">{t("runs.newWorkflow")}</Button>
         </Link>
       </div>
 
       {loading && (
         <div className="flex flex-col items-center gap-3 py-12" role="status" aria-live="polite">
           <Spinner size="lg" />
-          <span className="text-sm text-text-muted">Загрузка...</span>
+          <span className="text-sm text-text-muted">{t("common.loading")}</span>
         </div>
       )}
 
@@ -51,7 +53,7 @@ export const RunsPage: React.FC = () => {
           <div className="flex flex-col items-center gap-3 py-6 text-center">
             <p className="text-sm text-error">{error}</p>
             <Button variant="secondary" onClick={load}>
-              Повторить
+              {t("common.retry")}
             </Button>
           </div>
         </Card>
@@ -60,10 +62,10 @@ export const RunsPage: React.FC = () => {
       {!loading && !error && runs.length === 0 && (
         <Card>
           <div className="flex flex-col items-center gap-3 py-8 text-center">
-            <p className="text-sm text-text-muted">Пока нет запусков.</p>
+            <p className="text-sm text-text-muted">{t("runs.empty")}</p>
             <Link to="/editor">
               <Button variant="secondary" size="sm">
-                Создать workflow
+                {t("runs.createWorkflow")}
               </Button>
             </Link>
           </div>
@@ -83,7 +85,7 @@ export const RunsPage: React.FC = () => {
                 </div>
                 <Link to={`/run/${r.id}`} className="sm:shrink-0">
                   <Button variant="secondary" size="sm" className="w-full sm:w-auto">
-                    Открыть
+                    {t("runs.open")}
                   </Button>
                 </Link>
               </div>

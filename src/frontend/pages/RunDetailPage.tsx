@@ -11,6 +11,7 @@ import { nodeTypes } from "@frontend/components/nodes";
 import PropertyPanel from "@frontend/components/PropertyPanel";
 import ResultsPanel from "@frontend/components/ResultsPanel";
 import { api } from "@frontend/services/api";
+import { useI18n } from "@frontend/hooks/useI18n";
 import { useRunStore } from "@frontend/store/runStore";
 import { useWorkflowStore } from "@frontend/store/workflowStore";
 import type { NodeData } from "@shared/types";
@@ -29,6 +30,7 @@ const statusColor: Record<string, string> = {
 };
 
 export const RunDetailPage: React.FC = () => {
+  const { t } = useI18n();
   const { id } = useParams();
   const [workflow, setWorkflow] = useState<{ nodes: any[]; edges: any[]; name?: string } | null>(null);
   const [loading, setLoading] = useState(true);
@@ -100,11 +102,11 @@ export const RunDetailPage: React.FC = () => {
       <ReactFlowProvider>
         <Container size="full">
           <div className="py-4 flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-text">Запуск #{id}</h1>
+            <h1 className="text-xl font-semibold text-text">{t("runDetail.title")} #{id}</h1>
           </div>
           <div className="flex flex-col items-center gap-3 py-16" role="status" aria-live="polite">
             <Spinner size="lg" />
-            <span className="text-sm text-text-muted">Загрузка...</span>
+            <span className="text-sm text-text-muted">{t("common.loading")}</span>
           </div>
         </Container>
       </ReactFlowProvider>
@@ -116,16 +118,16 @@ export const RunDetailPage: React.FC = () => {
       <ReactFlowProvider>
         <Container size="full">
           <div className="py-4 flex items-center justify-between">
-            <h1 className="text-xl font-semibold text-text">Запуск #{id}</h1>
+            <h1 className="text-xl font-semibold text-text">{t("runDetail.title")} #{id}</h1>
             <Button variant="secondary" onClick={() => window.history.back()}>
-              Назад
+              {t("common.back")}
             </Button>
           </div>
           <Card>
             <div className="flex flex-col items-center gap-3 py-8 text-center">
               <p className="text-sm text-error">{error}</p>
               <Button variant="secondary" onClick={() => window.location.reload()}>
-                Повторить
+                {t("common.retry")}
               </Button>
             </div>
           </Card>
@@ -139,7 +141,7 @@ export const RunDetailPage: React.FC = () => {
       <Container size="full">
         <div className="py-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-semibold text-text">Запуск #{id}</h1>
+            <h1 className="text-xl font-semibold text-text">{t("runDetail.title")} #{id}</h1>
             {status && (
               <span
                 className={`rounded-full px-3 py-1 text-xs font-medium ${statusColor[status] ?? "bg-surface text-text-muted"}`}
@@ -151,7 +153,7 @@ export const RunDetailPage: React.FC = () => {
             )}
           </div>
           <Button variant="secondary" onClick={() => window.history.back()}>
-            Назад
+            {t("common.back")}
           </Button>
         </div>
         <div className="flex flex-col lg:flex-row gap-4 lg:h-[calc(100vh-200px)]">
