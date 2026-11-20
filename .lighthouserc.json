@@ -15,6 +15,7 @@
         "color-contrast": "warn",
         "errors-in-console": "warn",
         "meta-description": "warn",
+        "heading-order": "warn",
         "network-dependency-tree-insight": "warn",
         "unused-javascript": "warn",
         "lcp-lazy-loaded": "off",

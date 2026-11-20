@@ -66,3 +66,12 @@ GitHub Pages настроен на источник **GitHub Actions** (`build_t
 - `scripts/auto-commit.ps1` — автокоммит и пуш.
 - `scripts/setup-github.ps1` — настройка репозитория и Pages (через `gh` CLI).
 - `scripts/changelog.ps1` — генерация `CHANGELOG.md` из conventional commits.
+
+## Финальный деплой (Фаза 4-5)
+
+- Ветка: `main`, источник Pages — GitHub Actions (`build_type=workflow`).
+- URL production: https://Em-pechenki.github.io/OGMOP/
+- Проверка доступности: workflow `monitor.yml` (каждые 6 часов + ручной запуск) ожидает HTTP 200.
+- CI (`ci.yml`) включает lint, typecheck, test, build, Lighthouse CI.
+- Актуальные пороги Lighthouse: performance ≥0.7 (warn), accessibility ≥0.9 (error), best-practices ≥0.9 (warn), SEO ≥0.9 (error).
+- Секреты только в GitHub Secrets; `.env` игнорируется.
