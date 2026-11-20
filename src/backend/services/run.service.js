@@ -26,6 +26,8 @@ export function startRun(workflowId, input = {}) {
         status: result.status,
         nodeStatuses: result.nodeStatuses,
         nodeResults: result.nodeResults,
+        findings: result.findings || [],
+        aiReport: result.aiReport || null,
         error: result.error,
         finishedAt: new Date().toISOString(),
       });
