@@ -174,9 +174,12 @@ Security gate Фазы 3 пройден: CSP ужесточён, секрето�
 
 ### 10.1 Проверка новых эндпоинтов (generate, ci/run)
 
-- Поиск по `src/backend/routes`, `src/backend/controllers`, `src/backend/services`, `tests/`, `docs/` и `.github/` новых маршрутов `generate` и `ci/run` не выявил реализованных HTTP-эндпоинтов в текущей кодовой базе (star-задачи CI/CD и AI-генерации пока не реализованы).
-- Все **существующие** публичные эндпоинты (`/api/health`, `/api/workflows`, `/api/workflows/:id`, `/api/workflows/:id/run`, `/api/runs`, `/api/runs/:id`, `/api/templates`, `/api/templates/:id`) защищены Zod-схемами (`validateBody`/`validateParams`); тела ограничены 1MB, rate-limit 300/15 мин на `/api/`.
-- При появлении `generate`/`ci/run` бэкенд обязан подключить валидацию до деплоя; схемы должны блокировать path traversal, null-байты и приватные URL (SSRF), а секреты (GitHub token и т.п.) принимать только через env/зашифрованные настройки и маскировать в ответах.
+- Реализованы и подключены в `src/backend/server.js`: `/api/workflows/generate`, `/api/generate/*`, `/api/ci/*` (в т.ч. `/api/ci/run`).
+- `/api/workflows/generate` — `WorkflowGenerateSchema`: description (3–2000), name (≤200), language (≤64), scanners (enum secrets/sca/sast), notify (enum none/telegram/smtp/webhook/email), ai (boolean).
+- `/api/generate/*` — `GenerateScenarioSchema`: prompt (3–2000), name (≤200), stack (≤64), scanners (enum), notify/notification (enum), aiReport (boolean), targetPath (без `..`/null-байтов), webhookUrl (только http/https, без userinfo, SSRF-фильтр в проде).
+- `/api/ci/*` — `CiRunSchema`: workflowId/workflow_id/id (обязательный), branch (≤200), repo (owner/repo), commitSha/prNumber/title, input с проверкой repoPath (как в `WorkflowRunSchema`).
+- Все схемы подключены через `validateBody` в маршрутах; неизвестные поля отбрасываются (без `passthrough`), что снижает риск mass-assignment.
+- Защита на уровне сервисов: `generate.service.js` дополнительно санитизирует `targetPath` и `webhookUrl` (defense in depth).
 
 ### 10.2 Валидация входных данных
 
