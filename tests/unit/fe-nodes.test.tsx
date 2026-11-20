@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
+import { ReactFlowProvider } from "@xyflow/react";
 import { describe, it, expect } from "vitest";
 
 import { TriggerNode } from "../../src/frontend/components/nodes/TriggerNode";
@@ -14,27 +15,27 @@ import { useRunStore } from "../../src/frontend/store/runStore";
 
 describe("FE: node components", () => {
   it("TriggerNode renders label", () => {
-    render(<TriggerNode id="t1" data={{ label: "Trigger X" } as any} selected={false} />);
+    render(React.createElement(ReactFlowProvider, null, React.createElement(TriggerNode as any, { id: "t1", data: { label: "Trigger X" }, selected: false })));
     expect(screen.getByText("Trigger X")).toBeInTheDocument();
   });
 
   it("ScannerNode renders scannerType", () => {
-    render(<ScannerNode id="s1" data={{ label: "Scan", scannerType: "sast" } as any} selected={false} />);
+    render(React.createElement(ReactFlowProvider, null, React.createElement(ScannerNode as any, { id: "s1", data: { label: "Scan", scannerType: "sast" }, selected: false })));
     expect(screen.getByText("sast")).toBeInTheDocument();
   });
 
   it("LogicNode renders", () => {
-    render(<LogicNode id="l1" data={{ label: "Logic" } as any} selected={false} />);
+    render(React.createElement(ReactFlowProvider, null, React.createElement(LogicNode as any, { id: "l1", data: { label: "Logic" }, selected: false })));
     expect(screen.getByText("Logic")).toBeInTheDocument();
   });
 
   it("NotifyNode renders", () => {
-    render(<NotifyNode id="n1" data={{ label: "Notify" } as any} selected={false} />);
+    render(React.createElement(ReactFlowProvider, null, React.createElement(NotifyNode as any, { id: "n1", data: { label: "Notify" }, selected: false })));
     expect(screen.getByText("Notify")).toBeInTheDocument();
   });
 
   it("AiNode renders", () => {
-    render(<AiNode id="a1" data={{ label: "AI" } as any} selected={false} />);
+    render(React.createElement(ReactFlowProvider, null, React.createElement(AiNode as any, { id: "a1", data: { label: "AI" }, selected: false })));
     expect(screen.getByText("AI")).toBeInTheDocument();
   });
 });
