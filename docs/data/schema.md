@@ -27,8 +27,20 @@
 ### NotifyConfig / ScanConfig
 Конфигурации нод уведомлений и сканеров.
 
-### LlmRequest / LlmResponse / AiReport
-Контракты взаимодействия с LLM.
+### LlmPrompt / LlmResponse / AiReport
+Контракты взаимодействия с LLM. `LlmPrompt` (alias `LlmRequest`) поддерживает prompt/messages, context, findings, jsonSchema. `AiReport` — структурированный JSON: summary, riskLevel, findings, recommendations.
+
+### ScanFinding / ScanResult
+`ScanFinding = Finding`. `ScanResult` описывает результат работы сканера: scanner, status, findings, duration, summary, error, metadata.
+
+### ScannerConfig variants
+Дискриминированный union по `scannerType`: `SecretsScannerConfig`, `ScaScannerConfig`, `SastScannerConfig` (алиасы `*ScanConfig`). Общие поля: targetPath, repoUrl, include/excludePatterns, options.
+
+### NotificationPayload
+Полезная нагрузка уведомления: channel, title, message, summary, severity, findings, aiReport, metadata, timestamp.
+
+### NodeExecutionResult / WorkflowRunEvent
+`NodeExecutionResult` — результат выполнения ноды (status, output, findings, logs, timings). `WorkflowRunEvent` — событие выполнения workflow (run/node status changes, findings, aiReport, logs).
 
 ## NodeType
 `trigger.manual`, `trigger.schedule`, `logic.if`, `logic.compare`, `logic.regex`, `notify.telegram`, `notify.smtp`, `notify.webhook`, `scanner.secrets`, `scanner.sca`, `scanner.sast`, `ai.analyze`.
@@ -53,12 +65,13 @@ Template *..1 Workflow
 - `node.schema.ts` — `flowNodeSchema`, `flowEdgeSchema` (re-exported), `nodeTypeSchema`, `nodeDataSchema`, `positionSchema`.
 - `edge.schema.ts` — `flowEdgeSchema`.
 - `workflow.schema.ts` — `workflowSchema`.
-- `finding.schema.ts` — `findingSchema`, `severitySchema`.
-- `run.schema.ts` — `runResultSchema`, `nodeResultSchema`, `runStatusSchema`, `nodeRunStatusSchema`.
+- `finding.schema.ts` — `findingSchema`, `severitySchema`, `scanFindingSchema`.
+- `run.schema.ts` — `runResultSchema`, `nodeResultSchema`, `runStatusSchema`, `nodeRunStatusSchema`, `nodeExecutionResultSchema` (events).
 - `template.schema.ts` — `templateSchema`.
-- `notification.schema.ts` — `notifyChannelSchema`, `notifyConfigSchema`.
-- `scanner.schema.ts` — `scannerTypeSchema`, `scanConfigSchema`.
-- `llm.schema.ts` — `llmRequestSchema`, `llmResponseSchema`, `aiReportSchema`.
+- `notification.schema.ts` — `notifyChannelSchema`, `notifyConfigSchema`, `notificationPayloadSchema`.
+- `scanner.schema.ts` — `scannerTypeSchema`, `scanConfigSchema`/`scannerConfigSchema` (discriminated union: secrets/sca/sast), `scanResultSchema`, `secretsScannerConfigSchema`, `scaScannerConfigSchema`, `sastScannerConfigSchema`.
+- `llm.schema.ts` — `llmPromptSchema`/`llmRequestSchema`, `llmResponseSchema`, `aiReportSchema`, `llmJsonSchema`/`LLM_JSON_SCHEMA` (structured JSON: findings, summary, recommendations).
+- `events.schema.ts` — `nodeExecutionResultSchema`, `workflowRunEventSchema`.
 Все схемы реэкспортируются из `src/shared/schemas/index.ts`.
 
 ## Модели (in-memory)
@@ -69,7 +82,7 @@ Template *..1 Workflow
 
 ## Seed-данные
 - `src/backend/seed/demo-workflow.json` — пример сценария.
-- `src/backend/seed/cve-database.json` — справочник CVE (20 записей).
+- `src/backend/seed/cve-database.json` — справочник CVE (30 записей).
 - `src/backend/seed/demo-repo/` — учебный Kotlin/Spring Boot проект.
 ```
 

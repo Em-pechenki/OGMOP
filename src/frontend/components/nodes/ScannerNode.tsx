@@ -21,7 +21,7 @@ const statusBg: Record<string, string> = {
   skipped: "bg-surface",
 };
 
-export const ScannerNode: React.FC<NodeProps<NodeData>> = ({ id, data, selected }) => {
+export const ScannerNode: React.FC<NodeProps> = ({ id, data, selected }) => {
   const status = useRunStore((s) => s.nodeStatuses[id] ?? "idle");
   const result = useRunStore((s) => s.nodeResults[id]);
   const title = (data as { label?: string }).label || "Scanner";

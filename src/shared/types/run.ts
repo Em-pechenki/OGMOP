@@ -1,7 +1,7 @@
 import type { Finding } from "./finding";
 import type { AiReport } from "./llm";
 
-export type RunStatus = "pending" | "running" | "success" | "error" | "cancelled";
+export type RunStatus = "pending" | "queued" | "running" | "success" | "error" | "failed" | "completed" | "cancelled";
 export type NodeRunStatus = "idle" | "running" | "success" | "error" | "skipped";
 
 export interface NodeResult {

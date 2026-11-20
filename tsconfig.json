@@ -7,7 +7,7 @@
     "strict": true,
     "allowJs": true,
     "checkJs": false,
-    "types": ["node", "vitest/globals"],
+    "types": ["node", "vitest/globals", "vite/client"],
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,

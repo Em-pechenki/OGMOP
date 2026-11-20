@@ -1,5 +1,5 @@
 import { sendSuccess, sendError } from "../utils/response.js";
-import { startRun, getRunStatus } from "../services/run.service.js";
+import { startRun, getRunStatus, listRunsStatus } from "../services/run.service.js";
 import { asyncHandler } from "../utils/response.js";
 
 export const runWorkflow = asyncHandler(async (req, res) => {
@@ -12,4 +12,8 @@ export const getRun = asyncHandler(async (req, res) => {
   const run = getRunStatus(req.params.id);
   if (!run) return sendError(res, "Run not found", 404);
   return sendSuccess(res, run);
+});
+
+export const listRuns = asyncHandler(async (_req, res) => {
+  return sendSuccess(res, listRunsStatus());
 });

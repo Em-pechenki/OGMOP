@@ -2,7 +2,7 @@ import { z } from "zod";
 import { findingSchema } from "./finding.schema";
 import { aiReportSchema } from "./llm.schema";
 
-export const runStatusSchema = z.enum(["pending", "running", "success", "error", "cancelled"]);
+export const runStatusSchema = z.enum(["pending", "queued", "running", "success", "error", "failed", "completed", "cancelled"]);
 export const nodeRunStatusSchema = z.enum(["idle", "running", "success", "error", "skipped"]);
 
 export const nodeResultSchema = z.object({

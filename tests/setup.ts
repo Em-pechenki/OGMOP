@@ -1,3 +1,10 @@
 import "@testing-library/jest-dom";
 
-// Глобальные моки при необходимости добавляются здесь.
+// jsdom lacks ResizeObserver; React Flow needs it.
+if (typeof (globalThis as any).ResizeObserver === "undefined") {
+  (globalThis as any).ResizeObserver = class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  };
+}

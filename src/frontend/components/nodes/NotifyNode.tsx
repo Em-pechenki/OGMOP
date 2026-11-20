@@ -21,7 +21,7 @@ const statusBg: Record<string, string> = {
   skipped: "bg-surface",
 };
 
-export const NotifyNode: React.FC<NodeProps<NodeData>> = ({ id, data, selected }) => {
+export const NotifyNode: React.FC<NodeProps> = ({ id, data, selected }) => {
   const status = useRunStore((s) => s.nodeStatuses[id] ?? "idle");
   const title = (data as { label?: string }).label || "Notify";
   const base = import.meta.env.BASE_URL || "/";

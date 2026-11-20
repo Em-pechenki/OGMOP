@@ -18,7 +18,7 @@ import { nodeTypes } from "@frontend/components/nodes";
 import PropertyPanel from "@frontend/components/PropertyPanel";
 import { api } from "@frontend/services/api";
 import { runWorkflow } from "@frontend/services/workflowRunner";
-import type { NodeData } from "@shared/types";
+import type { NodeData, NodeType } from "@shared/types";
 
 interface PaletteItem {
   nodeType: NodeType;
@@ -114,8 +114,23 @@ export const EditorPageInner: React.FC = () => {
   const clear = () => {
     setNodes([]);
     setEdges([]);
-    show("Холст очищен", "info");
+    show("Очищено", "info");
   };
+
+  const handleRun = async () => {
+    try {
+      const res = await api.post("/api/workflows", { name: "Workflow", nodes, edges });
+      const wf = (res.data as { data?: { id?: string } })?.data;
+      const id = wf?.id;
+      if (!id) throw new Error("Не удалось сохранить workflow");
+      show("Запуск...", "info");
+      await runWorkflow(id);
+      show("Запуск завершён", "success");
+    } catch (e) {
+      show((e as Error).message, "error");
+    }
+  };
+
 
   return (
     <Container size="full">
@@ -123,8 +138,9 @@ export const EditorPageInner: React.FC = () => {
         <h1 className="text-xl font-semibold text-text">Редактор workflow</h1>
         <div className="flex gap-2">
           <Button variant="secondary" onClick={load}>Загрузить</Button>
-          <Button onClick={save}>Сохранить</Button>
+          <Button onClick={save}>Сохранить (local)</Button>
           <Button variant="ghost" onClick={clear}>Очистить</Button>
+          <Button onClick={handleRun}>Запустить</Button>
         </div>
       </div>
       <div className="flex gap-4 h-[calc(100vh-160px)]">
@@ -148,6 +164,7 @@ export const EditorPageInner: React.FC = () => {
           <ReactFlow
             nodes={nodes}
             edges={edges}
+            nodeTypes={nodeTypes}
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
@@ -159,6 +176,9 @@ export const EditorPageInner: React.FC = () => {
             <Controls />
             <MiniMap nodeColor={(n) => nodeColor(n.data as NodeData)} />
           </ReactFlow>
+        </div>
+        <div className="w-80 shrink-0 overflow-auto">
+          <PropertyPanel />
         </div>
       </div>
     </Container>

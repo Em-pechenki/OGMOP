@@ -1,4 +1,4 @@
-import { createRun, getRun, updateRun, getWorkflow } from "../store/memory.store.js";
+import { createRun, getRun, updateRun, getWorkflow, listRuns } from "../store/memory.store.js";
 import { executeWorkflow } from "../engine/workflow-engine.js";
 
 export function startRun(workflowId, input = {}) {
@@ -50,8 +50,21 @@ export function getRunStatus(runId) {
     status: run.status,
     nodeStatuses: run.nodeStatuses || {},
     nodeResults: run.nodeResults || {},
+    findings: run.findings || [],
+    aiReport: run.aiReport || null,
     startedAt: run.startedAt,
     finishedAt: run.finishedAt,
     error: run.error,
   };
+}
+
+
+export function listRunsStatus() {
+  return listRuns().map((run) => ({
+    id: run.id,
+    workflowId: run.workflowId,
+    status: run.status,
+    startedAt: run.startedAt,
+    finishedAt: run.finishedAt,
+  }));
 }

@@ -21,7 +21,7 @@ const statusBg: Record<string, string> = {
   skipped: "bg-surface",
 };
 
-export const TriggerNode: React.FC<NodeProps<NodeData>> = ({ id, data, selected }) => {
+export const TriggerNode: React.FC<NodeProps> = ({ id, data, selected }) => {
   const status = useRunStore((s) => s.nodeStatuses[id] ?? "idle");
   const title = (data as { label?: string }).label || "Trigger";
   const base = import.meta.env.BASE_URL || "/";
