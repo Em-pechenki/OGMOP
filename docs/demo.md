@@ -1,90 +1,133 @@
-# Демо-сценарий OGMOP (презентация)
+# Демо-сценарий OGMOP (финальный, v1.1.0)
 
-Этот сценарий предназначен для демонстрации проекта на хакатоне Cyber Garden 2026. Длительность — 5–8 минут. Можно сократить до 3 минут, показав только шаги 1–6.
+Этот сценарий рассчитан на 5-8 минут и показывает полный путь: запуск, создание workflow, сканирование, AI-анализ, уведомления, шаблоны и CI/CD.
 
-## 0. Подготовка (за 2 минуты до демо)
+## 0. Подготовка (до демо)
 
-1. Запустите бэкенд:
+1. Запустить бэкенд:
    ```bash
    cd OGMOP
    npm run server   # http://localhost:3001
    ```
-2. Запустите фронтенд:
+2. Запустить фронтенд:
    ```bash
    npm run dev      # http://localhost:5173
    ```
-3. Откройте браузер: http://localhost:5173.
-4. (Опционально) Установите `LLM_API_KEY` для реального AI-анализа. Без ключа используется mock-отчёт — демо всё равно работает.
-5. Убедитесь, что health отвечает: `curl http://localhost:3001/api/health`.
+3. Открыть http://localhost:5173.
+4. (Опционально) задать `LLM_API_KEY` для реального AI; без ключа работает mock-режим.
+5. Проверить health: `curl http://localhost:3001/api/health`.
 
-> Совет: заранее создайте workflow через API (см. ниже), чтобы не тратить время на drag-and-drop на сцене.
+> Примечание: основная работа с workflow идёт через API (см. раздел 3), drag-and-drop редактор используется для визуального конструирования.
 
 ## 1. Вступление (30 сек)
 
-- Проблема: проверка безопасности кода — долго и дорого; готовые сканеры тяжёлые.
-- Решение OGMOP: визуальный конструктор workflow из нод, собственные лёгкие сканеры (секреты / SCA / SAST для Kotlin + Spring Boot), AI-объяснения и уведомления. Демо доступно на GitHub Pages.
+- Проблема: ручной security-review медленный и неповторяемый.
+- Решение OGMOP: визуальный конструктор security-workflow, автосканеры (secrets/SCA/SAST), AI-анализ и уведомления. Деплой на GitHub Pages.
 
-## 2. Главная страница (30 сек)
+## 2. Обзор интерфейса (30 сек)
 
-- Показать главную: заголовок «Cyber Garden 2026», карточки «Конструктор», «Сканеры», «AI-анализ».
-- Кнопки «Открыть редактор» и «Шаблоны».
+- Показать главную, редактор, страницы Runs и Templates.
+- Упомянуть стек: React 18 + Vite + TypeScript + Tailwind + React Flow; Node.js + Express + Zod.
 
-## 3. Редактор workflow (2 мин)
+## 3. Создание workflow через API (2 мин)
 
-Вариант A — ручная сборка:
-1. Открыть `/editor`.
-2. Перетащить ноды из палитры: `Триггер: Ручной запуск` → `Сканер: Секреты` → `Сканер: SCA` → `Сканер: SAST` → `AI` (нет в палитре? нода `ai.analyze` добавляется через shared; в палитре её нет — используйте вариант B или добавьте вручную) → `Уведомление: Webhook`.
-3. Соединить выходы со входами.
-4. В боковой панели свойств (при наличии) указать `targetPath` для сканеров.
+Вариант A - готовый seed:
 
-Вариант B — загрузка готового демо-сценария (рекомендуется):
-1. Создать workflow через API:
-   ```bash
-   curl -X POST http://localhost:3001/api/workflows \
-     -H "Content-Type: application/json" \
-     -d @src/backend/seed/demo-workflow.json
-   ```
-   Ответ содержит `data.id`.
-2. Открыть редактор и показать сохранённый граф (или сразу страницу запуска).
+```bash
+curl -X POST http://localhost:3001/api/workflows \
+  -H "Content-Type: application/json" \
+  -d @src/backend/seed/demo-workflow.json
+```
 
-## 4. Запуск (30 сек)
+Сохранить `data.id`.
 
-- В редакторе нажать «Запустить» (или `POST /api/workflows/:id/run`).
-- Появится toast «Запуск...» → «Запуск завершён».
-- Перейти на `/runs` и открыть запуск, либо сразу `/run/:id`.
+Вариант B - ручной JSON:
 
-## 5. Результаты (2 мин)
+```bash
+curl -X POST http://localhost:3001/api/workflows \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Security scan demo",
+    "nodes": [
+      { "id": "t1", "type": "trigger.manual", "position": { "x": 0, "y": 0 }, "data": { "kind": "trigger", "triggerType": "manual", "label": "Start" } },
+      { "id": "s1", "type": "scanner.secrets", "position": { "x": 200, "y": 0 }, "data": { "kind": "scanner", "scannerType": "secrets", "label": "Secrets", "config": { "scannerType": "secrets", "targetPath": "./src/backend/seed/demo-repo" } } },
+      { "id": "a1", "type": "ai.analyze", "position": { "x": 400, "y": 0 }, "data": { "kind": "ai", "label": "AI", "provider": "openai", "model": "gpt-4o-mini", "prompt": "Summarize findings" } },
+      { "id": "n1", "type": "notify.webhook", "position": { "x": 600, "y": 0 }, "data": { "kind": "notify", "channel": "webhook", "label": "Webhook", "config": { "channel": "webhook", "url": "https://example.com/hook", "method": "POST" } } }
+    ],
+    "edges": [
+      { "id": "e1", "source": "t1", "target": "s1" },
+      { "id": "e2", "source": "s1", "target": "a1" },
+      { "id": "e3", "source": "a1", "target": "n1" }
+    ]
+  }'
+```
 
-- Показать граф с подсвеченными статусами нод (success).
-- В панели результатов показать находки, отсортированные по severity (critical/high/medium/low/info).
-- Ожидаемый результат на демо-репозитории: **32 находки**:
+## 4. Запуск workflow (30 сек)
+
+```bash
+curl -X POST http://localhost:3001/api/workflows/<workflowId>/run \
+  -H "Content-Type: application/json" \
+  -d '{ "input": {} }'
+# -> { "data": { "runId": "run_..." }, "error": null }
+```
+
+Показать toast/статус в UI, затем открыть `/runs` и `/run/:id`.
+
+## 5. Результаты сканирования (2 мин)
+
+- Успешный run (`status: success`).
+- `nodeStatuses` и `nodeResults` с находками.
+- 32 находки в demo-repo:
   - Secrets: 8 (2 critical, 5 high, 1 medium)
-  - SCA: 15 (1 critical, 10 high, 3 medium, 1 low) — включая Spring4Shell CVE-2022-22965
+  - SCA: 15 (1 critical, 10 high, 3 medium, 1 low), включая Spring4Shell CVE-2022-22965
   - SAST: 9 (2 critical, 4 high, 2 medium, 1 low)
-- Показать AI-отчёт: summary, список находок с объяснениями, рекомендации (riskLevel в mock-режиме может отсутствовать).
-- Показать результат уведомления (webhook может вернуть `ok: false` на example.com — это нормально для демо; run остаётся `success`).
+- Сортировка по severity (critical/high/medium/low/info).
+- AI-отчёт: summary, объяснения находок, рекомендации, riskLevel.
+- Уведомление (webhook) может вернуть `ok: false` на example.com - это ожидаемо, run остаётся `success`.
 
-## 6. Технические тезисы (1 мин)
+## 6. Шаблоны workflow (1 мин)
+
+1. Создать шаблон из workflow:
+   ```bash
+   curl -X POST http://localhost:3001/api/templates \
+     -H "Content-Type: application/json" \
+     -d '{ "name": "Security scan template", "description": "Manual -> scanners -> AI -> webhook", "workflow": { "name": "Security scan demo", "nodes": [], "edges": [] } }'
+   ```
+2. Показать список: `GET /api/templates`.
+3. Получить шаблон: `GET /api/templates/:id`.
+4. Удалить: `DELETE /api/templates/:id`.
+
+Шаблоны хранятся в in-memory store и сбрасываются при рестарте (MVP).
+
+## 7. AI-генерация (1 мин)
+
+- AI-узел вызывает LLM-адаптер (`src/backend/services/ai.service.js`).
+- Переменные окружения: `LLM_PROVIDER`, `LLM_API_KEY`/`OPENAI_API_KEY`/`ANTHROPIC_API_KEY`, `LLM_MODEL`, `LLM_BASE_URL`.
+- Без ключа используется mock-отчёт, поэтому демо работает офлайн.
+- Отчёт содержит только существующие finding id, каждая находка получает explanation/recommendation, CVE не выдумываются.
+
+## 8. CI/CD (1 мин)
+
+- `ci.yml`: lint, typecheck, tests, build, Lighthouse CI.
+- `deploy.yml`: сборка и деплой на GitHub Pages при push в `main`.
+- `preview.yml`: сборка PR-preview.
+- `monitor.yml`: проверка доступности Pages каждые 6 часов.
+- URL production: https://Em-pechenki.github.io/OGMOP/
+
+## 9. Технические детали (1 мин)
 
 - Стек: React 18 + Vite + TypeScript + Tailwind + React Flow; Node.js + Express + Zod.
-- Собственные сканеры без внешних зависимостей (regex/парсеры).
-- AI только объясняет и рекомендует; источник находок — сканеры. Ответ валидируется (нет выдуманных CVE).
-- Деплой на GitHub Pages (статика), бэкенд опционален.
-- In-memory store (MVP), история сбрасывается при рестарте.
+- Сканеры: regex (secrets), Gradle + CVE JSON (SCA), статический анализ Kotlin/Spring (SAST).
+- AI: LLM генерирует summary/рекомендации; итог валидируется на бэкенде.
+- Хранение: in-memory store (MVP), данные сбрасываются при рестарте.
+- Безопасность: helmet, CORS, rate-limit, валидация входных данных.
 
-## 7. Запасной план (если что-то не работает)
+## 10. Q&A (подготовленные ответы)
 
-- Бэкенд недоступен: показать статическую сборку `npm run preview` и документацию.
-- AI не отвечает: используется mock-отчёт, демо не ломается.
-- Webhook падает: результат `ok: false`, но запуск успешен — показать это как честное поведение.
-- Пустые результаты: проверить, что бэкенд запущен из корня проекта (см. troubleshooting).
-
-## 8. Вопросы жюри (заготовки)
-
-- **Почему собственные сканеры, а не Semgrep/Trivy?** Лёгкость, контроль, отсутствие внешних зависимостей, предсказуемость для демо.
-- **Как масштабировать?** Вынести движок в очередь (Bull/Redis), добавить БД, auth, RBAC, интеграцию с Git.
-- **Безопасность самого OGMOP?** Helmet/CORS/rate-limit/валидация, секреты не логируются, маскирование в notify.
-- **Что дальше?** Поддержка других языков, SARIF-экспорт, интеграция с CI.
+- **Почему не Semgrep/Trivy?** MVP использует собственные regex/парсеры; интеграция внешних сканеров - следующий шаг.
+- **Масштабирование?** Очередь (Bull/Redis), auth/RBAC, интеграция с Git.
+- **Безопасность OGMOP?** Helmet/CORS/rate-limit/валидация, маскирование секретов в notify.
+- **Что дальше?** SARIF-экспорт, интеграция с CI, расширенные шаблоны.
 
 ## Ссылки
 

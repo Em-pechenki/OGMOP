@@ -111,6 +111,20 @@ export function listTemplates() {
   return Array.from(templates.values());
 }
 
+export function updateTemplate(id, patch) {
+  const existing = templates.get(id);
+  if (!existing) return null;
+  const updated = {
+    ...existing,
+    ...(patch || {}),
+    id: existing.id,
+    createdAt: existing.createdAt,
+    updatedAt: now(),
+  };
+  templates.set(id, updated);
+  return updated;
+}
+
 export function deleteTemplate(id) {
   return templates.delete(id);
 }

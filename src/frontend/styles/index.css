@@ -4,6 +4,12 @@
 @tailwind components;
 @tailwind utilities;
 
+@keyframes ogmop-flow {
+  to {
+    stroke-dashoffset: -14;
+  }
+}
+
 @layer base {
   *:focus-visible {
     outline: none;

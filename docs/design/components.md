@@ -505,6 +505,87 @@ Overlay (затемнение `rgba(0,0,0,0.5)` + blur 4px) → Panel (surface-e
 
 ---
 
+## 17. FilterChip / SearchBar (фильтры и поиск)
+
+**Назначение**: фильтрация списков (templates, runs, findings).
+
+### FilterChip
+- Pill-кнопка высотой 28px, radius `--radius-full`, font `--text-xs`, font-weight 500.
+- Состояния: inactive (фон `--color-surface`, текст `--color-text-muted`, граница `--color-border`), active (фон `--color-primary`, текст #FFFFFF, граница primary), disabled (opacity 0.5).
+- Опция `dot` (цветная точка 8px слева) для severity/tags.
+- Multi-select: `aria-pressed`.
+- Hover: `--duration-fast`.
+
+### SearchBar (Input search обёртка)
+- Input type=search, size md, leftAdornment иконка search, rightAdornment кнопка очистки (ghost icon) при наличии значения.
+- Debounce 300ms на уровне компонента (опц.).
+- `aria-label` обязателен.
+
+### A11y
+- FilterChip: `role="button"` (или button), `aria-pressed`.
+- SearchBar: `role="search"` wrapper, input `aria-label`.
+
+---
+
+## 18. StatusBadge (статусы выполнения / CI)
+
+**Назначение**: компактный статус ноды, запуска, CI-run.
+
+### Варианты
+| Вариант | Фон | Текст | Иконка |
+|---------|-----|-------|--------|
+| `idle` / `pending` / `queued` | `--color-surface` | `--color-text-muted` | dot серая |
+| `running` | `--color-primary-light` | `--color-primary-dark` | spinner |
+| `success` / `completed` | `--color-success-bg` | `--color-primary-darker` | check |
+| `error` / `failed` | `--color-error-bg` | `--color-error` | x |
+| `skipped` / `cancelled` | `--color-surface` | `--color-text-subtle` | dash |
+| `ci-success` | `--color-success-bg` | `--color-primary-darker` | github-check |
+| `ci-failure` | `--color-error-bg` | `--color-error` | github-x |
+
+### Размеры
+- sm: height 18px, font xs, padding-x 6px.
+- md: height 22px, font sm, padding-x 8px.
+
+### Props
+```ts
+interface StatusBadgeProps {
+  status: "idle" | "pending" | "queued" | "running" | "success" | "completed" | "error" | "failed" | "skipped" | "cancelled";
+  size?: "sm" | "md";
+  showIcon?: boolean;
+  label?: string; // override
+}
+```
+
+### A11y
+- `role="status"`, `aria-live="polite"` (опц. для running).
+
+---
+
+## 19. PreviewPane (мини-граф read-only)
+
+**Назначение**: превью workflow в TemplateCard, PublishModal, AiGenerationModal, Run detail.
+
+### Поведение
+- React Flow read-only: drag отключён, handles скрыты, pan опц. (off на mobile).
+- Zoom 0.5–1.2, fit view при монтировании и при resize.
+- Высота: prop `height` (default 200px).
+- Фон: dotted grid `--color-border` на `--color-surface`.
+- Empty state: «Нет нод» xs muted.
+- Loading: shimmer.
+
+### Props
+```ts
+interface PreviewPaneProps {
+  nodes: Node[];
+  edges: Edge[];
+  height?: number;
+  interactive?: boolean; // default false
+  showMinimap?: boolean; // default false
+}
+```
+
+---
+
 ## 13. Общие состояния страниц
 
 Для всех страниц определены состояния:

@@ -56,8 +56,22 @@ export const TemplateCreateSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   description: z.string().max(2000).optional(),
   workflow: z.any().optional(),
+  isPublic: z.boolean().optional(),
+  tags: z.array(z.string()).optional(),
+  author: z.string().max(100).optional(),
 });
+
+export const TemplateUpdateSchema = TemplateCreateSchema;
 
 export const IdParamSchema = z.object({
   id: z.string().min(1),
+});
+
+export const WorkflowGenerateSchema = z.object({
+  description: z.string().min(3).max(2000),
+  name: z.string().min(1).max(200).optional(),
+  language: z.string().max(64).optional(),
+  scanners: z.array(z.string()).optional(),
+  notify: z.string().max(32).optional(),
+  ai: z.boolean().optional(),
 });

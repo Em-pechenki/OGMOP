@@ -2,6 +2,11 @@ import { sendSuccess, sendError } from "../utils/response.js";
 import { workflowService } from "../services/workflow.service.js";
 import { asyncHandler } from "../utils/response.js";
 
+export const generateWorkflow = asyncHandler(async (req, res) => {
+  const wf = workflowService.generate(req.body || {});
+  return sendSuccess(res, { workflow: wf }, 201);
+});
+
 export const createWorkflow = asyncHandler(async (req, res) => {
   const wf = workflowService.create(req.body);
   return sendSuccess(res, wf, 201);

@@ -10,4 +10,8 @@ export interface Template {
   createdAt?: string;
   updatedAt?: string;
   isPublic?: boolean;
+  usageCount?: number;
+  previewSvg?: string;
+  version?: string;
+  category?: string;
 }

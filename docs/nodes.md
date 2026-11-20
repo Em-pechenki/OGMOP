@@ -357,3 +357,93 @@ interface Finding {
 ## Расширение
 
 Новые типы нод — через расширение `NodeType` и `NodeData` в `src/shared/types/node.ts` плюс регистрация handler/UI. Движок использует `nodeHandler` (phase 2: реальные handlers для scanner/notify/ai/logic).
+
+---
+
+## 6. Шаблоны workflow (Templates)
+
+Шаблон - сохранённый workflow, который можно переиспользовать и запускать как обычный workflow. Хранится в in-memory store (`templates` Map) и доступен через `/api/templates`.
+
+### Схема `Template`
+
+```ts
+interface Template {
+  id: string;
+  name: string;
+  description?: string;
+  workflow: Workflow;        // полный снимок workflow (nodes, edges)
+  author?: string;
+  tags?: string[];
+  createdAt?: string;
+  updatedAt?: string;
+  isPublic?: boolean;
+}
+```
+
+### API шаблонов
+
+- `GET /api/templates` - список шаблонов.
+- `POST /api/templates` - создать шаблон (`{ name?, description?, workflow? }`), ответ `201`.
+- `GET /api/templates/:id` - получить шаблон.
+- `DELETE /api/templates/:id` - удалить шаблон (`{ deleted: true }`).
+
+### Работа с шаблоном
+
+1. Создать workflow в редакторе и сохранить через `POST /api/workflows`.
+2. Сохранить его как шаблон: `POST /api/templates` с `workflow` из шага 1.
+3. Запустить шаблон: получить `workflow` из шаблона и создать новый workflow (`POST /api/workflows`), затем `POST /api/workflows/:id/run`.
+4. Удалить устаревший шаблон через `DELETE /api/templates/:id`.
+
+### Пример
+
+```json
+{
+  "name": "Security scan template",
+  "description": "Manual trigger -> secrets/sca/sast -> AI -> webhook",
+  "workflow": {
+    "name": "Security scan demo",
+    "nodes": [],
+    "edges": []
+  }
+}
+```
+
+---
+
+## 7. AI-генерация отчётов
+
+AI-узел (`ai.analyze`) запускает LLM-адаптер (`src/backend/services/ai.service.js`) и формирует `AiReport`:
+
+- `summary` - краткое резюме.
+- `riskLevel` - общий уровень риска (Severity).
+- `findings` - объяснения и рекомендации по находкам.
+- `recommendations` - топ-рекомендации.
+- `generatedAt`, `model`, `provider`.
+
+### Провайдеры и переменные окружения
+
+- `LLM_PROVIDER` - `openai` | `anthropic` | `mock` (по умолчанию `mock`, если нет ключа).
+- `LLM_API_KEY` / `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` - ключ API.
+- `LLM_MODEL` - модель (по умолчанию `gpt-4o-mini` или `claude-3-5-sonnet-20241022`).
+- `LLM_BASE_URL` - базовый URL API.
+
+При отсутствии ключа или ошибке вызова используется mock-отчёт, поэтому демо работает без внешних сервисов.
+
+### Гарантии отчёта
+
+- В отчёт попадают только существующие finding id.
+- Каждая находка получает запись (explanation/recommendation).
+- LLM не должен выдумывать CVE; итоговый отчёт валидируется на бэкенде.
+
+---
+
+## 8. CI/CD (кратко)
+
+Pipeline описан в `.github/workflows`:
+
+- `ci.yml` - lint, typecheck, tests, build, Lighthouse CI.
+- `deploy.yml` - сборка и деплой на GitHub Pages при push в `main`.
+- `preview.yml` - сборка PR-preview.
+- `monitor.yml` - проверка доступности Pages каждые 6 часов.
+
+Подробности: [docs/deploy.md](deploy.md).

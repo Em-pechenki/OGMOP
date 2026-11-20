@@ -11,4 +11,8 @@ export const templateSchema = z.object({
   createdAt: z.string().optional(),
   updatedAt: z.string().optional(),
   isPublic: z.boolean().optional(),
+  usageCount: z.number().int().nonnegative().optional(),
+  previewSvg: z.string().optional(),
+  version: z.string().optional(),
+  category: z.string().optional(),
 });

@@ -203,6 +203,8 @@
 - `slide-up`: translateY(8px)→0 + fade.
 - `pulse-running`: масштабирующееся кольцо вокруг ноды (box-shadow 0 0 0 0 → 0 0 0 10px с fade), длительность 1.5s infinite. Используется для состояния `running` у NodeCard.
 - `spin`: вращение для спиннеров.
+- `flow`: течение пунктира по ребру (stroke-dashoffset 24→0), 0.8s linear infinite. Используется для running-рёбер (Data Flow Indicator).
+- `shimmer`: бегущий блик для skeleton-состояний, 1.5s infinite.
 
 ---
 

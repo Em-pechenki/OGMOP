@@ -2,6 +2,7 @@ import {
   createTemplate,
   getTemplate,
   listTemplates,
+  updateTemplate,
   deleteTemplate,
 } from "../store/memory.store.js";
 
@@ -14,6 +15,9 @@ export const templateService = {
   },
   list() {
     return listTemplates();
+  },
+  update(id, patch) {
+    return updateTemplate(id, patch || {});
   },
   remove(id) {
     return deleteTemplate(id);

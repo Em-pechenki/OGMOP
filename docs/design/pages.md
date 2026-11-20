@@ -138,7 +138,7 @@ Drag-and-drop редактор сценариев проверки безопа�
 
 1. **Page header**: «Библиотека шаблонов», кнопка «Опубликовать» (primary).
 2. **Toolbar**: Search input, Filter chips (tags: secrets, sca, sast, notify), Sort select (популярные/новые/имя).
-3. **Template card**: превью (миниатюра графа или иконки нод), название, описание (2 строки), теги (Badge), автор, число использований, дата. Actions: «Использовать» (primary sm), «Копировать» (ghost), «Подробнее» (ghost).
+3. **Template card**: превью через `PreviewPane` (миниатюра графа или иконки нод), название, описание (2 строки), теги (`Badge`/`FilterChip`), автор, число использований, дата. Actions: «Использовать» (primary sm), «Копировать» (ghost), «Подробнее» (ghost → PreviewModal). Фильтры/поиск/сортировка — по `docs/design/templates.md`.
 4. **Empty state**: «Шаблонов нет» + CTA.
 5. **Loading**: skeleton grid.
 

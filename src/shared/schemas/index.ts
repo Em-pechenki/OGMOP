@@ -4,6 +4,8 @@ export * from "./workflow.schema";
 export * from "./finding.schema";
 export * from "./run.schema";
 export * from "./template.schema";
+export * from "./cicd.schema";
+export * from "./ai-generation.schema";
 export * from "./notification.schema";
 export * from "./scanner.schema";
 export * from "./llm.schema";
