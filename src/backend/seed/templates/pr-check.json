@@ -1,0 +1,28 @@
+{
+  "id": "tpl-pr-check",
+  "name": "PR Security Check",
+  "description": "Run secrets and SAST on pull requests and notify webhook.",
+  "author": "OGMOP",
+  "tags": ["pr", "ci", "secrets", "sast"],
+  "category": "ci",
+  "version": "1.0.0",
+  "isPublic": true,
+  "createdAt": "2026-01-01T00:00:00.000Z",
+  "updatedAt": "2026-01-01T00:00:00.000Z",
+  "usageCount": 0,
+  "workflow": {
+    "name": "PR Security Check",
+    "description": "Manual trigger -> secrets -> SAST -> webhook",
+    "nodes": [
+      { "id": "n1", "type": "trigger.manual", "position": { "x": 50, "y": 100 }, "data": { "kind": "trigger", "triggerType": "manual", "label": "PR trigger" } },
+      { "id": "n2", "type": "scanner.secrets", "position": { "x": 260, "y": 100 }, "data": { "kind": "scanner", "scannerType": "secrets", "label": "Secrets scan", "config": { "scannerType": "secrets", "targetPath": "./demo-repo" } } },
+      { "id": "n3", "type": "scanner.sast", "position": { "x": 470, "y": 100 }, "data": { "kind": "scanner", "scannerType": "sast", "label": "SAST analysis", "config": { "scannerType": "sast", "targetPath": "./demo-repo" } } },
+      { "id": "n4", "type": "notify.webhook", "position": { "x": 680, "y": 100 }, "data": { "kind": "notify", "channel": "webhook", "label": "PR comment", "config": { "channel": "webhook", "url": "https://example.com/pr", "method": "POST" } } }
+    ],
+    "edges": [
+      { "id": "e1", "source": "n1", "target": "n2" },
+      { "id": "e2", "source": "n2", "target": "n3" },
+      { "id": "e3", "source": "n3", "target": "n4" }
+    ]
+  }
+}

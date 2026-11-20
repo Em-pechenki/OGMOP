@@ -382,9 +382,10 @@ interface Template {
 
 ### API шаблонов
 
-- `GET /api/templates` - список шаблонов.
-- `POST /api/templates` - создать шаблон (`{ name?, description?, workflow? }`), ответ `201`.
+- `GET /api/templates` - список шаблонов. Поддерживает фильтрацию (`?q=`, `?search=`, `?tag=`, `?category=`, `?author=`, `?isPublic=`), сортировку (`?sort=`, `?order=`) и пагинацию (`?page=`, `?limit=`).
+- `POST /api/templates` - создать/опубликовать шаблон (`{ name?, description?, workflow?, isPublic?, tags?, author? }`), ответ `201`.
 - `GET /api/templates/:id` - получить шаблон.
+- `POST /api/templates/:id/copy` - скопировать шаблон в workspace (создаёт workflow), ответ `201`.
 - `DELETE /api/templates/:id` - удалить шаблон (`{ deleted: true }`).
 
 ### Работа с шаблоном

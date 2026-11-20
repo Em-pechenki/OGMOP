@@ -1,0 +1,26 @@
+{
+  "id": "tpl-sast-scan",
+  "name": "SAST Code Review",
+  "description": "Static analysis for Kotlin/Spring Boot security issues.",
+  "author": "OGMOP",
+  "tags": ["sast", "kotlin", "spring"],
+  "category": "security",
+  "version": "1.0.0",
+  "isPublic": true,
+  "createdAt": "2026-01-01T00:00:00.000Z",
+  "updatedAt": "2026-01-01T00:00:00.000Z",
+  "usageCount": 0,
+  "workflow": {
+    "name": "SAST Code Review",
+    "description": "Manual trigger -> SAST scan -> webhook",
+    "nodes": [
+      { "id": "n1", "type": "trigger.manual", "position": { "x": 50, "y": 100 }, "data": { "kind": "trigger", "triggerType": "manual", "label": "Start" } },
+      { "id": "n2", "type": "scanner.sast", "position": { "x": 260, "y": 100 }, "data": { "kind": "scanner", "scannerType": "sast", "label": "SAST analysis", "config": { "scannerType": "sast", "targetPath": "./demo-repo" } } },
+      { "id": "n3", "type": "notify.webhook", "position": { "x": 470, "y": 100 }, "data": { "kind": "notify", "channel": "webhook", "label": "Send report", "config": { "channel": "webhook", "url": "https://example.com/webhook", "method": "POST" } } }
+    ],
+    "edges": [
+      { "id": "e1", "source": "n1", "target": "n2" },
+      { "id": "e2", "source": "n2", "target": "n3" }
+    ]
+  }
+}

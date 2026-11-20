@@ -19,8 +19,32 @@ export const getTemplate = asyncHandler(async (req, res) => {
   return sendSuccess(res, t);
 });
 
-export const listTemplates = asyncHandler(async (_req, res) => {
-  return sendSuccess(res, templateService.list());
+export const listTemplates = asyncHandler(async (req, res) => {
+  const result = templateService.list(req.query || {});
+  const { items, ...meta } = result;
+  return res.status(200).json({
+    data: items,
+    error: null,
+    items,
+    templates: items,
+    results: items,
+    ...meta,
+  });
+});
+
+export const copyTemplate = asyncHandler(async (req, res) => {
+  const result = templateService.copy(req.params.id);
+  if (!result) return sendError(res, "Template not found", 404);
+  const workflow = result.workflow;
+  return res.status(201).json({
+    data: workflow,
+    error: null,
+    workflow,
+    workflowId: workflow.id,
+    templateId: result.templateId,
+    copied: true,
+    template: result.template,
+  });
 });
 
 export const deleteTemplate = asyncHandler(async (req, res) => {

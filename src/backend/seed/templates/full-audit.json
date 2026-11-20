@@ -1,0 +1,32 @@
+{
+  "id": "tpl-full-audit",
+  "name": "Full Security Audit",
+  "description": "Secrets, SCA and SAST followed by AI analysis and webhook report.",
+  "author": "OGMOP",
+  "tags": ["full", "audit", "secrets", "sca", "sast", "ai"],
+  "category": "security",
+  "version": "1.0.0",
+  "isPublic": true,
+  "createdAt": "2026-01-01T00:00:00.000Z",
+  "updatedAt": "2026-01-01T00:00:00.000Z",
+  "usageCount": 0,
+  "workflow": {
+    "name": "Full Security Audit",
+    "description": "Manual trigger -> secrets -> SCA -> SAST -> AI -> webhook",
+    "nodes": [
+      { "id": "n1", "type": "trigger.manual", "position": { "x": 50, "y": 100 }, "data": { "kind": "trigger", "triggerType": "manual", "label": "Start" } },
+      { "id": "n2", "type": "scanner.secrets", "position": { "x": 260, "y": 100 }, "data": { "kind": "scanner", "scannerType": "secrets", "label": "Secrets scan", "config": { "scannerType": "secrets", "targetPath": "./demo-repo" } } },
+      { "id": "n3", "type": "scanner.sca", "position": { "x": 470, "y": 100 }, "data": { "kind": "scanner", "scannerType": "sca", "label": "Dependency check", "config": { "scannerType": "sca", "targetPath": "./demo-repo" } } },
+      { "id": "n4", "type": "scanner.sast", "position": { "x": 680, "y": 100 }, "data": { "kind": "scanner", "scannerType": "sast", "label": "SAST analysis", "config": { "scannerType": "sast", "targetPath": "./demo-repo" } } },
+      { "id": "n5", "type": "ai.analyze", "position": { "x": 890, "y": 100 }, "data": { "kind": "ai", "label": "AI report", "provider": "openai", "model": "gpt-4o-mini", "prompt": "Summarize all security findings." } },
+      { "id": "n6", "type": "notify.webhook", "position": { "x": 1100, "y": 100 }, "data": { "kind": "notify", "channel": "webhook", "label": "Send report", "config": { "channel": "webhook", "url": "https://example.com/webhook", "method": "POST" } } }
+    ],
+    "edges": [
+      { "id": "e1", "source": "n1", "target": "n2" },
+      { "id": "e2", "source": "n2", "target": "n3" },
+      { "id": "e3", "source": "n3", "target": "n4" },
+      { "id": "e4", "source": "n4", "target": "n5" },
+      { "id": "e5", "source": "n5", "target": "n6" }
+    ]
+  }
+}
