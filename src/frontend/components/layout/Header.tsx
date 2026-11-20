@@ -13,12 +13,10 @@ export const Header: React.FC = () => {
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur border-b border-border">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <NavLink to="/" className="flex items-center gap-2">
-          <span className="inline-block w-8 h-8 rounded-lg bg-primary-darker text-white font-bold flex items-center justify-center">
-            O
-          </span>
-          <span className="font-semibold text-text">OGMOP</span>
+          <img src="/OGMOP/logo.svg" alt="OGMOP" className="h-8 w-auto" />
         </NavLink>
-        <nav className="flex items-center gap-1 overflow-x-auto" aria-label="Основная навигация">          {navItems.map((item) => (
+        <nav className="flex items-center gap-1 overflow-x-auto" aria-label="Основная навигация">
+          {navItems.map((item) => (
             <NavLink
               key={item.to}
               to={item.to}
