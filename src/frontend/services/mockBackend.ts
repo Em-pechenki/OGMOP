@@ -43,7 +43,7 @@ function mask(v: string) {
 }
 
 async function scanSecrets(root: string): Promise<Finding[]> {
-  const bundle = await loadBundle();
+  const bundle = (await loadBundle())!;
   const findings: Finding[] = [];
   for (const [file, content] of Object.entries(bundle.files)) {
     const lines = (content as string).split(/\r?\n/);
@@ -84,7 +84,7 @@ const SAST_RULES = [
 ];
 
 async function scanSast(): Promise<Finding[]> {
-  const bundle = await loadBundle();
+  const bundle = (await loadBundle())!;
   const findings: Finding[] = [];
   for (const [file, content] of Object.entries(bundle.files)) {
     if (!file.endsWith(".kt") && !file.endsWith(".java")) continue;
@@ -144,7 +144,7 @@ function inRange(version: string, range: string) {
 }
 
 async function scanSca(): Promise<Finding[]> {
-  const bundle = await loadBundle();
+  const bundle = (await loadBundle())!;
   const findings: Finding[] = [];
   const db = bundle.cve || [];
   // parse build.gradle.kts from bundle
