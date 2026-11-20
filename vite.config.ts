@@ -12,10 +12,18 @@ export default defineConfig({
     chunkSizeWarningLimit: 500,
     rollupOptions: {
       output: {
-        manualChunks: {
-          "vendor-react": ["react", "react-dom", "react-router-dom"],
-          "vendor-flow": ["@xyflow/react"],
-          "vendor-form": ["react-hook-form", "zod", "zustand", "axios"],
+        manualChunks(id) {
+          if (id.includes("node_modules")) {
+            if (id.includes("@xyflow")) return "vendor-flow";
+            if (id.includes("react-router") || id.includes("react-dom") || id.includes("react/")) return "vendor-react";
+            if (
+              id.includes("react-hook-form") ||
+              id.includes("zod") ||
+              id.includes("zustand") ||
+              id.includes("axios")
+            )
+              return "vendor-form";
+          }
         },
       },
     },

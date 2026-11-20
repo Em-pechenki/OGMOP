@@ -16,6 +16,7 @@ async function sendTelegram(config, payload) {
   const token = config.token || process.env.TELEGRAM_BOT_TOKEN;
   const chatId = config.chatId || process.env.TELEGRAM_CHAT_ID;
   if (!token || !chatId) throw new Error("Telegram token/chatId missing");
+  if (!/^[A-Za-z0-9:_-]+$/.test(String(token))) throw new Error("Invalid Telegram token");
   const text = formatMessage(payload);
   const url = `https://api.telegram.org/bot${token}/sendMessage`;
   const res = await fetch(url, {
@@ -27,33 +28,56 @@ async function sendTelegram(config, payload) {
   return { channel: "telegram", ok: true };
 }
 
+function isPrivateHost(host) {
+  const h = String(host || "").toLowerCase();
+  if (!h) return true;
+  if (h === "localhost" || h === "127.0.0.1" || h === "::1" || h.endsWith(".localhost")) return true;
+  if (h === "0.0.0.0" || h === "169.254.169.254" || h === "metadata.google.internal") return true;
+  if (/^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[0-1])\.|169\.254\.)/.test(h)) return true;
+  // IPv6 private/link-local/unique-local
+  if (/^(fc|fd|fe80)/.test(h)) return true;
+  return false;
+}
+
 function isSafeUrl(raw) {
   try {
     const u = new URL(String(raw));
     if (u.protocol !== "http:" && u.protocol !== "https:") return false;
+    if (u.username || u.password) return false;
+    if (String(raw).length > 2048) return false;
     const host = u.hostname.toLowerCase();
     if (!host) return false;
     const allowLocal = process.env.NODE_ENV !== "production";
-    if (host === "localhost" || host === "127.0.0.1" || host === "::1" || host.endsWith(".localhost")) {
-      return allowLocal;
-    }
-    if (host === "0.0.0.0" || host === "169.254.169.254" || host === "metadata.google.internal") return false;
-    if (/^(10\\.|192\\.168\\.|172\\.(1[6-9]|2[0-9]|3[0-1])\\.|169\\.254\\.)/.test(host)) {
-      return allowLocal;
-    }
+    if (isPrivateHost(host)) return allowLocal;
     return true;
   } catch {
     return false;
   }
 }
 
+function isSafeHost(host) {
+  const allowLocal = process.env.NODE_ENV !== "production";
+  if (isPrivateHost(host)) return allowLocal;
+  return true;
+}
+
 async function sendWebhook(config, payload) {
   const url = config.url || config.webhookUrl;
   if (!url) throw new Error("Webhook URL missing");
   if (!isSafeUrl(url)) throw new Error("Unsafe webhook URL");
+  const headers = { "Content-Type": "application/json" };
+  if (config.headers && typeof config.headers === "object") {
+    for (const [k, v] of Object.entries(config.headers)) {
+      const key = String(k).replace(/[\r\n]/g, "").trim();
+      const val = String(v).replace(/[\r\n]/g, "").trim();
+      if (!key) continue;
+      if (/^(host|connection|content-length|transfer-encoding)$/i.test(key)) continue;
+      headers[key] = val;
+    }
+  }
   const res = await fetch(url, {
     method: "POST",
-    headers: { "Content-Type": "application/json", ...(config.headers || {}) },
+    headers,
     body: JSON.stringify(payload),
   });
   // don't throw on non-2xx? still report
@@ -74,10 +98,12 @@ async function sendSmtp(config, payload) {
     console.warn("SMTP unavailable: nodemailer not installed");
     return { channel: "smtp", ok: false, error: "nodemailer not installed" };
   }
+  const smtpHost = config.host || process.env.SMTP_HOST;
+  if (smtpHost && !isSafeHost(smtpHost)) throw new Error("Unsafe SMTP host");
   try {
     const transporter = nodemailer.createTransport ? nodemailer.createTransport : nodemailer.default.createTransport;
     const t = transporter({
-      host: config.host || process.env.SMTP_HOST,
+      host: smtpHost,
       port: config.port || process.env.SMTP_PORT || 587,
       secure: !!config.secure,
       auth: { user: config.user || process.env.SMTP_USER, pass: config.password || process.env.SMTP_PASS },

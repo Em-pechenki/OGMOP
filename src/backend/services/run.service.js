@@ -1,6 +1,21 @@
 import { createRun, getRun, updateRun, getWorkflow, listRuns } from "../store/memory.store.js";
 import { executeWorkflow } from "../engine/workflow-engine.js";
 
+const activeRuns = new Set();
+
+export function getActiveRunCount() {
+  return activeRuns.size;
+}
+
+export async function drainRuns(timeoutMs = 5000) {
+  const start = Date.now();
+  while (activeRuns.size > 0) {
+    if (Date.now() - start > timeoutMs) return activeRuns.size;
+    await new Promise((r) => setTimeout(r, 50));
+  }
+  return 0;
+}
+
 export function startRun(workflowId, input = {}) {
   const workflow = getWorkflow(workflowId);
   if (!workflow) return null;
@@ -16,7 +31,7 @@ export function startRun(workflowId, input = {}) {
   updateRun(run.id, { input: run.input });
 
   // execute asynchronously
-  setImmediate(async () => {
+  const task = (async () => {
     updateRun(run.id, { status: "running" });
     try {
       const result = await executeWorkflow(run, workflow, {
@@ -37,7 +52,16 @@ export function startRun(workflowId, input = {}) {
         error: err && err.message ? err.message : String(err),
         finishedAt: new Date().toISOString(),
       });
+    } finally {
+      activeRuns.delete(task);
     }
+  })();
+
+  activeRuns.add(task);
+
+  // keep setImmediate semantics for scheduling but track promise
+  setImmediate(() => {
+    // no-op: task already scheduled as microtask via async IIFE; ensure non-blocking
   });
 
   return run;

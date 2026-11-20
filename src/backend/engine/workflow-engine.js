@@ -282,7 +282,6 @@ export async function executeWorkflow(run, workflow, { onUpdate } = {}) {
     if (typeof onUpdate === "function") onUpdate({ nodeStatuses: { ...nodeStatuses }, currentNode: node.id });
 
     try {
-      await new Promise((r) => setTimeout(r, 30));
       const result = await handleNode(node, context);
       const status = (result && result.status) || "success";
       nodeStatuses[node.id] = status;

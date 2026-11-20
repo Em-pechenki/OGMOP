@@ -1,5 +1,6 @@
 // Scanner: SAST (basic rules for Kotlin/Spring Boot).
 import fs from "node:fs";
+import fsp from "node:fs/promises";
 import path from "node:path";
 import { cachedScan } from "./scan-cache.service.js";
 
@@ -80,39 +81,49 @@ function collectFiles(root, extensions) {
   return out;
 }
 
+function lineNumberOf(lines, idx) {
+  let acc = 0;
+  for (let i = 0; i < lines.length; i++) {
+    acc += lines[i].length + 1;
+    if (acc > idx) return i + 1;
+  }
+  return lines.length || 1;
+}
+
+async function scanOneFile(root, file) {
+  let content;
+  try { content = await fsp.readFile(file, "utf8"); } catch { return []; }
+  const lines = content.split(/\r?\n/);
+  const rel = path.relative(root, file).replace(/\\/g, "/");
+  const out = [];
+  for (const rule of RULES) {
+    const re = new RegExp(rule.regex.source, rule.regex.flags);
+    let m;
+    while ((m = re.exec(content)) !== null) {
+      out.push({
+        scanner: "sast",
+        severity: rule.severity,
+        file: rel,
+        line: lineNumberOf(lines, m.index),
+        title: rule.name,
+        message: rule.message + ` (${rule.name})`,
+        snippet: m[0].slice(0, 120),
+        cve: null,
+      });
+    }
+  }
+  return out;
+}
+
 export async function scanSast({ root, config = {} } = {}) {
   return cachedScan("sast", root, config, async () => {
-    const findings = [];
     const extensions = config.extensions || [".kt", ".java"];
     const files = collectFiles(root, extensions);
-    for (const file of files) {
-      let content;
-      try { content = fs.readFileSync(file, "utf8"); } catch { continue; }
-      const lines = content.split(/\r?\n/);
-      for (const rule of RULES) {
-        rule.regex.lastIndex = 0;
-        let m;
-        while ((m = rule.regex.exec(content)) !== null) {
-          const idx = m.index;
-          let lineNo = 1;
-          let acc = 0;
-          for (let i = 0; i < lines.length; i++) {
-            acc += lines[i].length + 1;
-            if (acc > idx) { lineNo = i + 1; break; }
-          }
-          findings.push({
-            id: `sast-${findings.length + 1}`,
-            scanner: "sast",
-            severity: rule.severity,
-            file: path.relative(root, file).replace(/\\/g, "/"),
-            line: lineNo,
-            title: rule.name,
-            message: rule.message + ` (${rule.name})`,
-            snippet: m[0].slice(0, 120),
-            cve: null,
-          });
-        }
-        rule.regex.lastIndex = 0;
+    const perFile = await Promise.all(files.map((file) => scanOneFile(root, file)));
+    const findings = [];
+    for (const arr of perFile) {
+      for (const f of arr) {
+        findings.push({ id: `sast-${findings.length + 1}`, ...f });
       }
     }
     return findings;

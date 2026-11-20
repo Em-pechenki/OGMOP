@@ -1,5 +1,6 @@
 // Scanner: secrets (regex-based). No external scanners.
 import fs from "node:fs";
+import fsp from "node:fs/promises";
 import path from "node:path";
 import { cachedScan } from "./scan-cache.service.js";
 
@@ -42,40 +43,49 @@ function mask(value) {
   return value.slice(0, 3) + "***" + value.slice(-2);
 }
 
+function lineNumberOf(lines, idx) {
+  let acc = 0;
+  for (let i = 0; i < lines.length; i++) {
+    acc += lines[i].length + 1;
+    if (acc > idx) return i + 1;
+  }
+  return lines.length || 1;
+}
+
+async function scanOneFile(root, file) {
+  let content;
+  try { content = await fsp.readFile(file, "utf8"); } catch { return []; }
+  const lines = content.split(/\r?\n/);
+  const rel = path.relative(root, file).replace(/\\/g, "/");
+  const out = [];
+  for (const pat of SECRET_PATTERNS) {
+    const re = new RegExp(pat.regex.source, pat.regex.flags);
+    let m;
+    while ((m = re.exec(content)) !== null) {
+      out.push({
+        scanner: "secrets",
+        severity: pat.severity,
+        file: rel,
+        line: lineNumberOf(lines, m.index),
+        title: `${pat.name} detected`,
+        message: `${pat.name} detected`,
+        snippet: mask(m[0]),
+        cve: null,
+      });
+    }
+  }
+  return out;
+}
+
 export async function scanSecrets({ root, config = {} } = {}) {
   return cachedScan("secrets", root, config, async () => {
-    const findings = [];
     const extensions = config.extensions || [".kt", ".kts", ".java", ".properties", ".yml", ".yaml", ".json", ".env", ".gradle"];
     const files = collectFiles(root, extensions);
-    for (const file of files) {
-      let content;
-      try { content = fs.readFileSync(file, "utf8"); } catch { continue; }
-      const lines = content.split(/\r?\n/);
-      for (const pat of SECRET_PATTERNS) {
-        pat.regex.lastIndex = 0;
-        let m;
-        while ((m = pat.regex.exec(content)) !== null) {
-          const idx = m.index;
-          let lineNo = 1;
-          let acc = 0;
-          for (let i = 0; i < lines.length; i++) {
-            acc += lines[i].length + 1;
-            if (acc > idx) { lineNo = i + 1; break; }
-          }
-          const matched = m[0];
-          findings.push({
-            id: `secret-${findings.length + 1}`,
-            scanner: "secrets",
-            severity: pat.severity,
-            file: path.relative(root, file).replace(/\\/g, "/"),
-            line: lineNo,
-            title: `${pat.name} detected`,
-            message: `${pat.name} detected`,
-            snippet: mask(matched),
-            cve: null,
-          });
-        }
-        pat.regex.lastIndex = 0;
+    const perFile = await Promise.all(files.map((file) => scanOneFile(root, file)));
+    const findings = [];
+    for (const arr of perFile) {
+      for (const f of arr) {
+        findings.push({ id: `secret-${findings.length + 1}`, ...f });
       }
     }
     return findings;

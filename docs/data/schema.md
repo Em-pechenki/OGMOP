@@ -109,4 +109,13 @@ Template *..1 Workflow
 
 - `tests/unit/seed-data.test.ts` — 2 теста, зелёные.
 - `src/backend/seed/demo-repo/` используется сканерами SCA/SAST/Secrets (тесты `scanner-*.test.ts`).
+## Final verification (phases 4-5)
+
+- `npx tsc --noEmit` (strict mode) — 0 errors.
+- `tests/unit/shared-schemas.test.ts` — 3 tests, green.
+- `tests/unit/seed-data.test.ts` — 2 tests, green (demo-workflow.json valid against workflowSchema; cve-database.json is an array of CVE entries).
+- Seed data: `src/backend/seed/demo-workflow.json`, `src/backend/seed/cve-database.json`, `src/backend/seed/demo-repo/`.
+- Migrations: `src/backend/migrations/README.md` (in-memory MVP, no persistent migrations).
+- Models: `src/backend/models/{workflow,finding,run,template}.model.ts` + `index.ts`.
+
 EOF

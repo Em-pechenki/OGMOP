@@ -41,7 +41,7 @@ export const ScannerNode: React.FC<NodeProps> = ({ id, data, selected }) => {
     >
       <Handle type="target" position={Position.Left} className="!h-2.5 !w-2.5 !bg-node-scanner" />
       <div className="flex items-center gap-2">
-        <img src={`${base}icons/${ICON}`} alt="" className="h-5 w-5" />
+        <img src={`${base}icons/${ICON}`} alt="" width={20} height={20} loading="lazy" decoding="async" className="h-5 w-5" />
         <span className="truncate text-sm font-semibold text-text">{title}</span>
         <span
           className={`ml-auto h-2.5 w-2.5 rounded-full ${

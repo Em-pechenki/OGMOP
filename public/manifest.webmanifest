@@ -1,0 +1,18 @@
+{
+  "name": "OGMOP — автоматизация workflow",
+  "short_name": "OGMOP",
+  "description": "Конструктор и запускатор автоматизированных workflow.",
+  "start_url": "/OGMOP/",
+  "scope": "/OGMOP/",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#50B848",
+  "icons": [
+    {
+      "src": "/OGMOP/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

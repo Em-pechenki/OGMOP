@@ -1,5 +1,6 @@
 import { createApp } from "./server.js";
 import { logger } from "./utils/logger.js";
+import { drainRuns, getActiveRunCount } from "./services/run.service.js";
 
 const app = createApp();
 const PORT = process.env.PORT || 3001;
@@ -12,13 +13,19 @@ let shuttingDown = false;
 function shutdown(signal) {
   if (shuttingDown) return;
   shuttingDown = true;
-  logger.info(`Received ${signal}, shutting down gracefully...`);
+  logger.info(`Received ${signal}, shutting down gracefully... (active runs: ${getActiveRunCount()})`);
   server.close((err) => {
     if (err) {
       logger.error(err);
-      process.exit(1);
     }
+  });
+  // drain in-flight runs, then exit
+  drainRuns(8000).then((remaining) => {
+    if (remaining > 0) logger.warn(`Shutdown with ${remaining} run(s) still active`);
     process.exit(0);
+  }).catch((err) => {
+    logger.error(err);
+    process.exit(1);
   });
   // force exit if not closed in time
   setTimeout(() => {
