@@ -343,16 +343,28 @@ Overlay (затемнение `rgba(0,0,0,0.5)` + blur 4px) → Panel (surface-e
 - Минимальная ширина 180px, max 260px.
 - Padding 12px; radius `--radius-lg`.
 
-### Состояния
+### Состояния (execution) — точная спецификация
 
-| Состояние | Рамка | Фон | Дополнительно |
-|-----------|-------|-----|---------------|
-| `idle` | `--color-border` (2px) | `--color-bg` | — |
-| `selected` | тип-цвет (2px) | `--color-bg` | тень focus |
-| `running` | тип-цвет (2px) | тип-фон | pulse-running кольцо |
-| `success` | `--color-success` | success-bg | галочка в header |
-| `error` | `--color-error` | error-bg | крест в header |
-| `disabled` | `--color-border` | surface | opacity 0.5 |
+| Состояние | Рамка | Фон | Индикатор в header | Анимация | Opacity |
+|-----------|-------|-----|--------------------|----------|---------|
+| `idle` | `--color-border` #E9F0F7 (2px solid) | `--color-bg` #FFFFFF | точка 8px `--color-text-subtle` #6B7280 | — | 1 |
+| `selected` | тип-цвет (2px solid) | `--color-bg` #FFFFFF | точка типа | — | 1 |
+| `running` | тип-цвет (2px solid) | тип-фон | спиннер 16px `--color-primary-dark` #3D8F3A (`animate-spin`) | `animate-pulse-running` (кольцо `--color-primary` #50B848) | 1 |
+| `success` | `--color-success` #50B848 (2px solid) | `--color-success-bg` #E9F7F3 | галочка `public/icons/status-success.svg` цвет `--color-primary-darker` #2E6F2C | fade-in иконки (`--duration-fast`) | 1 |
+| `error` | `--color-error` #D32F2F (2px solid) | `--color-error-bg` #FDECEA | крест `public/icons/status-error.svg` цвет `--color-error` #D32F2F | fade-in иконки (`--duration-fast`) | 1 |
+| `skipped` | `--color-border-strong` #D1D5DB (2px dashed) | `--color-surface` #F6F8FA | иконка пропуска (dash) `--color-text-subtle` #6B7280 | — | 0.7 |
+| `disabled` | `--color-border` #E9F0F7 (2px solid) | `--color-surface` #F6F8FA | точка `--color-text-subtle` | — | 0.5 |
+
+#### Текст и контраст в состояниях
+- Заголовок ноды всегда `--color-text` #01000C на светлом фоне состояния (контраст ≥17:1) — без исключений.
+- Подзаголовок/метрики: `--color-text-muted` #494B52 (контраст ≥8:1 на всех фонах состояний).
+- Текст статуса (опциональная подпись под иконкой): 
+  - success: `--color-primary-darker` #2E6F2C, font-weight ≥600 (контраст 5.56:1 на #E9F7F3 ✅);
+  - error: `--color-error` #D32F2F, font-weight ≥600 (контраст 4.35:1 на #FDECEA — допустимо для bold ≥14px; иначе использовать `--color-text`);
+  - skipped: `--color-text-subtle` #6B7280, font-weight 400 (контраст 4.54:1 на #F6F8FA ✅);
+  - running: `--color-primary-dark` #3D8F3A, font-weight ≥600.
+- Нетекстовые элементы (иконки/индикаторы) должны иметь контраст ≥3:1 с фоном: success-иконка #2E6F2C на #E9F7F3 = 5.56 ✅; error-иконка #D32F2F на #FDECEA = 4.35 ✅; running-спиннер #3D8F3A на тип-фоне ≥3.6 ✅; skipped-иконка #6B7280 на #F6F8FA = 4.54 ✅.
+- `animate-pulse-running` (1.5s infinite) применяется только к `running`; при `prefers-reduced-motion: reduce` — статичное кольцо без анимации, цвет `--color-primary`.
 
 ### A11y
 
@@ -391,6 +403,105 @@ Overlay (затемнение `rgba(0,0,0,0.5)` + blur 4px) → Panel (surface-e
 
 - Канвас контейнер `role="application"` с `aria-label="Редактор workflow"`.
 - Клавиатурное управление через React Flow defaults; добавить skip-link к панели свойств.
+
+---
+
+## 14. Properties Panel (панель свойств ноды)
+
+**Назначение**: редактирование параметров выбранной ноды в редакторе workflow.
+
+### Контейнер
+- Desktop (≥1024): правая колонка шириной 320px, `bg-surface-elevated`, граница слева `--color-border`, скролл внутри.
+- Tablet (768–1023): drawer справа (overlay) шириной 320px, backdrop `rgba(0,0,0,0.5)`.
+- Mobile (<768): full-screen drawer с кнопкой закрытия.
+- Заголовок: иконка типа (24px) + название типа (font-weight 600) + статус Badge (sm) + кнопка закрытия (ghost icon).
+
+### Вкладки (Tabs)
+`Params` | `Output` | `Logs` — высота 40px, активная вкладка: нижняя полоска 2px `--color-primary`, текст `--color-primary`.
+
+### Params (форма)
+- Поля по схеме ноды: `Input`/`Textarea`/`Select`/переключатели/списки.
+- Группировка по секциям с заголовками (`--text-sm`, font-weight 600, `--color-text-muted`).
+- Валидация: inline `error` под полем, кнопка Apply disabled при ошибках.
+- Кнопки в footer: `Apply` (primary, md) + `Reset` (ghost, md), sticky снизу.
+
+### Output
+- Последний результат выполнения ноды: JSON/текст в `<pre><code>` (mono, 12px), фон `--color-surface`, радиус `--radius-md`, max-height 320px со скроллом.
+- Кнопка «Копировать» (ghost icon) + «Скачать» (ghost).
+- Если результата нет — empty state «Нода ещё не выполнялась».
+
+### Logs
+- Список строк логов (mono, 12px), автоскролл, цвет по уровню: info `--color-text`, warn `--color-warning-text`, error `--color-error`.
+- Фильтр по уровню (chips).
+
+### Empty state (ничего не выбрано)
+- Иконка `logic.svg` 48px в `--color-text-subtle`, заголовок «Выберите ноду», описание «Кликните по ноде на холсте, чтобы редактировать её параметры.», CTA нет.
+
+### A11y
+- Контейнер `aside` с `aria-label="Панель свойств"`.
+- Вкладки: `role="tablist"`, `aria-selected`.
+- Поля формы с `label` и `aria-describedby`.
+- Focus trap в drawer на mobile.
+
+---
+
+## 15. Results Panel (панель результатов запуска)
+
+**Назначение**: отображение находок (findings) одного запуска workflow, фильтрация и навигация.
+
+### Контейнер
+- Card `elevated` с padding `--space-4`, скролл внутри, max-height 70vh на desktop.
+
+### Header
+- Заголовок «Находки» + счётчик `Badge neutral` (общее число).
+- Ряд фильтров: Severity (multi-select chips), Тип (secrets/sca/sast), поиск по файлу (Input sm с иконкой).
+- Сортировка: Select sm (severity desc / file asc).
+
+### FindingCard
+- Card `outlined`, padding `--space-3`, margin-bottom `--space-3`.
+- Шапка: `Badge` severity (sm) + тип (text `--text-xs`, muted) + локация `file:line` (mono, `--text-xs`, `--color-text-subtle`).
+- Заголовок: `--text-base`, font-weight 600, `--color-text`.
+- Сниппет кода: `<pre><code>` mono 12px, фон `--color-surface`, граница `--color-border`, радиус `--radius-md`, max-height 160px, горизонтальный скролл, подсветка строки-находки фоном `--color-risk-medium-bg` (или severity-bg).
+- Описание: `--text-sm`, `--color-text-muted`, 2–4 строки, раскрываемое («Показать полностью»).
+- AI-рекомендация: раскрываемый блок с иконкой AI, фон `--color-node-ai-bg`, текст `--color-text`, markdown (списки/код).
+- Действия: «Скопировать» (ghost sm, иконка copy), «Открыть файл» (ghost sm, опц.).
+
+### Empty state (нет находок)
+- Иконка check 48px `--color-success`, заголовок «Уязвимостей не найдено», описание «Запуск завершён без находок.», фон `--color-success-bg` у карточки empty.
+
+### Loading
+- Skeleton: 3 карточки-заглушки (shimmer).
+
+### A11y
+- Список `ul`/`ol` с `role="list"`; карточка `article` с `aria-labelledby` (заголовок).
+- Сниппет в `<pre><code>` с `aria-label="Фрагмент кода"`.
+- Live region для обновления счётчика при фильтрации (`aria-live="polite"`).
+
+---
+
+## 16. Data Flow Indicator (индикатор потока данных между нодами)
+
+**Назначение**: визуализация передачи данных по ребру (edge) между нодами во время выполнения.
+
+### Edge (соединение)
+- Базовый: `--color-border-strong` #D1D5DB, 2px, smoothstep.
+- Idle: сплошная линия, без анимации.
+- Active/running: `--color-primary` #50B848, 2px, `stroke-dasharray: 6 4`, анимация `animate-flow` (stroke-dashoffset 24→0, 0.8s linear infinite).
+- Success path: `--color-success` #50B848 сплошная, толщина 2px.
+- Error path: `--color-error` #D32F2F, 2px, dashed `4 4`, без анимации.
+- Skipped path: `--color-border` #E9F0F7, 1.5px, dashed `2 4`, opacity 0.5.
+
+### Пакет данных (data packet)
+- Круг 6px `--color-primary` #50B848, движется вдоль ребра от source к target за 600ms (`--ease-standard`).
+- Только на active-рёбрах; при `prefers-reduced-motion` — статичная точка у target.
+- Тень `--shadow-sm`.
+
+### Подпись на ребре (опц.)
+- При hover: tooltip с типом передаваемых данных / счётчиком находок, фон `--color-surface-elevated`, тень `--shadow-card`, `--text-xs`.
+
+### A11y
+- Рёбра React Flow имеют `aria-label="Соединение от {source} к {target}"`.
+- Анимация отключается при `prefers-reduced-motion: reduce`.
 
 ---
 

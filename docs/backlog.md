@@ -76,9 +76,9 @@ DESIGN, FE, BE, DATA, DEVOPS, QA, DOCS, SEC.
 ## Фаза 2 (8–16 ч) — Основной функционал
 
 ### DESIGN
-- [ ] Макеты всех экранов (editor, run view, templates).
-- [ ] Состояния нод (idle, running, success, error).
-- [ ] Адаптивность.
+- [x] Макеты всех экранов (editor, run view, templates).
+- [x] Состояния нод (idle, running, success, error, skipped).
+- [x] Адаптивность.
 
 ### FE
 - [ ] Ноды: Trigger (button/schedule), Logic (if/else, compare, regex), Notify (Telegram/SMTP/webhook), Scanner (secrets/SCA/SAST).

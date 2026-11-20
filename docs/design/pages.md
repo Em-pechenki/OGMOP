@@ -199,6 +199,36 @@ Drag-and-drop редактор сценариев проверки безопа�
 - Success/Failed: финальный вид.
 - Empty findings: «Уязвимостей не найдено» (success state).
 
+### Детализация визуализации выполнения (/run/:id)
+
+#### Мини-граф (Execution graph)
+- Использует `NodeCard` в read-only режиме (без drag, handles скрыты).
+- Статусы нод: idle/running/success/error/skipped (точная спека §11 components.md).
+- Рёбра: active/running/success/error/skipped по спеке §16 (Data Flow Indicator).
+- Масштаб: fit view, zoom 0.5–1.5, pan отключён на mobile (только pinch).
+- Легенда под графом: цветные точки + подписи состояний (sm).
+
+#### Timeline (список шагов)
+- Вертикальный список, каждый шаг: иконка статуса (status-*.svg), название ноды, время старта/окончания, длительность, краткий результат (1 строка, truncate).
+- Текущий шаг (running) подсвечен `--color-primary-light` и `animate-pulse-running` на иконке.
+- Ошибка шага: строка `--color-error-bg`, иконка status-error.
+
+#### Прогресс
+- Прогресс-бар (height 6px) над findings: `--color-primary` на `--color-surface`, анимация width 200ms.
+- Live region `aria-live="polite"`: «Выполнено X из Y нод».
+
+#### AI Report (card)
+- Card `elevated`, заголовок «AI-отчёт» с иконкой `ai.svg`.
+- Контент: markdown (заголовки, списки, code) рендерится в `--text-base`, `--color-text`.
+- Секции: «Краткое резюме», «Ключевые риски», «Рекомендации» (нумерованный список).
+- Состояния: loading (skeleton 6 строк), error (сообщение + «Повторить»), empty («Отчёт недоступен»).
+- Кнопки: «Скопировать» (ghost), «Экспорт» (secondary).
+
+#### Logs panel
+- Collapsible (по умолчанию свёрнут на mobile, развёрнут на desktop).
+- Высота 240px, скролл, mono 12px, автоскролл при новых логах (пауза при ручном скролле вверх).
+- Фильтр по уровню: chips All/Info/Warn/Error.
+
 ### A11y
 
 - Findings как `article` с `aria-labelledby`.

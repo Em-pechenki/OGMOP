@@ -118,6 +118,7 @@ module.exports = {
       },
       animation: {
         "pulse-running": "pulse-running 1.5s cubic-bezier(0.4,0,0.6,1) infinite",
+        "flow": "flow 0.8s linear infinite",
         "fade-in": "fade-in 200ms ease-out",
         "slide-up": "slide-up 200ms ease-out",
         spin: "spin 1s linear infinite",
@@ -128,6 +129,10 @@ module.exports = {
           "0%": { boxShadow: "0 0 0 0 rgba(80,184,72,0.5)" },
           "70%": { boxShadow: "0 0 0 10px rgba(80,184,72,0)" },
           "100%": { boxShadow: "0 0 0 0 rgba(80,184,72,0)" },
+        },
+        "flow": {
+          "0%": { "stroke-dashoffset": "24" },
+          "100%": { "stroke-dashoffset": "0" },
         },
         "fade-in": {
           "0%": { opacity: "0" },
